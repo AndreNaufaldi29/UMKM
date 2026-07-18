@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  frontend:
+    build: .
+    container_name: web-frontend
+    ports:
+      - "5173:5173"
+    volumes:
+      # Sinkronisasi file lokal ke dalam container agar fitur Hot-Reload berjalan
+      - .:/app
+      # Mencegah node_modules lokal menimpa node_modules di dalam container
+      - /app/node_modules
+    environment:
+      # Membantu memastikan hot-reload berfungsi dengan baik, terutama di Windows
+      - WATCHPACK_POLLING=true
