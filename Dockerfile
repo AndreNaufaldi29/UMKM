@@ -13,8 +13,8 @@ RUN npm install
 # Salin seluruh sisa file proyek ke dalam container
 COPY . .
 
-# Ekspos port standar Vite
+# Ekspos port standar Next.js (konfigurasi dev/start menggunakan port 5173)
 EXPOSE 5173
 
-# Jalankan server dengan flag --host agar dapat diakses dari luar container
-CMD ["npm", "run", "dev", "--", "--host"]
+# Jalankan dev server Next.js
+CMD ["npm", "run", "dev"]
