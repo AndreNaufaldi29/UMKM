@@ -170,28 +170,66 @@ export default function App() {
     }
 
     /* ---------------- RENDER PIECES ---------------- */
-    function navHTML(){
+    function navHTML() {
       return `
-      <header class="nav">
-        <div class="nav-inner">
-          <div class="brand" style="cursor:pointer" data-go="home">
-            <div class="brand-mark">
-              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#F6F1E4" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21h18M5 21V9l7-6 7 6v12M9 21v-6h6v6"/></svg>
+        <header class="nav">
+          <div class="nav-inner">
+
+            <div
+              class="brand"
+              style="cursor:pointer"
+              data-go="home"
+            >
+              <div class="brand-mark">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="#F6F1E4"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M3 21h18M5 21V9l7-6 7 6v12M9 21v-6h6v6"/>
+                </svg>
+              </div>
+
+              <div>
+                Desa Sukamaju
+                <small>Website Profil Desa</small>
+              </div>
             </div>
-            <div>Desa Sukamaju<small>Website Profil Desa</small></div>
+
+            <nav class="nav-links">
+              <button
+                data-go="home"
+                class="${state.view === 'home' ? 'active' : ''}"
+              >
+                Beranda
+              </button>
+
+              <button
+                data-go="directory"
+                class="${state.view === 'directory' ? 'active' : ''}"
+              >
+                UMKM Desa
+              </button>
+            </nav>
+
+            <div class="nav-right">
+              <button
+                class="icon-btn"
+                id="darkToggle"
+                title="Ganti tampilan"
+              >
+                ${state.dark ? ic.sun : ic.moon}
+              </button>
+            </div>
+
           </div>
-          <nav class="nav-links">
-            <button data-go="home" class="${state.view==='home'?'active':''}">Beranda</button>
-            <button data-go="directory" class="${state.view==='directory'?'active':''}">UMKM Desa</button>
-            <button>Profil Desa</button>
-            <button>Berita</button>
-            <button>Kontak</button>
-          </nav>
-          <div class="nav-right">
-            <button class="icon-btn" id="darkToggle" title="Ganti tampilan">${state.dark? ic.sun : ic.moon}</button>
-          </div>
-        </div>
-      </header>`;
+        </header>
+      `;
     }
 
     function breadcrumbHTML(){
@@ -206,17 +244,56 @@ export default function App() {
       return `<div class="wrap"><div class="breadcrumb">${items.join('')}</div></div>`;
     }
 
-    function statCardsHTML(){
-      const total = MSMES.length;
-      const cats = CATEGORIES.length;
-      const products = MSMES.reduce((s,m)=>s+m.products.length,0);
-      return `
-      <div class="stats">
-        <div class="stat-card"><div class="tick"></div><div class="num mono">${String(total).padStart(2,'0')}</div><div class="label">Total UMKM Terdaftar</div></div>
-        <div class="stat-card"><div class="tick"></div><div class="num mono">${String(cats).padStart(2,'0')}</div><div class="label">Kategori Usaha</div></div>
-        <div class="stat-card"><div class="tick"></div><div class="num mono">${String(products).padStart(2,'0')}</div><div class="label">Produk Unggulan</div></div>
-      </div>`;
-    }
+   function statCardsHTML() {
+  const total = MSMES.length;
+  const cats = CATEGORIES.length;
+  const products = MSMES.reduce(
+    (sum, m) => sum + m.products.length,
+    0
+  );
+
+  return `
+    <div class="stats">
+
+      <div class="stat-card">
+        <div class="stat-number mono">
+          ${String(total).padStart(2, '0')}
+        </div>
+
+        <div class="stat-label">
+          Total UMKM Terdaftar
+        </div>
+
+        <div class="stat-accent"></div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-number mono">
+          ${String(cats).padStart(2, '0')}
+        </div>
+
+        <div class="stat-label">
+          Kategori Usaha
+        </div>
+
+        <div class="stat-accent"></div>
+      </div>
+
+      <div class="stat-card">
+        <div class="stat-number mono">
+          ${String(products).padStart(2, '0')}
+        </div>
+
+        <div class="stat-label">
+          Produk Unggulan
+        </div>
+
+        <div class="stat-accent"></div>
+      </div>
+
+    </div>
+  `;
+}
 
     function chipRowHTML(){
       return `<div class="chip-row">
@@ -245,39 +322,205 @@ export default function App() {
       </div>`;
     }
 
-    function homeHTML(){
-      const latest = [...MSMES].sort((a,b)=>b.est-a.est).slice(0,6);
-      return `
-      <section class="hero">
-        <div class="hero-inner">
-          <div class="eyebrow">Sistem Informasi UMKM Desa</div>
-          <h1>Katalog UMKM Desa Sukamaju</h1>
-          <p>Temukan produk dan jasa unggulan yang ditawarkan oleh para pelaku usaha lokal desa kami.</p>
-          <button class="btn btn-soil" data-go="directory">Jelajahi Semua UMKM ${ic.arrow}</button>
+    function homeHTML() {
+  const latest = [...MSMES]
+    .sort((a, b) => b.est - a.est)
+    .slice(0, 6);
+
+  return `
+    <!-- HERO CAROUSEL -->
+    <section class="hero hero-carousel">
+
+      <div class="hero-slides">
+
+        <div class="hero-slide active">
+          <img src="/images/umkm-1.jpg" alt="UMKM Desa Sukamaju">
         </div>
-        <div class="terrace">${terraceDivider()}</div>
-      </section>
-      <div class="wrap">
-        <div class="search-card">
-          <div class="search-row">
-            <div class="search-field">${ic.search}<input id="homeSearch" type="text" placeholder="Cari nama UMKM, pemilik, atau kategori..." value="${state.query}"></div>
-            <button class="btn" id="homeSearchBtn">Cari</button>
+
+        <div class="hero-slide">
+          <img src="/images/umkm-2.jpg" alt="Produk UMKM Desa">
+        </div>
+
+        <div class="hero-slide">
+          <img src="/images/umkm-3.jpg" alt="Pelaku UMKM Desa">
+        </div>
+
+      </div>
+
+      <div class="hero-overlay"></div>
+
+      <button
+        class="carousel-arrow carousel-prev"
+        id="carouselPrev"
+        aria-label="Slide sebelumnya"
+      >
+        &#10094;
+      </button>
+
+      <button
+        class="carousel-arrow carousel-next"
+        id="carouselNext"
+        aria-label="Slide berikutnya"
+      >
+        &#10095;
+      </button>
+
+      <div class="hero-inner carousel-content">
+
+        <div class="eyebrow">
+          Sistem Informasi UMKM Desa
+        </div>
+
+        <h1>
+          Katalog UMKM Desa Sukamaju
+        </h1>
+
+        <p>
+          Temukan produk dan jasa unggulan yang ditawarkan
+          oleh para pelaku usaha lokal desa kami.
+        </p>
+
+        <button
+          class="btn btn-soil"
+          data-go="directory"
+        >
+          Jelajahi Semua UMKM
+          ${ic.arrow}
+        </button>
+
+      </div>
+
+      <div class="carousel-dots">
+
+        <button
+          class="carousel-dot active"
+          data-slide="0"
+          aria-label="Slide 1"
+        ></button>
+
+        <button
+          class="carousel-dot"
+          data-slide="1"
+          aria-label="Slide 2"
+        ></button>
+
+        <button
+          class="carousel-dot"
+          data-slide="2"
+          aria-label="Slide 3"
+        ></button>
+
+      </div>
+
+      <div class="terrace">
+        ${terraceDivider()}
+      </div>
+
+    </section>
+
+
+    <!-- SEARCH -->
+
+    <div class="wrap">
+
+      <div class="search-card">
+
+        <div class="search-row">
+
+          <div class="search-field">
+
+            ${ic.search}
+
+            <input
+              id="homeSearch"
+              type="text"
+              placeholder="Cari nama UMKM, pemilik, atau kategori..."
+              value="${state.query}"
+            >
+
           </div>
-          ${chipRowHTML()}
+
+          <button
+            class="btn"
+            id="homeSearchBtn"
+          >
+            Cari
+          </button>
+
         </div>
+
+        ${chipRowHTML()}
+
       </div>
-      <div class="wrap section">
-        <div class="section-head"><div><h2>Sekilas Desa Sukamaju</h2><div class="sub">Ringkasan data UMKM terkini</div></div></div>
-        ${statCardsHTML()}
-      </div>
-      <div class="wrap section" style="padding-top:0">
-        <div class="section-head">
-          <div><h2>UMKM Terbaru</h2><div class="sub">Usaha yang baru saja bergabung dalam katalog</div></div>
-          <button class="link-more" data-go="directory">Lihat semua ${ic.arrow}</button>
+
+    </div>
+
+
+    <!-- STATISTIK -->
+
+    <div class="wrap section">
+
+      <div class="section-head">
+
+        <div>
+
+          <h2>
+            Sekilas Desa Sukamaju
+          </h2>
+
+          <div class="sub">
+            Ringkasan data UMKM terkini
+          </div>
+
         </div>
-        <div class="latest-scroll">${latest.map(cardHTML).join('')}</div>
-      </div>`;
-    }
+
+      </div>
+
+      ${statCardsHTML()}
+
+    </div>
+
+
+    <!-- UMKM TERBARU -->
+
+    <div
+      class="wrap section"
+      style="padding-top:0"
+    >
+
+      <div class="section-head">
+
+        <div>
+
+          <h2>
+            UMKM Terbaru
+          </h2>
+
+          <div class="sub">
+            Usaha yang baru saja bergabung dalam katalog
+          </div>
+
+        </div>
+
+        <button
+          class="link-more"
+          data-go="directory"
+        >
+          Lihat semua
+          ${ic.arrow}
+        </button>
+
+      </div>
+
+      <div class="latest-scroll">
+
+        ${latest.map(cardHTML).join('')}
+
+      </div>
+
+    </div>
+  `;
+}
 
     function directoryHTML(){
       const all = filteredList();
@@ -530,10 +773,135 @@ export default function App() {
         const text = encodeURIComponent(`Lihat UMKM "${m.name}" di Katalog UMKM Desa Sukamaju!`);
         window.open(`https://wa.me/?text=${text}`,'_blank');
       });
+      const slides =
+  document.querySelectorAll('.hero-slide');
+
+const dots =
+  document.querySelectorAll('.carousel-dot');
+
+const prev =
+  document.getElementById('carouselPrev');
+
+const next =
+  document.getElementById('carouselNext');
+
+if (slides.length) {
+
+  let currentSlide = 0;
+
+  let carouselTimer;
+
+  function showSlide(index) {
+
+    slides.forEach(
+      slide =>
+        slide.classList.remove('active')
+    );
+
+    dots.forEach(
+      dot =>
+        dot.classList.remove('active')
+    );
+
+    currentSlide =
+      (index + slides.length)
+      % slides.length;
+
+    slides[currentSlide]
+      .classList.add('active');
+
+    if (dots[currentSlide]) {
+
+      dots[currentSlide]
+        .classList.add('active');
+
+    }
+
+  }
+
+
+  function nextSlide() {
+
+    showSlide(
+      currentSlide + 1
+    );
+
+  }
+
+
+  function startCarousel() {
+
+    clearInterval(carouselTimer);
+
+    carouselTimer =
+      setInterval(
+        nextSlide,
+        5000
+      );
+
+  }
+
+
+  if (next) {
+
+    next.addEventListener(
+      'click',
+      () => {
+
+        nextSlide();
+
+        startCarousel();
+
+      }
+    );
+
+  }
+
+
+  if (prev) {
+
+    prev.addEventListener(
+      'click',
+      () => {
+
+        showSlide(
+          currentSlide - 1
+        );
+
+        startCarousel();
+
+      }
+    );
+
+  }
+
+
+  dots.forEach(
+    (dot, index) => {
+
+      dot.addEventListener(
+        'click',
+        () => {
+
+          showSlide(index);
+
+          startCarousel();
+
+        }
+      );
+
+    }
+  );
+
+
+  startCarousel();
+
+}
     }
 
     renderPage();
 
+    
 
     return () => {
       const wa = document.getElementById('waFloat')
