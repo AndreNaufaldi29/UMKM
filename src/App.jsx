@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect } from 'react';
 
 export default function App() {
   useEffect(() => {
@@ -144,6 +144,7 @@ export default function App() {
       dark:false
     };
     const PER_PAGE = 6;
+    let carouselTimer = null;
 
     /* ---------------- HELPERS ---------------- */
     function filteredList(){
@@ -728,195 +729,361 @@ export default function App() {
       }
     }
 
-    function bindEvents(){
-      document.querySelectorAll('[data-go]').forEach(el=>{
-        el.addEventListener('click', ()=> go(el.getAttribute('data-go')));
-      });
-      document.querySelectorAll('[data-open]').forEach(el=>{
-        el.addEventListener('click', ()=> go('detail', {activeId: parseInt(el.getAttribute('data-open'))}));
-      });
-      document.querySelectorAll('[data-cat]').forEach(el=>{
-        el.addEventListener('click', ()=>{ state.cat = el.getAttribute('data-cat'); state.page=1; renderPage(); });
-      });
-      document.querySelectorAll('[data-dusun]').forEach(el=>{
-        el.addEventListener('click', ()=>{ state.dusun = el.getAttribute('data-dusun'); state.page=1; renderPage(); });
-      });
-      document.querySelectorAll('[data-page]').forEach(el=>{
-        el.addEventListener('click', ()=>{ state.page = parseInt(el.getAttribute('data-page')); renderPage(); window.scrollTo({top:0}); });
-      });
-      const dusunSelect = document.getElementById('dusunSelect');
-      if(dusunSelect) dusunSelect.addEventListener('change', e=>{ state.dusun = e.target.value; state.page=1; renderPage(); });
+    function bindEvents() {
+  /* ================================
+     NAVIGASI
+  ================================ */
 
-      const sortBtn = document.getElementById('sortBtn');
-      if(sortBtn) sortBtn.addEventListener('click', ()=>{
-        state.sort = state.sort==='newest' ? 'az' : state.sort==='az' ? 'za' : 'newest';
+  document.querySelectorAll('[data-go]').forEach(el => {
+    el.addEventListener('click', () => {
+      go(el.getAttribute('data-go'));
+    });
+  });
+
+  document.querySelectorAll('[data-open]').forEach(el => {
+    el.addEventListener('click', () => {
+      go('detail', {
+        activeId: Number(el.getAttribute('data-open'))
+      });
+    });
+  });
+
+  /* ================================
+     FILTER KATEGORI
+  ================================ */
+
+  document.querySelectorAll('[data-cat]').forEach(el => {
+    el.addEventListener('click', () => {
+      state.cat = el.getAttribute('data-cat');
+      state.page = 1;
+
+      // Jika filter kategori diklik dari halaman home,
+      // langsung buka direktori
+      if (state.view === 'home') {
+        go('directory');
+      } else {
         renderPage();
-      });
-
-      const homeSearch = document.getElementById('homeSearch');
-      const homeBtn = document.getElementById('homeSearchBtn');
-      if(homeSearch){
-        const submit = ()=>{ state.query = homeSearch.value; go('directory'); };
-        if (homeBtn) homeBtn.addEventListener('click', submit);
-        homeSearch.addEventListener('keydown', e=>{ if(e.key==='Enter') submit(); });
       }
-      const dirSearch = document.getElementById('dirSearch');
-      if(dirSearch){
-        dirSearch.addEventListener('input', e=>{ state.query = e.target.value; state.page=1; renderPage(); dirSearch.focus(); dirSearch.setSelectionRange(dirSearch.value.length, dirSearch.value.length); });
-      }
-      const darkToggle = document.getElementById('darkToggle');
-      if(darkToggle) darkToggle.addEventListener('click', ()=>{ state.dark = !state.dark; renderPage(); });
+    });
+  });
 
-      const shareBtn = document.getElementById('shareBtn');
-      if(shareBtn) shareBtn.addEventListener('click', ()=>{
-        const m = MSMES.find(x=>x.id===state.activeId);
-        const text = encodeURIComponent(`Lihat UMKM "${m.name}" di Katalog UMKM Desa Sukamaju!`);
-        window.open(`https://wa.me/?text=${text}`,'_blank');
+  /* ================================
+     FILTER DUSUN
+  ================================ */
+
+  document.querySelectorAll('[data-dusun]').forEach(el => {
+    el.addEventListener('click', () => {
+      state.dusun = el.getAttribute('data-dusun');
+      state.page = 1;
+      renderPage();
+    });
+  });
+
+  /* ================================
+     PAGINATION
+  ================================ */
+
+  document.querySelectorAll('[data-page]').forEach(el => {
+    el.addEventListener('click', () => {
+      state.page = Number(el.getAttribute('data-page'));
+
+      renderPage();
+
+      window.scrollTo({
+        top: 0,
+        behavior: 'smooth'
       });
-      const slides =
-  document.querySelectorAll('.hero-slide');
+    });
+  });
 
-const dots =
-  document.querySelectorAll('.carousel-dot');
+  /* ================================
+     SELECT DUSUN
+  ================================ */
 
-const prev =
-  document.getElementById('carouselPrev');
+  const dusunSelect = document.getElementById('dusunSelect');
 
-const next =
-  document.getElementById('carouselNext');
+  if (dusunSelect) {
+    dusunSelect.addEventListener('change', e => {
+      state.dusun = e.target.value;
+      state.page = 1;
+      renderPage();
+    });
+  }
 
-if (slides.length) {
+  /* ================================
+     SORT
+  ================================ */
+
+  const sortBtn = document.getElementById('sortBtn');
+
+  if (sortBtn) {
+    sortBtn.addEventListener('click', () => {
+      state.sort =
+        state.sort === 'newest'
+          ? 'az'
+          : state.sort === 'az'
+            ? 'za'
+            : 'newest';
+
+      state.page = 1;
+
+      renderPage();
+    });
+  }
+
+  /* ================================
+     SEARCH HOME
+  ================================ */
+
+  const homeSearch = document.getElementById('homeSearch');
+  const homeBtn = document.getElementById('homeSearchBtn');
+
+  if (homeSearch) {
+    const submitSearch = () => {
+      state.query = homeSearch.value.trim();
+      state.page = 1;
+
+      go('directory');
+    };
+
+    if (homeBtn) {
+      homeBtn.addEventListener('click', submitSearch);
+    }
+
+    homeSearch.addEventListener('keydown', e => {
+      if (e.key === 'Enter') {
+        submitSearch();
+      }
+    });
+  }
+
+  /* ================================
+     SEARCH DIRECTORY
+  ================================ */
+
+  const dirSearch = document.getElementById('dirSearch');
+
+  if (dirSearch) {
+    dirSearch.addEventListener('input', e => {
+      state.query = e.target.value;
+      state.page = 1;
+
+      renderPage();
+
+      // Karena renderPage mengganti innerHTML,
+      // ambil kembali input yang baru dibuat
+      const newInput = document.getElementById('dirSearch');
+
+      if (newInput) {
+        newInput.focus();
+
+        const length = newInput.value.length;
+
+        newInput.setSelectionRange(
+          length,
+          length
+        );
+      }
+    });
+  }
+
+  /* ================================
+     DARK MODE
+  ================================ */
+
+  const darkToggle = document.getElementById('darkToggle');
+
+  if (darkToggle) {
+    darkToggle.addEventListener('click', () => {
+      state.dark = !state.dark;
+
+      renderPage();
+    });
+  }
+
+  /* ================================
+     SHARE WHATSAPP
+  ================================ */
+
+  const shareBtn = document.getElementById('shareBtn');
+
+  if (shareBtn) {
+    shareBtn.addEventListener('click', () => {
+      const m = MSMES.find(
+        item => item.id === state.activeId
+      );
+
+      if (!m) return;
+
+      const text = encodeURIComponent(
+        `Lihat UMKM "${m.name}" di Katalog UMKM Desa Sukamaju!`
+      );
+
+      window.open(
+        `https://wa.me/?text=${text}`,
+        '_blank',
+        'noopener,noreferrer'
+      );
+    });
+  }
+
+  /* ================================
+     HERO CAROUSEL
+  ================================ */
+
+  const slides = Array.from(
+    document.querySelectorAll('.hero-slide')
+  );
+
+  const dots = Array.from(
+    document.querySelectorAll('.carousel-dot')
+  );
+
+  const prevButton =
+    document.getElementById('carouselPrev');
+
+  const nextButton =
+    document.getElementById('carouselNext');
+
+  // Hapus timer lama setiap kali halaman dirender
+  if (carouselTimer) {
+    clearInterval(carouselTimer);
+    carouselTimer = null;
+  }
+
+  // Carousel hanya berjalan di halaman home
+  if (slides.length === 0) {
+    return;
+  }
 
   let currentSlide = 0;
 
-  let carouselTimer;
-
   function showSlide(index) {
-
-    slides.forEach(
-      slide =>
-        slide.classList.remove('active')
-    );
-
-    dots.forEach(
-      dot =>
-        dot.classList.remove('active')
-    );
-
     currentSlide =
-      (index + slides.length)
-      % slides.length;
+      (index + slides.length) %
+      slides.length;
 
-    slides[currentSlide]
-      .classList.add('active');
+    slides.forEach((slide, slideIndex) => {
+      slide.classList.toggle(
+        'active',
+        slideIndex === currentSlide
+      );
+    });
 
-    if (dots[currentSlide]) {
+    dots.forEach((dot, dotIndex) => {
+      dot.classList.toggle(
+        'active',
+        dotIndex === currentSlide
+      );
 
-      dots[currentSlide]
-        .classList.add('active');
-
-    }
-
+      dot.setAttribute(
+        'aria-current',
+        dotIndex === currentSlide
+          ? 'true'
+          : 'false'
+      );
+    });
   }
-
 
   function nextSlide() {
-
-    showSlide(
-      currentSlide + 1
-    );
-
+    showSlide(currentSlide + 1);
   }
 
+  function previousSlide() {
+    showSlide(currentSlide - 1);
+  }
+
+  function stopCarousel() {
+    if (carouselTimer) {
+      clearInterval(carouselTimer);
+      carouselTimer = null;
+    }
+  }
 
   function startCarousel() {
+    stopCarousel();
 
-    clearInterval(carouselTimer);
-
-    carouselTimer =
-      setInterval(
-        nextSlide,
-        5000
-      );
-
+    carouselTimer = setInterval(() => {
+      nextSlide();
+    }, 5000);
   }
 
-
-  if (next) {
-
-    next.addEventListener(
-      'click',
-      () => {
-
-        nextSlide();
-
-        startCarousel();
-
-      }
-    );
-
+  function restartCarousel() {
+    startCarousel();
   }
 
+  /* NEXT */
 
-  if (prev) {
-
-    prev.addEventListener(
-      'click',
-      () => {
-
-        showSlide(
-          currentSlide - 1
-        );
-
-        startCarousel();
-
-      }
-    );
-
+  if (nextButton) {
+    nextButton.addEventListener('click', () => {
+      nextSlide();
+      restartCarousel();
+    });
   }
 
+  /* PREVIOUS */
 
-  dots.forEach(
-    (dot, index) => {
+  if (prevButton) {
+    prevButton.addEventListener('click', () => {
+      previousSlide();
+      restartCarousel();
+    });
+  }
 
-      dot.addEventListener(
-        'click',
-        () => {
+  /* DOT */
 
-          showSlide(index);
-
-          startCarousel();
-
-        }
-      );
-
-    }
-  );
+  dots.forEach((dot, index) => {
+    dot.addEventListener('click', () => {
+      showSlide(index);
+      restartCarousel();
+    });
+  });
 
 
+  /* START */
+
+  showSlide(0);
   startCarousel();
-
 }
-    }
 
     renderPage();
 
-    
-
     return () => {
-      const wa = document.getElementById('waFloat')
-      if (wa) wa.onclick = null
+    // Matikan carousel saat App di-unmount
+    if (carouselTimer) {
+      clearInterval(carouselTimer);
+      carouselTimer = null;
     }
-  }, [])
+
+    // Bersihkan event WhatsApp floating button
+    const wa = document.getElementById('waFloat');
+
+    if (wa) {
+      wa.onclick = null;
+    }
+    };
+  }, []);
 
   return (
     <>
       <div id="app"></div>
-      <button className="wa-float" id="waFloat" title="Hubungi via WhatsApp" style={{ display: 'none' }}>
-        <svg width="26" height="26" viewBox="0 0 24 24" fill="currentColor">
+
+      <button
+        className="wa-float"
+        id="waFloat"
+        title="Hubungi via WhatsApp"
+        aria-label="Hubungi UMKM melalui WhatsApp"
+        style={{ display: 'none' }}
+      >
+        <svg
+          width="26"
+          height="26"
+          viewBox="0 0 24 24"
+          fill="currentColor"
+        >
           <path d="M12.04 2c-5.46 0-9.9 4.44-9.9 9.9 0 1.75.46 3.45 1.32 4.95L2 22l5.28-1.38a9.9 9.9 0 0 0 4.76 1.21h.01c5.46 0 9.9-4.44 9.9-9.9 0-2.64-1.03-5.13-2.9-6.99A9.82 9.82 0 0 0 12.04 2Zm0 1.67c2.19 0 4.25.85 5.8 2.4a8.18 8.18 0 0 1 2.4 5.83c0 4.53-3.68 8.22-8.21 8.22a8.2 8.2 0 0 1-4.18-1.15l-.3-.18-3.13.82.84-3.05-.2-.31a8.15 8.15 0 0 1-1.25-4.35c0-4.53 3.7-8.23 8.23-8.23Z"/>
         </svg>
       </button>
     </>
-  )
+  );
 }

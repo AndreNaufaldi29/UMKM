@@ -322,116 +322,145 @@
 
 .carousel-arrow {
   position: absolute;
-
   top: 50%;
-
-  transform: translateY(-50%);
-
   z-index: 5;
 
-  width: 46px;
-  height: 46px;
+  /* Posisi vertikal */
+  transform: translateY(-50%);
 
-  border-radius: 50%;
+  /* Hilangkan bentuk lingkaran */
+  width: auto;
+  height: auto;
+  padding: 10px;
 
-  border: 1px solid rgba(255,255,255,.4);
+  border: none;
+  border-radius: 0;
+  outline: none;
+  box-shadow: none;
 
-  background:
-    rgba(0,0,0,.30);
+  /* Transparan */
+  background: transparent;
 
-  color: white;
-
-  font-size: 25px;
+  /* Tampilan panah */
+  color: #ffffff;
+  font-size: 42px;
+  font-weight: 300;
+  line-height: 1;
 
   cursor: pointer;
 
   display: flex;
-
   align-items: center;
   justify-content: center;
 
-  transition: 0.25s;
+  opacity: 0.75;
+
+  transition:
+    opacity 0.25s ease,
+    transform 0.25s ease;
 }
 
+
+/* Hover */
+
 .carousel-arrow:hover {
-  background:
-    rgba(0,0,0,.60);
+  background: transparent;
+  border: none;
+  box-shadow: none;
+
+  opacity: 1;
 
   transform:
     translateY(-50%)
-    scale(1.08);
+    scale(1.15);
 }
+
+
+/* Saat tombol ditekan */
+
+.carousel-arrow:active {
+  background: transparent;
+
+  transform:
+    translateY(-50%)
+    scale(0.95);
+}
+
+
+/* Hilangkan outline / background saat fokus */
+
+.carousel-arrow:focus,
+.carousel-arrow:focus-visible {
+  background: transparent;
+  border: none;
+  outline: none;
+  box-shadow: none;
+}
+
+
+/* Tombol kiri */
 
 .carousel-prev {
   left: 25px;
 }
 
+
+/* Tombol kanan */
+
 .carousel-next {
   right: 25px;
 }
 
-
-/* DOT */
-
 .carousel-dots {
   position: absolute;
+  z-index: 10;
 
-  z-index: 5;
-
-  bottom: 75px;
-
+  /* Letakkan di bawah tombol Jelajahi */
+  bottom: 110px;
   left: 50%;
-
-  transform:
-    translateX(-50%);
+  transform: translateX(-50%);
 
   display: flex;
-
-  gap: 9px;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
 }
 
 .carousel-dot {
   width: 10px;
   height: 10px;
-
   padding: 0;
 
-  border: none;
-
+  border: 2px solid rgba(255, 255, 255, 0.9);
   border-radius: 50%;
 
-  background:
-    rgba(255,255,255,.5);
+  background: transparent;
 
   cursor: pointer;
 
-  transition: 0.3s;
+  transition:
+    width 0.3s ease,
+    background 0.3s ease,
+    border-radius 0.3s ease;
 }
 
+/* Slide yang sedang aktif */
 .carousel-dot.active {
-  width: 28px;
+  width: 30px;
+  height: 10px;
 
   border-radius: 10px;
+  border-color: #ffffff;
 
-  background: white;
-}
-
-
-/* Terrace tetap di depan */
-
-.hero-carousel .terrace {
-  position: absolute;
-
-  bottom: 0;
-  left: 0;
-
-  width: 100%;
-
-  z-index: 4;
+  background: #ffffff;
 }
 
 
 /* MOBILE */
+
+/* =========================================
+   MOBILE
+========================================= */
 
 @media (max-width: 768px) {
 
@@ -448,14 +477,18 @@
   }
 
   .carousel-arrow {
-    width: 38px;
-    height: 38px;
+    width: auto;
+    height: auto;
+    padding: 8px;
 
-    font-size: 20px;
+    font-size: 32px;
+
+    background: transparent;
+    border: none;
+    border-radius: 0;
   }
 
   .carousel-dots {
     bottom: 65px;
   }
-
 }
