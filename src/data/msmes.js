@@ -23,9 +23,10 @@ export const MSMES = [
     tiktok: 'kopisunyi',
     certs: ['Sertifikat Halal MUI', 'Izin Usaha Mikro Kecil (IUMK)'],
     products: [
-      { name: 'Kopi Robusta Sangrai 250g', desc: 'Biji kopi pilihan sangrai medium', price: 'Rp 35.000' },
-      { name: 'Kopi Susu Gula Aren', desc: 'Signature drink kedai', price: 'Rp 12.000' },
-      { name: 'Pisang Goreng Madu', desc: 'Camilan pendamping kopi', price: 'Rp 10.000' }
+      { id: 'p1_1', name: 'Kopi Robusta Sangrai 250g', desc: 'Biji kopi pilihan sangrai medium', price: 35000, unit: 'pack', rating: 4.9, sales: 230, views: 640, isFeatured: true },
+      { id: 'p1_2', name: 'Kopi Susu Gula Aren', desc: 'Signature drink kedai kopi susu', price: 12000, unit: 'cup', rating: 4.8, sales: 480, views: 1200, isFeatured: true },
+      { id: 'p1_3', name: 'Pisang Goreng Madu', desc: 'Camilan manis pendamping kopi', price: 10000, unit: 'porsi', rating: 4.6, sales: 150, views: 420, isFeatured: false },
+      { id: 'p1_4', name: 'Kopi Arabika Robusta Blend', desc: 'Perpaduan seimbang arabika & robusta', price: 40000, unit: 'pack', rating: 4.7, sales: 85, views: 310, isFeatured: false }
     ]
   },
   {
@@ -48,8 +49,9 @@ export const MSMES = [
     tiktok: 'sekararumbatik',
     certs: ['Hak Kekayaan Intelektual (Motif Terdaftar)', 'Izin Usaha Mikro Kecil (IUMK)', 'Penghargaan UMKM Terbaik Kabupaten 2022'],
     products: [
-      { name: 'Kain Batik Tulis Motif Terasering', desc: 'Katun primisima, 2.2m', price: 'Rp 350.000' },
-      { name: 'Selendang Batik Cap Kombinasi', desc: 'Motif bunga sekar', price: 'Rp 120.000' }
+      { id: 'p2_1', name: 'Kain Batik Tulis Motif Terasering', desc: 'Bahan katun primisima premium ukuran 2.2m', price: 350000, unit: 'lembar', rating: 5.0, sales: 42, views: 310, isFeatured: true },
+      { id: 'p2_2', name: 'Selendang Batik Cap Kombinasi', desc: 'Bahan sutra motif bunga sekar arum', price: 120000, unit: 'lembar', rating: 4.8, sales: 95, views: 240, isFeatured: false },
+      { id: 'p2_3', name: 'Kemeja Batik Pria Sekar Arum', desc: 'Kemeja batik lengan panjang furing halus', price: 250000, unit: 'pcs', rating: 4.9, sales: 60, views: 380, isFeatured: true }
     ]
   },
   {
@@ -72,9 +74,10 @@ export const MSMES = [
     tiktok: '',
     certs: ['Izin Usaha Mikro Kecil (IUMK)'],
     products: [
-      { name: 'Tampah Bambu 40cm', desc: 'Untuk dekorasi & dapur', price: 'Rp 45.000' },
-      { name: 'Keranjang Belanja Anyam', desc: 'Tahan lama, motif kotak', price: 'Rp 60.000' },
-      { name: 'Tudung Saji Bambu', desc: 'Ukuran sedang', price: 'Rp 55.000' }
+      { id: 'p3_1', name: 'Tampah Bambu Hias 40cm', desc: 'Untuk jemuran, dekorasi tradisional & dapur', price: 45000, unit: 'pcs', rating: 4.5, sales: 110, views: 280, isFeatured: false },
+      { id: 'p3_2', name: 'Keranjang Belanja Anyam', desc: 'Tahan lama, kuat, ramah lingkungan motif kotak', price: 60000, unit: 'pcs', rating: 4.7, sales: 140, views: 320, isFeatured: true },
+      { id: 'p3_3', name: 'Tudung Saji Bambu Premium', desc: 'Pelindung makanan ukuran sedang penutup rapat', price: 55000, unit: 'pcs', rating: 4.6, sales: 75, views: 190, isFeatured: false },
+      { id: 'p3_4', name: 'Hiasan Lampu Gantung Bambu', desc: 'Kap lampu anyam aesthetic untuk cafe/rumah', price: 85000, unit: 'pcs', rating: 4.8, sales: 55, views: 430, isFeatured: true }
     ]
   },
   {
@@ -97,8 +100,9 @@ export const MSMES = [
     tiktok: 'keripikbudarmi',
     certs: ['Sertifikat Halal MUI', 'PIRT (Pangan Industri Rumah Tangga)'],
     products: [
-      { name: 'Keripik Singkong Original 200g', desc: 'Renyah gurih', price: 'Rp 15.000' },
-      { name: 'Keripik Singkong Balado', desc: 'Pedas manis', price: 'Rp 17.000' }
+      { id: 'p4_1', name: 'Keripik Singkong Original 200g', desc: 'Renyah gurih rasa kaldu bawang putih asli', price: 15000, unit: 'bungkus', rating: 4.8, sales: 520, views: 980, isFeatured: true },
+      { id: 'p4_2', name: 'Keripik Singkong Balado Pedas', desc: 'Pedas manis gurih bumbu cabai basah melimpah', price: 17000, unit: 'bungkus', rating: 4.9, sales: 430, views: 890, isFeatured: true },
+      { id: 'p4_3', name: 'Keripik Talas Pedas Jeruk', desc: 'Keripik talas renyah dengan aroma jeruk purut segar', price: 18000, unit: 'bungkus', rating: 4.7, sales: 180, views: 450, isFeatured: false }
     ]
   },
   {
@@ -121,8 +125,8 @@ export const MSMES = [
     tiktok: '',
     certs: ['Izin Usaha Mikro Kecil (IUMK)'],
     products: [
-      { name: 'Kaos Polos Combed 30s', desc: 'Custom sablon, min. 12 pcs', price: 'Rp 45.000' },
-      { name: 'Seragam Sekolah Custom', desc: 'Sesuai ukuran & logo sekolah', price: 'Rp 85.000' }
+      { id: 'p5_1', name: 'Kaos Polos Combed 30s', desc: 'Bahan katun adem, custom sablon, min 12 pcs', price: 45000, unit: 'pcs', rating: 4.6, sales: 850, views: 1500, isFeatured: true },
+      { id: 'p5_2', name: 'Seragam Sekolah Custom', desc: 'Bahan Oxford, jahitan rapi, sesuai ukuran & logo sekolah', price: 85000, unit: 'set', rating: 4.7, sales: 340, views: 670, isFeatured: false }
     ]
   },
   {
@@ -145,8 +149,9 @@ export const MSMES = [
     tiktok: 'maduhutandesa',
     certs: ['Sertifikat Halal MUI', 'PIRT', 'Penghargaan Produk Unggulan Desa 2023'],
     products: [
-      { name: 'Madu Hutan Murni 500ml', desc: 'Panen langsung dari hutan desa', price: 'Rp 90.000' },
-      { name: 'Madu Hutan Murni 250ml', desc: 'Kemasan travel', price: 'Rp 50.000' }
+      { id: 'p6_1', name: 'Madu Hutan Murni 500ml', desc: 'Madu murni mentah tanpa campuran hasil hutan desa', price: 90000, unit: 'botol', rating: 4.9, sales: 290, views: 760, isFeatured: true },
+      { id: 'p6_2', name: 'Madu Hutan Murni 250ml', desc: 'Kemasan botol plastik travel-friendly higienis', price: 50000, unit: 'botol', rating: 4.8, sales: 190, views: 430, isFeatured: false },
+      { id: 'p6_3', name: 'Bee Pollen Murni 100g', desc: 'Suplemen alami superfood kaya antioksidan', price: 45000, unit: 'jar', rating: 4.8, sales: 65, views: 210, isFeatured: false }
     ]
   },
   {
@@ -169,8 +174,8 @@ export const MSMES = [
     tiktok: '',
     certs: [],
     products: [
-      { name: 'Servis Ringan', desc: 'Ganti oli & pengecekan umum', price: 'Rp 35.000' },
-      { name: 'Servis Berkala Lengkap', desc: 'Termasuk tune-up', price: 'Rp 75.000' }
+      { id: 'p7_1', name: 'Paket Servis Ringan', desc: 'Ganti oli mesin, tune up karburator/injeksi & cek rem', price: 35000, unit: 'motor', rating: 4.7, sales: 410, views: 800, isFeatured: false },
+      { id: 'p7_2', name: 'Servis Berkala Lengkap', desc: 'Pembersihan cvt, setel klep, pembersihan tangki bensin', price: 75000, unit: 'motor', rating: 4.8, sales: 180, views: 390, isFeatured: false }
     ]
   },
   {
@@ -193,7 +198,7 @@ export const MSMES = [
     tiktok: '',
     certs: [],
     products: [
-      { name: 'Lele Segar per Kg', desc: 'Ukuran konsumsi', price: 'Rp 25.000' }
+      { id: 'p8_1', name: 'Lele Segar Konsumsi', desc: 'Lele segar ukuran konsumsi isi 6-8 ekor per Kg', price: 25000, unit: 'kg', rating: 4.5, sales: 300, views: 500, isFeatured: false }
     ]
   },
   {
@@ -216,9 +221,10 @@ export const MSMES = [
     tiktok: 'gerabahdesa',
     certs: ['Izin Usaha Mikro Kecil (IUMK)', 'Penghargaan Warisan Budaya Kriya Kabupaten'],
     products: [
-      { name: 'Kendi Tanah Liat', desc: 'Motif ukir tangan', price: 'Rp 65.000' },
-      { name: 'Pot Bunga Gerabah', desc: 'Diameter 20cm', price: 'Rp 40.000' },
-      { name: 'Cobek Batu Tradisional', desc: 'Untuk keperluan dapur', price: 'Rp 30.000' }
+      { id: 'p9_1', name: 'Kendi Tanah Liat Tradisional', desc: 'Kendi air minum alami dingin bermotif ukir tangan', price: 65000, unit: 'pcs', rating: 4.8, sales: 88, views: 320, isFeatured: true },
+      { id: 'p9_2', name: 'Pot Bunga Gerabah Aesthetic', desc: 'Pot tanaman terracotta diameter 20cm dengan lubang drainase', price: 40000, unit: 'pcs', rating: 4.6, sales: 120, views: 270, isFeatured: false },
+      { id: 'p9_3', name: 'Cobek Batu Tradisional Sukamaju', desc: 'Cobek batu kali asli padat awet tidak luntur', price: 30000, unit: 'pcs', rating: 4.9, sales: 250, views: 610, isFeatured: true },
+      { id: 'p9_4', name: 'Cangkir Gerabah Set', desc: 'Set isi 2 cangkir + teko mini dari tanah liat bakar', price: 55000, unit: 'set', rating: 4.7, sales: 45, views: 190, isFeatured: false }
     ]
   },
   {
@@ -241,8 +247,21 @@ export const MSMES = [
     tiktok: 'sawahhijauhomestay',
     certs: ['Izin Usaha Pariwisata', 'Sertifikat Standar Kebersihan (CHSE)'],
     products: [
-      { name: 'Kamar Standard / malam', desc: '2 orang, sarapan termasuk', price: 'Rp 250.000' },
-      { name: 'Paket Tur Sawah + Kuliner', desc: 'Setengah hari, min. 2 orang', price: 'Rp 100.000/org' }
+      { id: 'p10_1', name: 'Kamar Standard Homestay', desc: 'Fasilitas 2 orang, sarapan khas desa & air hangat', price: 250000, unit: 'malam', rating: 4.9, sales: 85, views: 540, isFeatured: true },
+      { id: 'p10_2', name: 'Paket Tur Sawah & Kuliner Tradisional', desc: 'Tur jalan kaki setengah hari pemandu lokal, min 2 orang', price: 100000, unit: 'orang', rating: 4.8, sales: 110, views: 320, isFeatured: false },
+      { id: 'p10_3', name: 'Sewa Sepeda Gunung Desa', desc: 'Sepeda mtb untuk keliling desa & persawahan seharian', price: 35000, unit: 'hari', rating: 4.5, sales: 60, views: 150, isFeatured: false }
     ]
   }
 ];
+
+export const PRODUCTS = MSMES.flatMap((m, mIndex) =>
+  (m.products || []).map((p, pIndex) => ({
+    ...p,
+    msmeId: m.id,
+    msmeName: m.name,
+    cat: m.cat,
+    dusun: m.dusun,
+    status: m.status,
+    wa: m.wa
+  }))
+);

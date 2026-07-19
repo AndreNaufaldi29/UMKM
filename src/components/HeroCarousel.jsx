@@ -82,7 +82,7 @@ export default function HeroCarousel() {
         <p>
           Temukan produk dan jasa unggulan yang ditawarkan oleh para pelaku usaha lokal desa kami.
         </p>
-        <Link href="/directory" className="btn btn-soil">
+        <Link href="/umkm" className="btn btn-soil">
           Jelajahi Semua UMKM
           <ArrowIcon style={{ marginLeft: '8px' }} />
         </Link>

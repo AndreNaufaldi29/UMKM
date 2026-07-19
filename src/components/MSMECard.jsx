@@ -5,7 +5,7 @@ import { PhotoSVG } from './DynamicSVGs';
 
 export default function MSMECard({ m }) {
   return (
-    <Link href={`/directory/${m.id}`} className="card">
+    <Link href={`/umkm/${m.id}`} className="card">
       <div className="card-photo">
         <PhotoSVG cat={m.cat} seed={m.id} />
         <div className="card-cat">
