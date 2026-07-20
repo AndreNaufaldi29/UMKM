@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from '../../app/providers';
@@ -9,11 +9,12 @@ import { SunIcon, MoonIcon } from './Icons';
 export default function Navbar() {
   const pathname = usePathname();
   const { dark, toggleDark } = useTheme();
+  const [isOpen, setIsOpen] = useState(false);
 
   return (
     <header className="nav">
       <div className="nav-inner">
-        <Link href="/" className="brand">
+        <Link href="/" className="brand" onClick={() => setIsOpen(false)}>
           <div className="brand-mark">
             <svg
               width="18"
@@ -38,8 +39,11 @@ export default function Navbar() {
           <Link href="/" className={pathname === '/' ? 'active' : ''}>
             Beranda
           </Link>
-          <Link href="/directory" className={pathname.startsWith('/directory') ? 'active' : ''}>
+          <Link href="/umkm" className={pathname.startsWith('/umkm') ? 'active' : ''}>
             UMKM Desa
+          </Link>
+          <Link href="/products" className={pathname.startsWith('/products') ? 'active' : ''}>
+            Katalog Produk
           </Link>
         </nav>
 
@@ -53,6 +57,39 @@ export default function Navbar() {
           >
             {dark ? <SunIcon /> : <MoonIcon />}
           </button>
+
+          {/* HAMBURGER BUTTON */}
+          <button
+            className={`hamburger-btn ${isOpen ? 'open' : ''}`}
+            onClick={() => setIsOpen(!isOpen)}
+            aria-label="Menu navigasi"
+            aria-expanded={isOpen}
+          >
+            <span className="line"></span>
+            <span className="line"></span>
+            <span className="line"></span>
+          </button>
+        </div>
+      </div>
+
+      {/* MOBILE SIDEBAR DRAWER */}
+      <div className={`nav-drawer ${isOpen ? 'open' : ''}`}>
+        <div className="drawer-overlay" onClick={() => setIsOpen(false)} />
+        <div className="drawer-content">
+          <div className="drawer-header">
+            <span className="drawer-title">Desa Sukamaju</span>
+          </div>
+          <nav className="drawer-links">
+            <Link href="/" className={pathname === '/' ? 'active' : ''} onClick={() => setIsOpen(false)}>
+              Beranda
+            </Link>
+            <Link href="/umkm" className={pathname.startsWith('/umkm') ? 'active' : ''} onClick={() => setIsOpen(false)}>
+              UMKM Desa
+            </Link>
+            <Link href="/products" className={pathname.startsWith('/products') ? 'active' : ''} onClick={() => setIsOpen(false)}>
+              Katalog Produk
+            </Link>
+          </nav>
         </div>
       </div>
     </header>

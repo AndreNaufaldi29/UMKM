@@ -3,18 +3,27 @@ import Link from 'next/link';
 import HeroCarousel from '../src/components/HeroCarousel';
 import HomeSearch from '../src/components/HomeSearch';
 import MSMECard from '../src/components/MSMECard';
-import { MSMES, CATEGORIES } from '../src/data/msmes';
-import { ArrowIcon } from '../src/components/Icons';
+import ProductCard from '../src/components/ProductCard';
+import TestimonialCarousel from '../src/components/TestimonialCarousel';
+import AnimatedCounter from '../src/components/AnimatedCounter';
+import { MSMES, CATEGORIES, PRODUCTS } from '../src/data/msmes';
+import { ArrowIcon, CategoryIcon } from '../src/components/Icons';
 
 export default function Home() {
   const totalUMKM = MSMES.length;
   const totalCats = CATEGORIES.length;
-  const totalProducts = MSMES.reduce((sum, m) => sum + (m.products?.length || 0), 0);
+  const totalProducts = PRODUCTS.length;
 
   // Latest 6 MSMEs by est year
   const latestMSMEs = [...MSMES]
     .sort((a, b) => b.est - a.est)
     .slice(0, 6);
+
+  // Top 4 featured products sorted by rating descending
+  const featuredProducts = [...PRODUCTS]
+    .filter((p) => p.isFeatured)
+    .sort((a, b) => b.rating - a.rating)
+    .slice(0, 4);
 
   return (
     <main>
@@ -24,6 +33,18 @@ export default function Home() {
       {/* SEARCH CARD */}
       <div className="wrap">
         <HomeSearch />
+      </div>
+
+      {/* TESTIMONIALS SECTION */}
+      <div className="wrap section" style={{ paddingBottom: 0 }}>
+        <div className="section-head" style={{ marginBottom: '24px', justifyContent: 'center', textAlign: 'center' }}>
+          <div>
+            <h2 style={{ fontSize: '1.6rem', fontWeight: 600 }}>Apa Kata Mereka?</h2>
+            <div className="sub">Ulasan tulus dari para pembeli produk unggulan UMKM kami</div>
+          </div>
+        </div>
+
+        <TestimonialCarousel />
       </div>
 
       {/* STATS SECTION */}
@@ -37,28 +58,71 @@ export default function Home() {
 
         <div className="stats">
           <div className="stat-card">
-            <div className="stat-number mono" style={{ fontSize: '2.1rem', fontWeight: 600, color: 'var(--forest)' }}>
-              {String(totalUMKM).padStart(2, '0')}
+            <div className="num">
+              <AnimatedCounter targetValue={totalUMKM} />
             </div>
-            <div className="stat-label">Total UMKM Terdaftar</div>
-            <div className="stat-accent" style={{ position: 'absolute', top: '20px', right: '20px', width: '8px', height: '8px', borderRadius: '999px', background: 'var(--soil)' }}></div>
+            <div className="label">Total UMKM Terdaftar</div>
+            <div className="tick"></div>
           </div>
 
           <div className="stat-card">
-            <div className="stat-number mono" style={{ fontSize: '2.1rem', fontWeight: 600, color: 'var(--forest)' }}>
-              {String(totalCats).padStart(2, '0')}
+            <div className="num">
+              <AnimatedCounter targetValue={totalCats} />
             </div>
-            <div className="stat-label">Kategori Usaha</div>
-            <div className="stat-accent" style={{ position: 'absolute', top: '20px', right: '20px', width: '8px', height: '8px', borderRadius: '999px', background: 'var(--soil)' }}></div>
+            <div className="label">Kategori Usaha</div>
+            <div className="tick"></div>
           </div>
 
           <div className="stat-card">
-            <div className="stat-number mono" style={{ fontSize: '2.1rem', fontWeight: 600, color: 'var(--forest)' }}>
-              {String(totalProducts).padStart(2, '0')}
+            <div className="num">
+              <AnimatedCounter targetValue={totalProducts} />
             </div>
-            <div className="stat-label">Produk Unggulan</div>
-            <div className="stat-accent" style={{ position: 'absolute', top: '20px', right: '20px', width: '8px', height: '8px', borderRadius: '999px', background: 'var(--soil)' }}></div>
+            <div className="label">Produk Unggulan</div>
+            <div className="tick"></div>
           </div>
+        </div>
+      </div>
+
+      {/* KATEGORI PILIHAN SECTION */}
+      <div className="wrap section" style={{ paddingTop: 0 }}>
+        <div className="section-head">
+          <div>
+            <h2>Kategori Produk</h2>
+            <div className="sub">Jelajahi produk berdasarkan sektor UMKM</div>
+          </div>
+        </div>
+        <div className="category-home-grid">
+          {CATEGORIES.map((c) => (
+            <Link key={c} href={`/products?cat=${c}`} className="cat-home-card">
+              <div className="cat-home-icon">
+                <CategoryIcon cat={c} width="22" height="22" />
+              </div>
+              <span className="cat-home-title">{c}</span>
+              <span className="cat-home-count mono">
+                {PRODUCTS.filter(p => p.cat === c).length} Produk
+              </span>
+            </Link>
+          ))}
+        </div>
+      </div>
+
+      {/* PRODUK UNGGULAN SECTION */}
+      <div className="wrap section" style={{ paddingTop: 0 }}>
+        <div className="section-head">
+          <div>
+            <h2>Produk Unggulan Desa</h2>
+            <div className="sub">Karya terbaik dan produk pilihan dari warga desa</div>
+          </div>
+          <Link href="/products" className="link-more">
+            Lihat semua produk
+            <ArrowIcon style={{ marginLeft: '4px' }} />
+          </Link>
+        </div>
+
+        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
+          {featuredProducts.map((p) => (
+            <ProductCard key={p.id} p={p} />
+          ))}
         </div>
       </div>
 
@@ -69,7 +133,7 @@ export default function Home() {
             <h2>UMKM Terbaru</h2>
             <div className="sub">Usaha yang baru saja bergabung dalam katalog</div>
           </div>
-          <Link href="/directory" className="link-more">
+          <Link href="/umkm" className="link-more">
             Lihat semua
             <ArrowIcon style={{ marginLeft: '4px' }} />
           </Link>

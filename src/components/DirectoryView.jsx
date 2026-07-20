@@ -58,7 +58,7 @@ export default function DirectoryView() {
     if (newSort !== 'newest') params.set('sort', newSort);
     if (newPage > 1) params.set('page', newPage.toString());
 
-    const urlString = params.toString() ? `/directory?${params.toString()}` : '/directory';
+    const urlString = params.toString() ? `/umkm?${params.toString()}` : '/umkm';
     router.push(urlString, { scroll: false });
   };
 

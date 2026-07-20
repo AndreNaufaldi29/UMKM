@@ -11,11 +11,11 @@ export default function HomeSearch() {
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
-    router.push(`/directory?q=${encodeURIComponent(query.trim())}`);
+    router.push(`/umkm?q=${encodeURIComponent(query.trim())}`);
   };
 
   const handleCategoryClick = (cat) => {
-    router.push(`/directory?cat=${encodeURIComponent(cat)}`);
+    router.push(`/umkm?cat=${encodeURIComponent(cat)}`);
   };
 
   return (
@@ -36,7 +36,7 @@ export default function HomeSearch() {
       </form>
 
       <div className="chip-row">
-        <button className="chip" onClick={() => router.push('/directory')}>
+        <button className="chip" onClick={() => router.push('/umkm')}>
           Semua Kategori
         </button>
         {CATEGORIES.map((c) => (

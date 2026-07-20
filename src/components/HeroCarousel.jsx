@@ -48,13 +48,13 @@ export default function HeroCarousel() {
     <section className="hero hero-carousel">
       <div className="hero-slides">
         <div className={`hero-slide ${currentSlide === 0 ? 'active' : ''}`}>
-          <img src="/images/umkm-1.jpg" alt="UMKM Desa Sukamaju" />
+          <img src="/umkm-kedungsumur/images/umkm-1.jpg" alt="UMKM Desa Sukamaju" />
         </div>
         <div className={`hero-slide ${currentSlide === 1 ? 'active' : ''}`}>
-          <img src="/images/umkm-2.jpg" alt="Produk UMKM Desa" />
+          <img src="/umkm-kedungsumur/images/umkm-2.jpg" alt="Produk UMKM Desa" />
         </div>
         <div className={`hero-slide ${currentSlide === 2 ? 'active' : ''}`}>
-          <img src="/images/umkm-3.jpg" alt="Pelaku UMKM Desa" />
+          <img src="/umkm-kedungsumur/images/umkm-3.jpg" alt="Pelaku UMKM Desa" />
         </div>
       </div>
 
@@ -82,7 +82,7 @@ export default function HeroCarousel() {
         <p>
           Temukan produk dan jasa unggulan yang ditawarkan oleh para pelaku usaha lokal desa kami.
         </p>
-        <Link href="/directory" className="btn btn-soil">
+        <Link href="/umkm" className="btn btn-soil">
           Jelajahi Semua UMKM
           <ArrowIcon style={{ marginLeft: '8px' }} />
         </Link>

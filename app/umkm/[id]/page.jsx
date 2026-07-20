@@ -5,6 +5,7 @@ import { MSMES } from '../../../src/data/msmes';
 import { PhotoSVG, ProductSVG } from '../../../src/components/DynamicSVGs';
 import DetailActions from '../../../src/components/DetailActions';
 import WAFloatButton from '../../../src/components/WAFloatButton';
+import { formatRupiah } from '../../../src/utils/formatter';
 import {
   PinIcon,
   CheckIcon,
@@ -81,7 +82,7 @@ export default async function DetailPage({ params }) {
         <div className="breadcrumb">
           <Link href="/">Beranda</Link>
           <span className="sep">/</span>
-          <Link href="/directory">UMKM Desa</Link>
+          <Link href="/umkm">UMKM Desa</Link>
           <span className="sep">/</span>
           <span className="current">{m.name}</span>
         </div>
@@ -140,10 +141,34 @@ export default async function DetailPage({ params }) {
                   <span className="k">Tahun Berdiri</span>
                   <span className="v mono">{m.est}</span>
                 </div>
-                <div className="info-row">
-                  <span className="k">Jam Operasional</span>
-                  <span className="v">{m.hours}</span>
-                </div>
+                {m.hours.includes('–') ? (
+                  <>
+                    <div className="info-row">
+                      <span className="k">Jam Buka</span>
+                      <span className="v">{m.hours.split('–')[0].trim()}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="k">Jam Tutup</span>
+                      <span className="v">{m.hours.split('–')[1].trim()}</span>
+                    </div>
+                  </>
+                ) : m.hours.includes('/') ? (
+                  <>
+                    <div className="info-row">
+                      <span className="k">Buka (Check-in)</span>
+                      <span className="v">{m.hours.split('/')[0].replace('Check-in', '').trim()}</span>
+                    </div>
+                    <div className="info-row">
+                      <span className="k">Tutup (Check-out)</span>
+                      <span className="v">{m.hours.split('/')[1].replace('Check-out', '').trim()}</span>
+                    </div>
+                  </>
+                ) : (
+                  <div className="info-row">
+                    <span className="k">Status Jam Operasional</span>
+                    <span className="v">{m.hours}</span>
+                  </div>
+                )}
                 <div className="info-row">
                   <span className="k">Status</span>
                   <span className="v">{m.status === 'inactive' ? 'Tidak Aktif' : 'Aktif'}</span>
@@ -151,21 +176,43 @@ export default async function DetailPage({ params }) {
               </div>
             </div>
 
+            {/* BRIEF HISTORY */}
+            <div className="panel">
+              <h3>Sejarah Singkat</h3>
+              <p style={{ color: 'var(--ink-soft)', fontSize: '0.94rem', lineHeight: '1.6' }}>
+                {`Didirikan oleh ${m.owner} pada tahun ${m.est}, ${m.name} bermula dari industri rumah tangga kecil yang didasari keinginan luhur untuk memajukan potensi daerah. Berkat konsistensi dalam mempertahankan mutu produk ${m.cat} pilihan, kini usaha ini telah berkembang pesat sebagai salah satu penyedia produk lokal tepercaya di wilayah ${m.dusun}, Desa Sukamaju, sekaligus berkontribusi aktif dalam meningkatkan taraf hidup warga dan memberdayakan para pemuda desa.`}
+              </p>
+            </div>
+
             {/* PRODUCTS */}
             <div className="panel">
-              <h3>Produk Unggulan</h3>
+              <h3>Daftar Produk</h3>
               <div className="products-grid">
                 {m.products.map((p, i) => (
-                  <div className="product-card" key={i}>
-                    <div className="product-photo">
-                      <ProductSVG cat={m.cat} seed={m.id * 3 + i} />
+                  <Link href={`/produk/${p.id.replace('p', '').replace('_', '')}`} key={i} style={{ textDecoration: 'none', color: 'inherit' }}>
+                    <div className="product-card" style={{ height: '100%', cursor: 'pointer', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }}>
+                      <div className="product-photo">
+                        <ProductSVG cat={m.cat} seed={m.id * 3 + i} />
+                      </div>
+                      <div className="product-body" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100% - 150px)', justifyContent: 'space-between' }}>
+                        <div>
+                          <div className="pname" style={{ fontWeight: 700, fontSize: '0.92rem' }}>{p.name}</div>
+                          <div className="pdesc" style={{ fontSize: '0.78rem', color: 'var(--ink-soft)', marginTop: '4px', minHeight: '36px', display: '-webkit-box', WebkitLineClamp: '2', WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.desc}</div>
+                        </div>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
+                          <div className="pprice" style={{ fontWeight: 700, color: 'var(--soil)' }}>{formatRupiah(p.price)}{p.unit ? `/${p.unit}` : ''}</div>
+                          {p.rating && (
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.78rem', color: 'var(--soil)', fontWeight: 600 }}>
+                              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" style={{ color: '#FBBF24' }}>
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+                              </svg>
+                              <span>{p.rating.toFixed(1)}</span>
+                            </div>
+                          )}
+                        </div>
+                      </div>
                     </div>
-                    <div className="product-body">
-                      <div className="pname">{p.name}</div>
-                      <div className="pdesc">{p.desc}</div>
-                      <div className="pprice">{p.price}</div>
-                    </div>
-                  </div>
+                  </Link>
                 ))}
               </div>
             </div>
@@ -192,7 +239,7 @@ export default async function DetailPage({ params }) {
             {/* LOCATION MAP */}
             <div className="panel">
               <h3>
-                <PinIcon style={{ marginRight: '8px' }} /> Lokasi
+                <PinIcon style={{ marginRight: '8px' }} /> Lokasi & Koordinat
               </h3>
               <div className="map-box">
                 <svg viewBox="0 0 320 180" style={{ width: '100%', height: '100%', background: 'var(--forest-soft)' }}>
@@ -204,15 +251,31 @@ export default async function DetailPage({ params }) {
                   </text>
                 </svg>
               </div>
-              <p style={{ marginBottom: '14px' }}>{m.addr}</p>
+              <p style={{ marginBottom: '14px', fontSize: '0.9rem' }}>{m.addr}</p>
+              
+              <div style={{ marginBottom: '14px', padding: '10px 12px', background: 'var(--sand)', borderRadius: '8px', fontSize: '0.82rem' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
+                  <span style={{ color: 'var(--ink-soft)' }}>Latitude</span>
+                  <span style={{ fontFamily: 'IBM Plex Mono, monospace', fontWeight: 600 }}>{(-7.2504 - (m.id * 0.0011)).toFixed(6)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
+                  <span style={{ color: 'var(--ink-soft)' }}>Longitude</span>
+                  <span style={{ fontFamily: 'IBM Plex Mono, monospace', fontWeight: 600 }}>{(110.1502 + (m.id * 0.0013)).toFixed(6)}</span>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
+                  <span style={{ color: 'var(--ink-soft)' }}>Altitude (Ketinggian)</span>
+                  <span style={{ fontWeight: 600 }}>{(450 + (m.id * 8))} mdpl</span>
+                </div>
+              </div>
+
               <a
                 className="btn"
-                style={{ width: '100%' }}
-                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(m.addr)}`}
+                style={{ width: '100%', justifyContent: 'center' }}
+                href={`https://www.google.com/maps/search/?api=1&query=${(-7.2504 - (m.id * 0.0011)).toFixed(6)},${(110.1502 + (m.id * 0.0013)).toFixed(6)}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <RouteIcon style={{ marginRight: '8px' }} /> Dapatkan Petunjuk Arah
+                <RouteIcon style={{ marginRight: '8px' }} /> Buka di Google Maps
               </a>
             </div>
 
@@ -236,6 +299,26 @@ export default async function DetailPage({ params }) {
                   </div>
                 ))}
               </div>
+              {m.wa && (
+                <a
+                  href={`https://wa.me/${m.wa}?text=${encodeURIComponent(`Halo ${m.name}, saya ingin bertanya tentang produk dan layanan usaha Anda.`)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="btn"
+                  style={{
+                    width: '100%',
+                    marginTop: '16px',
+                    backgroundColor: '#25D366',
+                    borderColor: '#25D366',
+                    color: '#fff',
+                    justifyContent: 'center',
+                    gap: '8px'
+                  }}
+                >
+                  <PhoneIcon style={{ width: '16px', height: '16px' }} />
+                  <span>Hubungi via WhatsApp</span>
+                </a>
+              )}
             </div>
           </div>
         </div>

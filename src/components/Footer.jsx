@@ -1,4 +1,5 @@
 import React from 'react';
+import Link from 'next/link';
 import { TerraceDivider } from './DynamicSVGs';
 
 export default function Footer() {
@@ -13,10 +14,9 @@ export default function Footer() {
           <p>Sistem Informasi UMKM Desa — bagian dari Website Profil Desa Sukamaju.</p>
         </div>
         <div className="footer-links">
-          <a href="#">Profil Desa</a>
-          <a href="#">Berita Desa</a>
-          <a href="#">Layanan Publik</a>
-          <a href="#">Kontak</a>
+          <Link href="/">Beranda</Link>
+          <Link href="/umkm">UMKM Desa</Link>
+          <Link href="/products">Katalog Produk</Link>
         </div>
       </div>
     </footer>
