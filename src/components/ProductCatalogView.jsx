@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { PRODUCTS, CATEGORIES, DUSUN } from '../data/msmes';
+import { PRODUCTS, CATEGORIES } from '../data/msmes';
 import ProductCard from './ProductCard';
 import { SearchIcon, EmptyIcon, CategoryIcon } from './Icons';
 
@@ -17,14 +17,12 @@ export default function ProductCatalogView() {
   // Load initial state from URL query parameters
   const initialQ = searchParams.get('q') || '';
   const initialCat = searchParams.get('cat') || 'all';
-  const initialDusun = searchParams.get('dusun') || 'all';
   const initialSort = searchParams.get('sort') || 'rating';
   const initialPage = parseInt(searchParams.get('page') || '1', 10);
 
   // States
   const [query, setQuery] = useState(initialQ);
   const [cat, setCat] = useState(initialCat);
-  const [dusun, setDusun] = useState(initialDusun);
   const [sort, setSort] = useState(initialSort);
   const [page, setPage] = useState(initialPage);
 
@@ -32,7 +30,6 @@ export default function ProductCatalogView() {
   useEffect(() => {
     setQuery(searchParams.get('q') || '');
     setCat(searchParams.get('cat') || 'all');
-    setDusun(searchParams.get('dusun') || 'all');
     setSort(searchParams.get('sort') || 'rating');
     setPage(parseInt(searchParams.get('page') || '1', 10));
   }, [searchParams]);
@@ -76,11 +73,7 @@ export default function ProductCatalogView() {
     updateUrl(query, newCat, dusun, sort, 1);
   };
 
-  const handleDusunChange = (newDusun) => {
-    setDusun(newDusun);
-    setPage(1);
-    updateUrl(query, cat, newDusun, sort, 1);
-  };
+  
 
   const handleSortChange = (newSort) => {
     setSort(newSort);
@@ -90,13 +83,11 @@ export default function ProductCatalogView() {
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    updateUrl(query, cat, dusun, sort, newPage);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Helper counts
   const getCatCount = (c) => PRODUCTS.filter((p) => (c === 'all' ? true : p.cat === c)).length;
-  const getDusunCount = (d) => PRODUCTS.filter((p) => (d === 'all' ? true : p.dusun === d)).length;
 
   // Filter & sort logic
   const filteredList = PRODUCTS.filter((p) => {
@@ -107,8 +98,7 @@ export default function ProductCatalogView() {
       p.desc.toLowerCase().includes(q) ||
       p.msmeName.toLowerCase().includes(q);
     const matchCat = cat === 'all' || p.cat === cat;
-    const matchDusun = dusun === 'all' || p.dusun === dusun;
-    return matchQ && matchCat && matchDusun;
+    return matchQ && matchCat;
   });
 
   const sortedList = [...filteredList];
@@ -160,19 +150,6 @@ export default function ProductCatalogView() {
                 onChange={handleQueryChange}
               />
             </div>
-            <select
-              id="dusunSelect"
-              value={dusun}
-              onChange={(e) => handleDusunChange(e.target.value)}
-              style={{ fontWeight: 600 }}
-            >
-              <option value="all">Semua Dusun</option>
-              {DUSUN.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
           </div>
         </div>
 
@@ -200,27 +177,6 @@ export default function ProductCatalogView() {
                     {c}
                   </span>
                   <span className="count mono">{getCatCount(c)}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="filter-group">
-              <h4>Dusun Asal</h4>
-              <div
-                className={`filter-opt ${dusun === 'all' ? 'active' : ''}`}
-                onClick={() => handleDusunChange('all')}
-              >
-                <span>Semua Dusun</span>
-                <span className="count mono">{getDusunCount('all')}</span>
-              </div>
-              {DUSUN.map((d) => (
-                <div
-                  key={d}
-                  className={`filter-opt ${dusun === d ? 'active' : ''}`}
-                  onClick={() => handleDusunChange(d)}
-                >
-                  <span>{d}</span>
-                  <span className="count mono">{getDusunCount(d)}</span>
                 </div>
               ))}
             </div>

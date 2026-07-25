@@ -1,4 +1,4 @@
-export const CATEGORIES = ['Kuliner', 'Kerajinan', 'Fashion', 'Pertanian', 'Jasa', 'Wisata'];
+export const CATEGORIES = ['Kuliner', 'Kerajinan', 'Fashion', 'Pertanian', 'Jasa'];
 
 export const DUSUN = ['Dusun Mekar', 'Dusun Sejahtera', 'Dusun Indah', 'Dusun Makmur'];
 
@@ -227,31 +227,7 @@ export const MSMES = [
       { id: 'p9_4', name: 'Cangkir Gerabah Set', desc: 'Set isi 2 cangkir + teko mini dari tanah liat bakar', price: 55000, unit: 'set', rating: 4.7, sales: 45, views: 190, isFeatured: false }
     ]
   },
-  {
-    id: 10,
-    name: 'Homestay Sawah Hijau',
-    owner: 'Ratna Dewi',
-    cat: 'Wisata',
-    dusun: 'Dusun Indah',
-    est: 2021,
-    status: 'active',
-    addr: 'Jl. Pemandangan Sawah No. 1, Dusun Indah',
-    hours: 'Check-in 12.00 / Check-out 11.00',
-    desc: 'Homestay dengan pemandangan sawah terasering langsung dari kamar, dikelola keluarga lokal, cocok untuk wisatawan yang ingin merasakan suasana pedesaan otentik.',
-    wa: '6281234567810',
-    phone: '0274-557733',
-    email: 'homestaysawahhijau@gmail.com',
-    web: 'sawahhijau-homestay.com',
-    fb: 'homestaysawahhijau',
-    ig: 'sawahhijau.homestay',
-    tiktok: 'sawahhijauhomestay',
-    certs: ['Izin Usaha Pariwisata', 'Sertifikat Standar Kebersihan (CHSE)'],
-    products: [
-      { id: 'p10_1', name: 'Kamar Standard Homestay', desc: 'Fasilitas 2 orang, sarapan khas desa & air hangat', price: 250000, unit: 'malam', rating: 4.9, sales: 85, views: 540, isFeatured: true },
-      { id: 'p10_2', name: 'Paket Tur Sawah & Kuliner Tradisional', desc: 'Tur jalan kaki setengah hari pemandu lokal, min 2 orang', price: 100000, unit: 'orang', rating: 4.8, sales: 110, views: 320, isFeatured: false },
-      { id: 'p10_3', name: 'Sewa Sepeda Gunung Desa', desc: 'Sepeda mtb untuk keliling desa & persawahan seharian', price: 35000, unit: 'hari', rating: 4.5, sales: 60, views: 150, isFeatured: false }
-    ]
-  }
+  
 ];
 
 export const PRODUCTS = MSMES.flatMap((m, mIndex) =>

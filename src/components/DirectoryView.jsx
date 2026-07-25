@@ -159,18 +159,6 @@ export default function DirectoryView() {
                 onChange={handleQueryChange}
               />
             </div>
-            <select
-              id="dusunSelect"
-              value={dusun}
-              onChange={(e) => handleDusunChange(e.target.value)}
-            >
-              <option value="all">Semua Dusun</option>
-              {DUSUN.map((d) => (
-                <option key={d} value={d}>
-                  {d}
-                </option>
-              ))}
-            </select>
           </div>
         </div>
 
@@ -198,27 +186,6 @@ export default function DirectoryView() {
                     {c}
                   </span>
                   <span className="count mono">{getCatCount(c)}</span>
-                </div>
-              ))}
-            </div>
-
-            <div className="filter-group">
-              <h4>Dusun / RW</h4>
-              <div
-                className={`filter-opt ${dusun === 'all' ? 'active' : ''}`}
-                onClick={() => handleDusunChange('all')}
-              >
-                <span>Semua Dusun</span>
-                <span className="count mono">{getDusunCount('all')}</span>
-              </div>
-              {DUSUN.map((d) => (
-                <div
-                  key={d}
-                  className={`filter-opt ${dusun === d ? 'active' : ''}`}
-                  onClick={() => handleDusunChange(d)}
-                >
-                  <span>{d}</span>
-                  <span className="count mono">{getDusunCount(d)}</span>
                 </div>
               ))}
             </div>
