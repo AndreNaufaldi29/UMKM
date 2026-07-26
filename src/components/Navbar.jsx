@@ -30,7 +30,7 @@ export default function Navbar() {
             </svg>
           </div>
           <div>
-            Desa Sukamaju
+            Desa Kedungsumur
             <small>Website Profil Desa</small>
           </div>
         </Link>

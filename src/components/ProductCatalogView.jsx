@@ -133,7 +133,7 @@ export default function ProductCatalogView() {
         <div className="section-head">
           <div>
             <h2>Katalog Produk UMKM</h2>
-            <div className="sub">{PRODUCTS.length} produk unggulan dari UMKM Desa Sukamaju</div>
+            <div className="sub">{PRODUCTS.length} produk unggulan dari UMKM Desa kedungsumur</div>
           </div>
         </div>
 

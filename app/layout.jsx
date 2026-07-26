@@ -5,7 +5,7 @@ import Navbar from '../src/components/Navbar';
 import Footer from '../src/components/Footer';
 
 export const metadata = {
-  title: 'Katalog UMKM Desa Sukamaju',
+  title: 'Katalog UMKM Desa kedungsumur',
   description: 'Temukan produk dan jasa unggulan yang ditawarkan oleh para pelaku usaha lokal desa kami.',
 };
 

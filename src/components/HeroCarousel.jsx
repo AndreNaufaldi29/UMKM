@@ -78,7 +78,7 @@ export default function HeroCarousel() {
 
       <div className="hero-inner carousel-content">
         <div className="eyebrow">Sistem Informasi UMKM Desa</div>
-        <h1>Katalog UMKM Desa Sukamaju</h1>
+        <h1>Katalog UMKM Desa kedungsumur</h1>
         <p>
           Temukan produk dan jasa unggulan yang ditawarkan oleh para pelaku usaha lokal desa kami.
         </p>

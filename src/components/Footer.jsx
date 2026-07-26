@@ -10,8 +10,8 @@ export default function Footer() {
       </div>
       <div className="footer-inner">
         <div>
-          <div className="fbrand">Desa Sukamaju</div>
-          <p>Sistem Informasi UMKM Desa — bagian dari Website Profil Desa Sukamaju.</p>
+          <div className="fbrand">Desa Kedungsumur</div>
+          <p>Sistem Informasi UMKM Desa — bagian dari Website Profil Desa Kedungsumur.</p>
         </div>
         <div className="footer-links">
           <Link href="/">Beranda</Link>

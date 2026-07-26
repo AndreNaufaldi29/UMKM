@@ -5,7 +5,7 @@ import { ShareIcon, PhoneIcon } from './Icons';
 
 export default function DetailActions({ name, wa }) {
   const handleShare = () => {
-    const text = encodeURIComponent(`Lihat UMKM "${name}" di Katalog UMKM Desa Sukamaju!`);
+    const text = encodeURIComponent(`Lihat UMKM "${name}" di Katalog UMKM Desa Kedungsumur!`);
     window.open(`https://wa.me/?text=${text}`, '_blank', 'noopener,noreferrer');
   };
 

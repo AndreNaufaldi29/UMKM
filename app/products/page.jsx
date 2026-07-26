@@ -2,8 +2,8 @@ import React, { Suspense } from 'react';
 import ProductCatalogView from '../../src/components/ProductCatalogView';
 
 export const metadata = {
-  title: 'Katalog Produk UMKM Desa Sukamaju',
-  description: 'Temukan produk-produk unggulan terbaik dari berbagai usaha mikro, kecil, dan menengah di Desa Sukamaju.',
+  title: 'Katalog Produk UMKM Desa Kedungsumur',
+  description: 'Temukan produk-produk unggulan terbaik dari berbagai usaha mikro, kecil, dan menengah di Desa Kedungsumur.',
 };
 
 export default function ProductsPage() {

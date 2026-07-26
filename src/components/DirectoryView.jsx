@@ -142,7 +142,7 @@ export default function DirectoryView() {
         <div className="section-head">
           <div>
             <h2>Direktori UMKM</h2>
-            <div className="sub">{MSMES.length} usaha terdaftar di Desa Sukamaju</div>
+            <div className="sub">{MSMES.length} usaha terdaftar di Desa Kedungsumur</div>
           </div>
         </div>
 

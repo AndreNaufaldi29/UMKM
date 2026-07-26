@@ -51,7 +51,7 @@ export default function Home() {
       <div className="wrap section">
         <div className="section-head">
           <div>
-            <h2>Sekilas Desa Sukamaju</h2>
+            <h2>Sekilas Desa Kedungsumur</h2>
             <div className="sub">Ringkasan data UMKM terkini</div>
           </div>
         </div>
