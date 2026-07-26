@@ -2,6 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 
+import { DataProvider } from '../src/context/DataContext';
+
 const ThemeContext = createContext({
   dark: false,
   toggleDark: () => {},
@@ -24,9 +26,11 @@ export function ThemeProvider({ children }) {
   };
 
   return (
-    <ThemeContext.Provider value={{ dark, toggleDark }}>
-      {children}
-    </ThemeContext.Provider>
+    <DataProvider>
+      <ThemeContext.Provider value={{ dark, toggleDark }}>
+        {children}
+      </ThemeContext.Provider>
+    </DataProvider>
   );
 }
 

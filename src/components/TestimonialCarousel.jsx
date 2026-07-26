@@ -3,43 +3,19 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { StarIcon, ArrowIcon } from './Icons';
-
-const TESTIMONIALS = [
-  {
-    id: 1,
-    name: 'Budi Santoso',
-    role: 'Pemilik Cafe, Yogyakarta',
-    avatar: 'BS',
-    quote: '"Kopi Robusta Sangrai dari Desa Sukamaju benar-benar luar biasa. Aroma dan konsistensi rasanya sangat disukai oleh pelanggan cafe saya. Pengisian stok selalu aman."',
-    productLink: '/umkm/1',
-    productName: 'Kopi Robusta Sangrai'
-  },
-  {
-    id: 2,
-    name: 'Dewi Lestari',
-    role: 'Wisatawan, Jakarta',
-    avatar: 'DL',
-    quote: '"Sangat terkesan dengan keindahan Kain Batik Tulis Motif Terasering. Detail cantingnya sangat rapi dan kainnya nyaman dipakai. Mahakarya asli yang bernilai tinggi!"',
-    productLink: '/umkm/2',
-    productName: 'Kain Batik Tulis'
-  },
-  {
-    id: 3,
-    name: 'Hendra Wijaya',
-    role: 'Pencinta Produk Lokal, Bandung',
-    avatar: 'HW',
-    quote: '"Keranjang anyaman bambunya sangat kuat dan estetik untuk dekorasi rumah. Sangat bangga bisa membeli produk lokal yang ramah lingkungan dengan kualitas premium."',
-    productLink: '/umkm/3',
-    productName: 'Anyaman Bambu'
-  }
-];
+import { useData } from '../context/DataContext';
 
 export default function TestimonialCarousel() {
+  const { reviews } = useData();
+  const approvedReviews = reviews.filter((r) => r.status === 'approved');
+  const TESTIMONIALS = approvedReviews.length > 0 ? approvedReviews : reviews;
+
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);
   const autoplayTimerRef = useRef(null);
 
   const startAutoplay = () => {
+    if (TESTIMONIALS.length <= 1) return;
     stopAutoplay();
     autoplayTimerRef.current = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % TESTIMONIALS.length);
@@ -107,7 +83,7 @@ export default function TestimonialCarousel() {
                   <span className="role">{t.role}</span>
                 </div>
               </div>
-              <Link href={t.productLink} className="btn btn-outline btn-sm testimonial-action-btn">
+              <Link href={t.productLink || (t.msmeId ? `/umkm/${t.msmeId}` : '/umkm')} className="btn btn-outline btn-sm testimonial-action-btn">
                 <span>Lihat {t.productName}</span>
                 <ArrowIcon style={{ marginLeft: '4px', width: '12px', height: '12px' }} />
               </Link>

@@ -4,7 +4,7 @@ import React, { useState } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from '../../app/providers';
-import { SunIcon, MoonIcon } from './Icons';
+import { SunIcon, MoonIcon, AdminIcon } from './Icons';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -21,7 +21,7 @@ export default function Navbar() {
               height="18"
               viewBox="0 0 24 24"
               fill="none"
-              stroke="#F6F1E4"
+              stroke="currentColor"
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
@@ -44,6 +44,10 @@ export default function Navbar() {
           </Link>
           <Link href="/products" className={pathname.startsWith('/products') ? 'active' : ''}>
             Katalog Produk
+          </Link>
+          <Link href="/admin" className={pathname.startsWith('/admin') ? 'active' : ''} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+            <AdminIcon width="14" height="14" />
+            <span>Admin</span>
           </Link>
         </nav>
 
@@ -77,7 +81,7 @@ export default function Navbar() {
         <div className="drawer-overlay" onClick={() => setIsOpen(false)} />
         <div className="drawer-content">
           <div className="drawer-header">
-            <span className="drawer-title">Desa Sukamaju</span>
+            <span className="drawer-title">Desa Kedungsumur</span>
           </div>
           <nav className="drawer-links">
             <Link href="/" className={pathname === '/' ? 'active' : ''} onClick={() => setIsOpen(false)}>
@@ -88,6 +92,10 @@ export default function Navbar() {
             </Link>
             <Link href="/products" className={pathname.startsWith('/products') ? 'active' : ''} onClick={() => setIsOpen(false)}>
               Katalog Produk
+            </Link>
+            <Link href="/admin" className={pathname.startsWith('/admin') ? 'active' : ''} onClick={() => setIsOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <AdminIcon width="16" height="16" />
+              <span>Admin Panel</span>
             </Link>
           </nav>
         </div>

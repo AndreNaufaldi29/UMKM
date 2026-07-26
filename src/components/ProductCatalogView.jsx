@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { PRODUCTS, CATEGORIES } from '../data/msmes';
+import { useData } from '../context/DataContext';
 import ProductCard from './ProductCard';
 import { SearchIcon, EmptyIcon, CategoryIcon } from './Icons';
 
@@ -12,6 +12,7 @@ const PER_PAGE = 8;
 export default function ProductCatalogView() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { products: PRODUCTS, categories: CATEGORIES } = useData();
   const [mounted, setMounted] = useState(false);
 
   // Load initial state from URL query parameters

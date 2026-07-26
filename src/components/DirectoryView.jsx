@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { MSMES, CATEGORIES, DUSUN } from '../data/msmes';
+import { useData } from '../context/DataContext';
 import MSMECard from './MSMECard';
 import { SearchIcon, SortIcon, EmptyIcon, CategoryIcon } from './Icons';
 
@@ -12,6 +12,7 @@ const PER_PAGE = 6;
 export default function DirectoryView() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { msmes: MSMES, categories: CATEGORIES } = useData();
   const [mounted, setMounted] = useState(false);
 
   // Load initial state from URL query parameters
