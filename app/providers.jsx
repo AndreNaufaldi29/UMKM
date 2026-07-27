@@ -1,7 +1,6 @@
 'use client';
 
 import { createContext, useContext, useEffect, useState } from 'react';
-
 import { DataProvider } from '../src/context/DataContext';
 
 const ThemeContext = createContext({
@@ -12,22 +11,41 @@ const ThemeContext = createContext({
 export function ThemeProvider({ children }) {
   const [dark, setDark] = useState(false);
 
+  // Load theme ketika aplikasi dibuka
   useEffect(() => {
-    const isDark = localStorage.getItem('theme') === 'dark';
+    const savedTheme = localStorage.getItem('theme');
+
+    let isDark;
+
+    if (savedTheme) {
+      isDark = savedTheme === 'dark';
+    } else {
+      // Ikuti tema sistem jika belum pernah memilih
+      isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+    }
+
     setDark(isDark);
     document.body.classList.toggle('dark', isDark);
   }, []);
 
+  // Simpan perubahan theme
+  useEffect(() => {
+    document.body.classList.toggle('dark', dark);
+    localStorage.setItem('theme', dark ? 'dark' : 'light');
+  }, [dark]);
+
   const toggleDark = () => {
-    const nextDark = !dark;
-    setDark(nextDark);
-    localStorage.setItem('theme', nextDark ? 'dark' : 'light');
-    document.body.classList.toggle('dark', nextDark);
+    setDark(prev => !prev);
   };
 
   return (
     <DataProvider>
-      <ThemeContext.Provider value={{ dark, toggleDark }}>
+      <ThemeContext.Provider
+        value={{
+          dark,
+          toggleDark,
+        }}
+      >
         {children}
       </ThemeContext.Provider>
     </DataProvider>

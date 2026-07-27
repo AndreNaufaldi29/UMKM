@@ -35,12 +35,127 @@
   html{scroll-behavior:smooth;}
   body{
     font-family:'Public Sans', sans-serif;
-    background:var(--sand);
+
     color:var(--ink);
+
     line-height:1.5;
+
     -webkit-font-smoothing:antialiased;
-    transition:background .25s ease, color .25s ease;
+
+    background:
+
+        radial-gradient(
+            circle at 15% 20%,
+            rgba(255,255,255,.85),
+            transparent 28%
+        ),
+
+        radial-gradient(
+            circle at 85% 75%,
+            rgba(215,189,142,.35),
+            transparent 36%
+        ),
+
+        linear-gradient(
+            160deg,
+            var(--sand),
+            #EFE4D1
+        );
+
+    background-attachment:fixed;
+
+    transition:
+        background .35s ease,
+        color .35s ease;
   }
+  body::before{
+
+    content:"";
+
+    position:fixed;
+
+    inset:0;
+
+    pointer-events:none;
+
+    opacity:.45;
+
+    background:
+
+        radial-gradient(circle at -10% 110%,
+            rgba(255,255,255,.8) 0 18%,
+            transparent 19%
+        ),
+
+        radial-gradient(circle at 30% 112%,
+            rgba(255,255,255,.6) 0 22%,
+            transparent 23%
+        ),
+
+        radial-gradient(circle at 70% 110%,
+            rgba(255,255,255,.7) 0 18%,
+            transparent 19%
+        ),
+
+        radial-gradient(circle at 110% 112%,
+            rgba(255,255,255,.6) 0 22%,
+            transparent 23%
+        );
+
+    z-index:-1;
+
+}
+body.dark{
+
+    background:
+
+        radial-gradient(
+            circle at 15% 20%,
+            rgba(72,135,110,.22),
+            transparent 30%
+        ),
+
+        radial-gradient(
+            circle at 85% 75%,
+            rgba(30,74,58,.45),
+            transparent 36%
+        ),
+
+        linear-gradient(
+            160deg,
+            #101816,
+            #162420
+        );
+
+}
+
+body.dark::before{
+
+    opacity:.18;
+
+    background:
+
+        radial-gradient(circle at -10% 110%,
+            rgba(55,92,75,.8) 0 18%,
+            transparent 19%
+        ),
+
+        radial-gradient(circle at 30% 112%,
+            rgba(55,92,75,.6) 0 22%,
+            transparent 23%
+        ),
+
+        radial-gradient(circle at 70% 110%,
+            rgba(55,92,75,.8) 0 18%,
+            transparent 19%
+        ),
+
+        radial-gradient(circle at 110% 112%,
+            rgba(55,92,75,.6) 0 22%,
+            transparent 23%
+        );
+
+}
   h1,h2,h3,.display{font-family:'Fraunces', serif;}
   .mono{font-family:'IBM Plex Mono', monospace;}
   a{color:inherit; text-decoration:none;}

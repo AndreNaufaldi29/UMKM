@@ -1,4 +1,4 @@
-// File: /app/app/admin/page.jsx
+// File: D:\umkm\app\admin\page.jsx
 import * as entry from '../../../../app/admin/page.js'
 import type { ResolvingMetadata, ResolvingViewport } from 'next/dist/lib/metadata/types/metadata-interface.js'
 
