@@ -74,6 +74,21 @@ body.dark::before{
   .wrap{max-width:1180px; margin:0 auto; padding:0 24px;}
   :focus-visible{outline:3px solid var(--sky); outline-offset:2px;}
 
+    body.dark h1,
+  body.dark h2,
+  body.dark h3,
+  body.dark h4,
+  body.dark h5,
+  body.dark h6{
+      color:#F5F4EF !important;
+  }
+
+  body.dark p,
+  body.dark span,
+  body.dark label,
+  body.dark small{
+      color:#D9D7CF;
+  }
   /* NAV */
   .nav{
     position:sticky; top:0; z-index:40;
@@ -199,6 +214,7 @@ body.dark::before{
   }
   .stat-card:hover .num{
     color: var(--forest-light);
+    color:#7EC49E !important;
   }
   .stat-card .label{
     font-size:.85rem; 
@@ -209,6 +225,7 @@ body.dark::before{
   }
   .dark .stat-card .label{
     color:#D8D5CC !important;
+    color:#E7E4DB !important;
   }
   .stat-card:hover .label{
     color: var(--ink);
@@ -665,6 +682,9 @@ body.dark::before{
 .cat-home-count {
   font-size: 0.76rem;
   color: var(--ink-soft);
+}
+.dark .cat-home-count{
+    color:#B7C1B7 !important;
 }
 
 /* Product Catalog Card Micro-interactions */
