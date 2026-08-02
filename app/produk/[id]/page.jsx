@@ -133,7 +133,7 @@ export default async function ProductDetailPage({ params }) {
   const testimonials = getProductTestimonials(p.name);
 
   return (
-    <main>
+    <main className='home-page'>
       {/* BREADCRUMB */}
       <div className="wrap">
         <div className="breadcrumb">

@@ -26,10 +26,9 @@ export default function Home() {
     .slice(0, 4);
 
   return (
-    <main>
+    <main className="home-page">
       {/* HERO CAROUSEL */}
       <HeroCarousel />
-
       {/* SEARCH CARD */}
       <div className="wrap">
         <HomeSearch />
