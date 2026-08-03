@@ -83,11 +83,11 @@ export default function DirectoryView() {
     updateUrl(query, cat, newDusun, sort, 1);
   };
 
-  const handleSortToggle = () => {
-    const nextSort = sort === 'newest' ? 'az' : sort === 'az' ? 'za' : 'newest';
-    setSort(nextSort);
+  const handleSortChange = (e) => {
+    const newSort = e.target.value;
+    setSort(newSort);
     setPage(1);
-    updateUrl(query, cat, dusun, nextSort, 1);
+    updateUrl(query, cat, dusun, newSort, 1);
   };
 
   const handlePageChange = (newPage) => {
@@ -118,6 +118,8 @@ export default function DirectoryView() {
     sortedList.sort((a, b) => a.name.localeCompare(b.name));
   } else if (sort === 'za') {
     sortedList.sort((a, b) => b.name.localeCompare(a.name));
+  } else if (sort === 'oldest') {
+    sortedList.sort((a, b) => a.est - b.est);
   } else {
     // newest (by est year descending)
     sortedList.sort((a, b) => b.est - a.est);
@@ -198,10 +200,29 @@ export default function DirectoryView() {
               <div className="result-count">
                 Menampilkan <b>{pageItems.length}</b> dari <b>{sortedList.length}</b> UMKM
               </div>
-              <button className="sort-btn" id="sortBtn" onClick={handleSortToggle}>
-                <SortIcon style={{ marginRight: '6px' }} />
-                {sort === 'az' ? 'A–Z' : sort === 'za' ? 'Z–A' : 'Terbaru'}
-              </button>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <label htmlFor="sortSelect" style={{ fontSize: '0.84rem', color: 'var(--ink-soft)', fontWeight: 600 }}>Urutkan:</label>
+                <select
+                  id="sortSelect"
+                  value={sort}
+                  onChange={handleSortChange}
+                  style={{
+                    padding: '8px 14px',
+                    borderRadius: '8px',
+                    fontSize: '0.85rem',
+                    fontWeight: 600,
+                    border: '1px solid var(--line)',
+                    background: 'var(--paper)',
+                    color: 'var(--ink)',
+                    cursor: 'pointer'
+                  }}
+                >
+                  <option value="newest">✨ UMKM Terbaru</option>
+                  <option value="oldest">🏛️ UMKM Terlama</option>
+                  <option value="az">🔤 Nama: A–Z</option>
+                  <option value="za">🔤 Nama: Z–A</option>
+                </select>
+              </div>
             </div>
 
             {pageItems.length ? (

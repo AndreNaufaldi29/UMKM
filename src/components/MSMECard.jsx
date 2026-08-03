@@ -1,14 +1,27 @@
+'use client';
+
 import React from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { PinIcon, ArrowIcon, CategoryIcon } from './Icons';
 import { PhotoSVG } from './DynamicSVGs';
 
 export default function MSMECard({ m }) {
+  const router = useRouter();
+
   return (
     <Link href={`/umkm/${m.id}`} className="card">
       <div className="card-photo">
         <PhotoSVG cat={m.cat} seed={m.id} />
-        <div className="card-cat">
+        <div 
+          className="card-cat"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            router.push(`/umkm?cat=${encodeURIComponent(m.cat)}`);
+          }}
+          style={{ cursor: 'pointer' }}
+        >
           <CategoryIcon cat={m.cat} />
           <span style={{ marginLeft: '4px' }}>{m.cat}</span>
         </div>

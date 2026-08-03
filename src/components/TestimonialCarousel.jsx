@@ -19,7 +19,7 @@ export default function TestimonialCarousel() {
     stopAutoplay();
     autoplayTimerRef.current = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % TESTIMONIALS.length);
-    }, 6000);
+    }, 4000);
   };
 
   const stopAutoplay = () => {

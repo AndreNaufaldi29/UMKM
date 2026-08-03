@@ -2,7 +2,9 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { DataProvider } from '../src/context/DataContext';
+import { AuthProvider } from '../src/context/AuthContext';
 import ScrollReveal from '../src/components/ScrollReveal';
+import PageTransitionLoader from '../src/components/PageTransitionLoader';
 
 const ThemeContext = createContext({
   dark: false,
@@ -41,14 +43,17 @@ export function ThemeProvider({ children }) {
 
   return (
     <DataProvider>
-      <ThemeContext.Provider
-        value={{
-          dark,
-          toggleDark,
-        }}
-      >
-        <ScrollReveal>{children}</ScrollReveal>
-      </ThemeContext.Provider>
+      <AuthProvider>
+        <ThemeContext.Provider
+          value={{
+            dark,
+            toggleDark,
+          }}
+        >
+          <PageTransitionLoader />
+          <ScrollReveal>{children}</ScrollReveal>
+        </ThemeContext.Provider>
+      </AuthProvider>
     </DataProvider>
   );
 }

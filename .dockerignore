@@ -1,0 +1,33 @@
+# Node modules
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Next.js build output
+.next
+out
+build
+dist
+
+# Environment variables
+.env
+.env*.local
+
+# Git & Docker
+.git
+.gitignore
+.dockerignore
+Dockerfile*
+docker-compose*
+
+# IDE / Editor files
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+
+# Documentation & Misc
+README.md

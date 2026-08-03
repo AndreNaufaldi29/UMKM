@@ -10,7 +10,7 @@ import React, { useState, useEffect, useRef } from 'react';
  */
 export default function AnimatedCounter({ 
   targetValue, 
-  duration = 1500, 
+  duration = 800, 
   delay = 0, 
   format = (val) => String(val).padStart(2, '0') 
 }) {

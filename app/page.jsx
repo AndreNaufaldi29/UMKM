@@ -3,6 +3,7 @@ import Link from 'next/link';
 import HeroCarousel from '../src/components/HeroCarousel';
 import HomeSearch from '../src/components/HomeSearch';
 import MSMECard from '../src/components/MSMECard';
+import LatestMSMECarousel from '../src/components/LatestMSMECarousel';
 import ProductCard from '../src/components/ProductCard';
 import TestimonialCarousel from '../src/components/TestimonialCarousel';
 import AnimatedCounter from '../src/components/AnimatedCounter';
@@ -138,11 +139,7 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="latest-scroll reveal-stagger">
-          {latestMSMEs.map((m) => (
-            <MSMECard key={m.id} m={m} />
-          ))}
-        </div>
+        <LatestMSMECarousel latestMSMEs={latestMSMEs} />
       </div>
     </main>
   );

@@ -15,7 +15,7 @@ export default function HomeSearch() {
   };
 
   const handleCategoryClick = (cat) => {
-    router.push(`/umkm?cat=${encodeURIComponent(cat)}`);
+    router.push(`/products?cat=${encodeURIComponent(cat)}`);
   };
 
   return (
@@ -36,7 +36,7 @@ export default function HomeSearch() {
       </form>
 
       <div className="chip-row">
-        <button className="chip" onClick={() => router.push('/umkm')}>
+        <button className="chip" onClick={() => router.push('/products')}>
           Semua Kategori
         </button>
         {CATEGORIES.map((c) => (

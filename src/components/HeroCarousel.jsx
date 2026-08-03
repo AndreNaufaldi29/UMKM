@@ -36,11 +36,14 @@ export default function HeroCarousel() {
   const timerRef = useRef(null);
   const slidesCount = SLIDES.length;
 
+  const slidesRef = useRef(null);
+  const contentRef = useRef(null);
+
   const startCarousel = () => {
     stopCarousel();
     timerRef.current = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slidesCount);
-    }, 6000);
+    }, 4000);
   };
 
   const stopCarousel = () => {
@@ -53,6 +56,29 @@ export default function HeroCarousel() {
   useEffect(() => {
     startCarousel();
     return () => stopCarousel();
+  }, []);
+
+  useEffect(() => {
+    let rafId = null;
+    const handleScroll = () => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
+        const scrollY = window.scrollY;
+        if (scrollY <= window.innerHeight * 1.2) {
+          if (slidesRef.current) {
+            slidesRef.current.style.transform = `translate3d(0, ${scrollY * 0.35}px, 0)`;
+          }
+          if (contentRef.current) {
+            contentRef.current.style.transform = `translate3d(0, ${scrollY * 0.15}px, 0)`;
+          }
+        }
+      });
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const handlePrev = () => {
@@ -74,7 +100,10 @@ export default function HeroCarousel() {
 
   return (
     <section className="hero hero-carousel">
-      <div className="hero-slides">
+      <div 
+        ref={slidesRef}
+        className="hero-slides" 
+      >
         {SLIDES.map((s, i) => (
           <div key={i} className={`hero-slide ${currentSlide === i ? 'active' : ''}`}>
             <img src={s.image} alt={s.title} />
@@ -100,7 +129,10 @@ export default function HeroCarousel() {
         &#10095;
       </button>
 
-      <div key={currentSlide} className="hero-inner carousel-content">
+      <div 
+        ref={contentRef}
+        className="hero-inner carousel-content"
+      >
         <div className="eyebrow">{slide.eyebrow}</div>
         <h1>{slide.title}</h1>
         <p>{slide.desc}</p>

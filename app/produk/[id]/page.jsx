@@ -14,6 +14,8 @@ import {
 } from '../../../src/components/Icons';
 import { formatRupiah } from '../../../src/utils/formatter';
 import WAFloatButton from '../../../src/components/WAFloatButton';
+import ProductCard from '../../../src/components/ProductCard';
+import ProductVariantSelector from '../../../src/components/ProductVariantSelector';
 
 function getOriginalProductId(mappedId) {
   if (!mappedId || mappedId.length < 2) return null;
@@ -169,10 +171,10 @@ export default async function ProductDetailPage({ params }) {
                     <span>{p.views} Kali Dilihat</span>
                   </span>
                 </div>
-                <span className="badge">
+                <Link href={`/products?cat=${encodeURIComponent(p.cat)}`} className="badge" style={{ cursor: 'pointer' }}>
                   <CategoryIcon cat={p.cat} />
                   <span style={{ marginLeft: '6px' }}>{p.cat}</span>
-                </span>
+                </Link>
               </div>
             </div>
 
@@ -234,6 +236,16 @@ export default async function ProductDetailPage({ params }) {
           <div className="reveal reveal-right">
             <div className="panel" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
+                <div style={{ marginBottom: '10px' }}>
+                  <Link 
+                    href={`/products?cat=${encodeURIComponent(p.cat)}`} 
+                    className="badge" 
+                    style={{ cursor: 'pointer', display: 'inline-flex' }}
+                  >
+                    <CategoryIcon cat={p.cat} />
+                    <span style={{ marginLeft: '6px' }}>{p.cat}</span>
+                  </Link>
+                </div>
                 <h1 style={{ fontSize: '1.9rem', fontWeight: 600, color: 'var(--ink)', lineHeight: '1.2', marginBottom: '6px' }}>{p.name}</h1>
                 <div className="pprice" style={{ fontSize: '1.7rem', fontWeight: 700, color: 'var(--soil)', fontFamily: 'IBM Plex Mono, monospace' }}>
                   {formatRupiah(p.price)}
@@ -241,30 +253,14 @@ export default async function ProductDetailPage({ params }) {
                 </div>
               </div>
 
-              {/* VARIANTS */}
-              <div>
-                <h4 style={{ fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--ink-soft)', marginBottom: '10px' }}>Pilihan Varian</h4>
-                <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-                  {variants.map((v, idx) => (
-                    <div 
-                      key={idx} 
-                      className="variant-chip"
-                      style={{ 
-                        padding: '8px 14px', 
-                        border: idx === 0 ? '2px solid var(--forest)' : '1px solid var(--line)', 
-                        background: idx === 0 ? 'var(--forest-soft)' : 'var(--paper)',
-                        color: idx === 0 ? 'var(--forest)' : 'var(--ink-soft)',
-                        borderRadius: '6px', 
-                        fontSize: '0.82rem', 
-                        fontWeight: idx === 0 ? 700 : 500,
-                        cursor: 'pointer'
-                      }}
-                    >
-                      {v} {idx === 0 && <span style={{ fontSize: '0.75rem', marginLeft: '4px' }}>✓</span>}
-                    </div>
-                  ))}
-                </div>
-              </div>
+              {/* VARIANTS & ACTION BUTTONS */}
+              <ProductVariantSelector 
+                variants={variants} 
+                productName={p.name} 
+                msmeName={p.msmeName} 
+                waNumber={p.wa} 
+                status={p.status} 
+              />
 
               <div>
                 <h4 style={{ fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--ink-soft)', marginBottom: '8px' }}>Deskripsi Produk</h4>
@@ -296,30 +292,14 @@ export default async function ProductDetailPage({ params }) {
                 </Link>
               </div>
 
-              {/* ACTION BUTTONS */}
-              <div style={{ display: 'flex', gap: '12px', marginTop: '8px', flexWrap: 'wrap' }}>
-                {waUrl && p.status !== 'inactive' ? (
-                  <a 
-                    href={waUrl} 
-                    target="_blank" 
-                    rel="noopener noreferrer" 
-                    className="btn btn-soil" 
-                    style={{ flex: '1 1 200px', padding: '14px 22px', justifyContent: 'center', backgroundColor: '#25D366', borderColor: '#25D366', color: '#fff' }}
-                  >
-                    <PhoneIcon style={{ width: '16px', height: '16px' }} />
-                    <span>Beli Sekarang via WhatsApp</span>
-                  </a>
-                ) : (
-                  <div className="btn btn-outline" style={{ flex: '1 1 200px', cursor: 'not-allowed', opacity: 0.6, justifyContent: 'center' }}>
-                    Toko Tutup Sementara
-                  </div>
-                )}
+              {/* STORE LINK */}
+              <div>
                 <Link 
                   href={`/umkm/${p.msmeId}`} 
                   className="btn btn-outline" 
-                  style={{ padding: '14px 22px', justifyContent: 'center' }}
+                  style={{ width: '100%', padding: '12px 22px', justifyContent: 'center' }}
                 >
-                  <span>Kunjungi Toko</span>
+                  <span>Kunjungi Profil Toko</span>
                 </Link>
               </div>
 
@@ -365,25 +345,18 @@ export default async function ProductDetailPage({ params }) {
             </div>
             <div className="products-grid reveal-stagger">
               {relatedProducts.map((rp) => (
-                <div className="product-card card" key={rp.id} style={{ display: 'flex', flexDirection: 'column' }}>
-                  <div className="card-photo" style={{ aspectRatio: '1/1', position: 'relative' }}>
-                    <ProductSVG cat={rp.cat} seed={rp.name.length + rp.price} />
-                  </div>
-                  <div className="card-body" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
-                    <div>
-                      <div className="pname" style={{ fontWeight: 700, fontSize: '0.92rem' }}>{rp.name}</div>
-                      <div className="pdesc" style={{ fontSize: '0.78rem', color: 'var(--ink-soft)', marginTop: '4px', minHeight: '36px', display: '-webkit-box', WebkitLineClamp: '2', WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
-                        {rp.desc}
-                      </div>
-                    </div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
-                      <div className="pprice" style={{ fontWeight: 700, color: 'var(--soil)', fontFamily: 'IBM Plex Mono, monospace' }}>{formatRupiah(rp.price)}</div>
-                      <Link href={`/produk/${rp.id.replace('p', '').replace('_', '')}`} className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '0.74rem', borderRadius: '6px' }}>
-                        Detail
-                      </Link>
-                    </div>
-                  </div>
-                </div>
+                <ProductCard 
+                  key={rp.id} 
+                  p={{ 
+                    ...rp, 
+                    msmeName: msme?.name || '', 
+                    msmeId: msme?.id || 1, 
+                    cat: rp.cat || p.cat, 
+                    status: 'active',
+                    rating: rp.rating || 5.0,
+                    views: rp.views || 100
+                  }} 
+                />
               ))}
             </div>
           </div>

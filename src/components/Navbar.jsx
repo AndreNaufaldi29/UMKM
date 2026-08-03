@@ -45,10 +45,6 @@ export default function Navbar() {
           <Link href="/products" className={pathname.startsWith('/products') ? 'active' : ''}>
             Katalog Produk
           </Link>
-          <Link href="/admin" className={pathname.startsWith('/admin') ? 'active' : ''} style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-            <AdminIcon width="14" height="14" />
-            <span>Admin</span>
-          </Link>
         </nav>
 
         <div className="nav-right">
@@ -92,10 +88,6 @@ export default function Navbar() {
             </Link>
             <Link href="/products" className={pathname.startsWith('/products') ? 'active' : ''} onClick={() => setIsOpen(false)}>
               Katalog Produk
-            </Link>
-            <Link href="/admin" className={pathname.startsWith('/admin') ? 'active' : ''} onClick={() => setIsOpen(false)} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-              <AdminIcon width="16" height="16" />
-              <span>Admin Panel</span>
             </Link>
           </nav>
         </div>

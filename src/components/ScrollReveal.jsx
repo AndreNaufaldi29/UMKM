@@ -9,50 +9,38 @@ export default function ScrollReveal({ children }) {
   useEffect(() => {
     let observer = null;
 
-    const setupObserver = () => {
-      const observerCallback = (entries, obs) => {
-        entries.forEach((entry) => {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('is-revealed');
-            obs.unobserve(entry.target);
-          }
-        });
-      };
-
-      const observerOptions = {
-        root: null,
-        rootMargin: '0px 0px -40px 0px',
-        threshold: 0.05,
-      };
-
-      observer = new IntersectionObserver(observerCallback, observerOptions);
-
-      const elements = document.querySelectorAll('.reveal, [data-reveal]');
-      elements.forEach((el) => {
-        const rect = el.getBoundingClientRect();
-        // Immediately reveal elements inside or above viewport upon page load/route switch
-        if (rect.top < window.innerHeight && rect.bottom > -100) {
-          el.classList.add('is-revealed');
-        } else {
-          observer.observe(el);
+    const observerCallback = (entries, obs) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting) {
+          entry.target.classList.add('is-revealed');
+          obs.unobserve(entry.target);
         }
       });
     };
 
-    // Run after DOM rendering completes
-    const rafId = requestAnimationFrame(() => {
-      setupObserver();
+    const observerOptions = {
+      root: null,
+      rootMargin: '0px 0px -20px 0px',
+      threshold: 0.05,
+    };
+
+    observer = new IntersectionObserver(observerCallback, observerOptions);
+
+    const elements = document.querySelectorAll('.reveal, [data-reveal], .reveal-stagger');
+    elements.forEach((el) => {
+      const rect = el.getBoundingClientRect();
+      const viewportHeight = window.innerHeight || document.documentElement.clientHeight;
+
+      // Jika elemen berada dalam area tampilan layar saat halaman dimuat/navigasi, langsung jalankan animasi
+      if (rect.top < viewportHeight && rect.bottom > 0) {
+        el.classList.add('is-revealed');
+      } else {
+        el.classList.remove('is-revealed');
+        observer.observe(el);
+      }
     });
 
-    // Safety fallback: reveal all elements after 1.2s to guarantee no hidden elements
-    const fallbackTimer = setTimeout(() => {
-      const elements = document.querySelectorAll('.reveal:not(.is-revealed), [data-reveal]:not(.is-revealed)');
-      elements.forEach((el) => el.classList.add('is-revealed'));
-    }, 1200);
-
     return () => {
-      cancelAnimationFrame(rafId);
-      clearTimeout(fallbackTimer);
       if (observer) {
         observer.disconnect();
       }

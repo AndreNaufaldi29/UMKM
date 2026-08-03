@@ -48,11 +48,10 @@ export default function ProductCatalogView() {
   }
 
   // Update URL parameters when state changes
-  const updateUrl = (newQ, newCat, newDusun, newSort, newPage) => {
+  const updateUrl = (newQ, newCat, newSort, newPage) => {
     const params = new URLSearchParams();
     if (newQ.trim()) params.set('q', newQ.trim());
     if (newCat !== 'all') params.set('cat', newCat);
-    if (newDusun !== 'all') params.set('dusun', newDusun);
     if (newSort !== 'rating') params.set('sort', newSort);
     if (newPage > 1) params.set('page', newPage.toString());
 
@@ -65,25 +64,24 @@ export default function ProductCatalogView() {
     const val = e.target.value;
     setQuery(val);
     setPage(1);
-    updateUrl(val, cat, dusun, sort, 1);
+    updateUrl(val, cat, sort, 1);
   };
 
   const handleCatChange = (newCat) => {
     setCat(newCat);
     setPage(1);
-    updateUrl(query, newCat, dusun, sort, 1);
+    updateUrl(query, newCat, sort, 1);
   };
-
-  
 
   const handleSortChange = (newSort) => {
     setSort(newSort);
     setPage(1);
-    updateUrl(query, cat, dusun, newSort, 1);
+    updateUrl(query, cat, newSort, 1);
   };
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
+    updateUrl(query, cat, sort, newPage);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 

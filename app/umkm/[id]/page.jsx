@@ -5,6 +5,7 @@ import { MSMES } from '../../../src/data/msmes';
 import { PhotoSVG, ProductSVG } from '../../../src/components/DynamicSVGs';
 import DetailActions from '../../../src/components/DetailActions';
 import WAFloatButton from '../../../src/components/WAFloatButton';
+import ProductCard from '../../../src/components/ProductCard';
 import { formatRupiah } from '../../../src/utils/formatter';
 import {
   PinIcon,
@@ -108,10 +109,10 @@ export default async function DetailPage({ params }) {
           <div>
             <h1>{m.name}</h1>
             <div className="detail-meta">
-              <span className="badge">
+              <Link href={`/products?cat=${encodeURIComponent(m.cat)}`} className="badge" style={{ cursor: 'pointer' }}>
                 <CategoryIcon cat={m.cat} />
                 <span style={{ marginLeft: '6px' }}>{m.cat}</span>
-              </span>
+              </Link>
               <span className="badge sky">
                 <PinIcon />
                 <span style={{ marginLeft: '6px' }}>{m.dusun}</span>
@@ -189,30 +190,18 @@ export default async function DetailPage({ params }) {
               <h3>Daftar Produk</h3>
               <div className="products-grid reveal-stagger">
                 {m.products.map((p, i) => (
-                  <Link href={`/produk/${p.id.replace('p', '').replace('_', '')}`} key={i} style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <div className="product-card card" style={{ height: '100%', cursor: 'pointer' }}>
-                      <div className="card-photo">
-                        <ProductSVG cat={m.cat} seed={m.id * 3 + i} />
-                      </div>
-                      <div className="card-body" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100% - 150px)', justifyContent: 'space-between' }}>
-                        <div>
-                          <div className="pname" style={{ fontWeight: 700, fontSize: '0.92rem' }}>{p.name}</div>
-                          <div className="pdesc" style={{ fontSize: '0.78rem', color: 'var(--ink-soft)', marginTop: '4px', minHeight: '36px', display: '-webkit-box', WebkitLineClamp: '2', WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.desc}</div>
-                        </div>
-                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
-                          <div className="pprice" style={{ fontWeight: 700, color: 'var(--soil)', fontFamily: 'IBM Plex Mono, monospace' }}>{formatRupiah(p.price)}{p.unit ? `/${p.unit}` : ''}</div>
-                          {p.rating && (
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.78rem', color: 'var(--soil)', fontWeight: 600 }}>
-                              <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" style={{ color: '#FBBF24' }}>
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
-                              </svg>
-                              <span>{p.rating.toFixed(1)}</span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  </Link>
+                  <ProductCard 
+                    key={p.id || i} 
+                    p={{ 
+                      ...p, 
+                      msmeName: m.name, 
+                      msmeId: m.id, 
+                      cat: m.cat, 
+                      status: m.status,
+                      rating: p.rating || 5.0,
+                      views: p.views || 100
+                    }} 
+                  />
                 ))}
               </div>
             </div>
@@ -241,17 +230,21 @@ export default async function DetailPage({ params }) {
               <h3>
                 <PinIcon style={{ marginRight: '8px' }} /> Lokasi & Koordinat
               </h3>
-              <div className="map-box">
-                <svg viewBox="0 0 320 180" style={{ width: '100%', height: '100%', background: 'var(--forest-soft)' }}>
-                  <path d="M0,140 L60,120 L130,132 L200,105 L260,125 L320,110 L320,180 L0,180 Z" fill="var(--forest-light)" opacity=".5" />
-                  <circle cx="160" cy="85" r="9" fill="var(--soil)" />
-                  <path d="M160 85 v-22" stroke="var(--soil)" strokeWidth="3" strokeLinecap="round" />
-                  <text x="160" y="45" textAnchor="middle" fontSize="10" fill="var(--ink-soft)" fontFamily="IBM Plex Mono, monospace">
-                    Peta Lokasi (Google Maps)
-                  </text>
-                </svg>
+              <div className="map-box" style={{ height: '250px', minHeight: '220px', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--line)', marginBottom: '14px', position: 'relative' }}>
+                <iframe
+                  title={`Peta Lokasi ${m.name}`}
+                  width="100%"
+                  height="100%"
+                  style={{ border: 0, width: '100%', height: '100%', display: 'block' }}
+                  loading="lazy"
+                  allowFullScreen
+                  referrerPolicy="no-referrer-when-downgrade"
+                  src={`https://maps.google.com/maps?q=${(-7.2504 - (m.id * 0.0011)).toFixed(6)},${(110.1502 + (m.id * 0.0013)).toFixed(6)}&hl=id&z=15&output=embed`}
+                />
               </div>
-              <p style={{ marginBottom: '14px', fontSize: '0.9rem' }}>{m.addr}</p>
+              <p style={{ marginBottom: '14px', fontSize: '0.9rem', color: 'var(--ink)' }}>
+                <b>Alamat Lengkap:</b> {m.addr}
+              </p>
               
               <div style={{ marginBottom: '14px', padding: '10px 12px', background: 'var(--sand)', borderRadius: '8px', fontSize: '0.82rem' }}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
@@ -269,13 +262,14 @@ export default async function DetailPage({ params }) {
               </div>
 
               <a
-                className="btn"
-                style={{ width: '100%', justifyContent: 'center' }}
+                className="btn btn-soil"
+                style={{ width: '100%', padding: '12px 16px', justifyContent: 'center', boxSizing: 'border-box', display: 'flex', alignItems: 'center', fontSize: '0.86rem' }}
                 href={`https://www.google.com/maps/search/?api=1&query=${(-7.2504 - (m.id * 0.0011)).toFixed(6)},${(110.1502 + (m.id * 0.0013)).toFixed(6)}`}
                 target="_blank"
                 rel="noopener noreferrer"
               >
-                <RouteIcon style={{ marginRight: '8px' }} /> Buka di Google Maps
+                <RouteIcon style={{ marginRight: '8px', flexShrink: 0 }} />
+                <span>Buka Arah di Google Maps</span>
               </a>
             </div>
 
