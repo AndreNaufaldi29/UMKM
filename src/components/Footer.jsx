@@ -1,13 +1,9 @@
 import React from 'react';
 import Link from 'next/link';
-import { TerraceDivider } from './DynamicSVGs';
 
 export default function Footer() {
   return (
     <footer>
-      <div className="footer-terrace">
-        <TerraceDivider flip />
-      </div>
       <div className="footer-inner">
         <div>
           <div className="fbrand">Desa Kedungsumur</div>

@@ -30,12 +30,12 @@ export default function Home() {
       {/* HERO CAROUSEL */}
       <HeroCarousel />
       {/* SEARCH CARD */}
-      <div className="wrap">
+      <div className="wrap search-wrap reveal reveal-scale">
         <HomeSearch />
       </div>
 
       {/* TESTIMONIALS SECTION */}
-      <div className="wrap section" style={{ paddingBottom: 0 }}>
+      <div className="wrap section reveal" style={{ paddingBottom: 0 }}>
         <div className="section-head" style={{ marginBottom: '24px', justifyContent: 'center', textAlign: 'center' }}>
           <div>
             <h2 style={{ fontSize: '1.6rem', fontWeight: 600 }}>Apa Kata Mereka?</h2>
@@ -47,7 +47,7 @@ export default function Home() {
       </div>
 
       {/* STATS SECTION */}
-      <div className="wrap section">
+      <div className="wrap section reveal">
         <div className="section-head">
           <div>
             <h2>Sekilas Desa Kedungsumur</h2>
@@ -55,7 +55,7 @@ export default function Home() {
           </div>
         </div>
 
-        <div className="stats">
+        <div className="stats reveal-stagger">
           <div className="stat-card">
             <div className="num">
               <AnimatedCounter targetValue={totalUMKM} />
@@ -83,14 +83,14 @@ export default function Home() {
       </div>
 
       {/* KATEGORI PILIHAN SECTION */}
-      <div className="wrap section" style={{ paddingTop: 0 }}>
+      <div className="wrap section reveal" style={{ paddingTop: 0 }}>
         <div className="section-head">
           <div>
             <h2>Kategori Produk</h2>
             <div className="sub">Jelajahi produk berdasarkan sektor UMKM</div>
           </div>
         </div>
-        <div className="category-home-grid">
+        <div className="category-home-grid reveal-stagger">
           {CATEGORIES.map((c) => (
             <Link key={c} href={`/products?cat=${c}`} className="cat-home-card">
               <div className="cat-home-icon">
@@ -106,7 +106,7 @@ export default function Home() {
       </div>
 
       {/* PRODUK UNGGULAN SECTION */}
-      <div className="wrap section" style={{ paddingTop: 0 }}>
+      <div className="wrap section reveal" style={{ paddingTop: 0 }}>
         <div className="section-head">
           <div>
             <h2>Produk Unggulan Desa</h2>
@@ -118,7 +118,7 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="grid" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
+        <div className="grid reveal-stagger" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
           {featuredProducts.map((p) => (
             <ProductCard key={p.id} p={p} />
           ))}
@@ -126,7 +126,7 @@ export default function Home() {
       </div>
 
       {/* LATEST MSMES */}
-      <div className="wrap section" style={{ paddingTop: 0 }}>
+      <div className="wrap section reveal" style={{ paddingTop: 0 }}>
         <div className="section-head">
           <div>
             <h2>UMKM Terbaru</h2>
@@ -138,7 +138,7 @@ export default function Home() {
           </Link>
         </div>
 
-        <div className="latest-scroll">
+        <div className="latest-scroll reveal-stagger">
           {latestMSMEs.map((m) => (
             <MSMECard key={m.id} m={m} />
           ))}

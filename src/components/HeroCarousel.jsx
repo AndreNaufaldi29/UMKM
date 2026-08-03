@@ -3,18 +3,44 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ArrowIcon } from './Icons';
-import { TerraceDivider } from './DynamicSVGs';
+
+const SLIDES = [
+  {
+    image: '/umkm-kedungsumur/images/umkm-1.jpg',
+    eyebrow: 'Sistem Informasi UMKM Desa',
+    title: 'Katalog UMKM Desa Kedungsumur',
+    desc: 'Temukan produk dan jasa unggulan yang ditawarkan oleh para pelaku usaha lokal desa kami.',
+    btnText: 'Jelajahi Semua UMKM',
+    link: '/umkm',
+  },
+  {
+    image: '/umkm-kedungsumur/images/umkm-2.jpg',
+    eyebrow: 'Produk Unggulan Warga',
+    title: 'Kualitas Terbaik Asli Buatan Lokal',
+    desc: 'Dukung kemajuan ekonomi warga desa dengan membeli produk asli buatan tangan masyarakat.',
+    btnText: 'Lihat Katalog Produk',
+    link: '/products',
+  },
+  {
+    image: '/umkm-kedungsumur/images/umkm-3.jpg',
+    eyebrow: 'Pemberdayaan Ekonomi Desa',
+    title: 'Kemandirian Usaha & Jaringan UMKM',
+    desc: 'Wujudkan pertumbuhan ekonomi desa yang inklusif melalui jaringan pelaku usaha yang terintegrasi.',
+    btnText: 'Gabung UMKM Desa',
+    link: '/umkm',
+  },
+];
 
 export default function HeroCarousel() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const timerRef = useRef(null);
-  const slidesCount = 3;
+  const slidesCount = SLIDES.length;
 
   const startCarousel = () => {
     stopCarousel();
     timerRef.current = setInterval(() => {
       setCurrentSlide((prev) => (prev + 1) % slidesCount);
-    }, 5000);
+    }, 6000);
   };
 
   const stopCarousel = () => {
@@ -44,18 +70,16 @@ export default function HeroCarousel() {
     startCarousel();
   };
 
+  const slide = SLIDES[currentSlide];
+
   return (
     <section className="hero hero-carousel">
       <div className="hero-slides">
-        <div className={`hero-slide ${currentSlide === 0 ? 'active' : ''}`}>
-          <img src="/umkm-kedungsumur/images/umkm-1.jpg" alt="UMKM Desa Sukamaju" />
-        </div>
-        <div className={`hero-slide ${currentSlide === 1 ? 'active' : ''}`}>
-          <img src="/umkm-kedungsumur/images/umkm-2.jpg" alt="Produk UMKM Desa" />
-        </div>
-        <div className={`hero-slide ${currentSlide === 2 ? 'active' : ''}`}>
-          <img src="/umkm-kedungsumur/images/umkm-3.jpg" alt="Pelaku UMKM Desa" />
-        </div>
+        {SLIDES.map((s, i) => (
+          <div key={i} className={`hero-slide ${currentSlide === i ? 'active' : ''}`}>
+            <img src={s.image} alt={s.title} />
+          </div>
+        ))}
       </div>
 
       <div className="hero-overlay"></div>
@@ -76,20 +100,18 @@ export default function HeroCarousel() {
         &#10095;
       </button>
 
-      <div className="hero-inner carousel-content">
-        <div className="eyebrow">Sistem Informasi UMKM Desa</div>
-        <h1>Katalog UMKM Desa kedungsumur</h1>
-        <p>
-          Temukan produk dan jasa unggulan yang ditawarkan oleh para pelaku usaha lokal desa kami.
-        </p>
-        <Link href="/umkm" className="btn btn-soil">
-          Jelajahi Semua UMKM
+      <div key={currentSlide} className="hero-inner carousel-content">
+        <div className="eyebrow">{slide.eyebrow}</div>
+        <h1>{slide.title}</h1>
+        <p>{slide.desc}</p>
+        <Link href={slide.link} className="btn btn-soil">
+          {slide.btnText}
           <ArrowIcon style={{ marginLeft: '8px' }} />
         </Link>
       </div>
 
       <div className="carousel-dots">
-        {Array.from({ length: slidesCount }).map((_, i) => (
+        {SLIDES.map((_, i) => (
           <button
             key={i}
             className={`carousel-dot ${currentSlide === i ? 'active' : ''}`}
@@ -98,10 +120,6 @@ export default function HeroCarousel() {
             aria-current={currentSlide === i ? 'true' : 'false'}
           ></button>
         ))}
-      </div>
-
-      <div className="terrace">
-        <TerraceDivider />
       </div>
     </section>
   );

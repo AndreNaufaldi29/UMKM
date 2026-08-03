@@ -78,7 +78,7 @@ export default async function DetailPage({ params }) {
   return (
     <main>
       {/* BREADCRUMB */}
-      <div className="wrap">
+      <div className="wrap reveal reveal-left">
         <div className="breadcrumb">
           <Link href="/">Beranda</Link>
           <span className="sep">/</span>
@@ -90,12 +90,12 @@ export default async function DetailPage({ params }) {
 
       <div className="wrap section" style={{ paddingTop: '8px' }}>
         {/* HERO IMAGE */}
-        <div className="detail-hero">
+        <div className="detail-hero reveal reveal-scale">
           <PhotoSVG cat={m.cat} seed={m.id} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
         </div>
 
         {/* GALLERY STRIP */}
-        <div className="gallery-strip">
+        <div className="gallery-strip reveal reveal-scale">
           {gallery.map((g, index) => (
             <div key={index} className="thumb">
               <PhotoSVG cat={m.cat} seed={g} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
@@ -104,7 +104,7 @@ export default async function DetailPage({ params }) {
         </div>
 
         {/* TOP META & ACTION BUTTONS */}
-        <div className="detail-top">
+        <div className="detail-top reveal reveal-left">
           <div>
             <h1>{m.name}</h1>
             <div className="detail-meta">
@@ -127,7 +127,7 @@ export default async function DetailPage({ params }) {
 
         {/* MAIN PANEL AND SIDEBAR */}
         <div className="detail-layout" style={{ marginTop: '20px' }}>
-          <div>
+          <div className="reveal reveal-left">
             {/* ABOUT */}
             <div className="panel">
               <h3>Tentang Usaha</h3>
@@ -187,20 +187,20 @@ export default async function DetailPage({ params }) {
             {/* PRODUCTS */}
             <div className="panel">
               <h3>Daftar Produk</h3>
-              <div className="products-grid">
+              <div className="products-grid reveal-stagger">
                 {m.products.map((p, i) => (
                   <Link href={`/produk/${p.id.replace('p', '').replace('_', '')}`} key={i} style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <div className="product-card" style={{ height: '100%', cursor: 'pointer', transition: 'transform 0.2s ease, box-shadow 0.2s ease' }}>
-                      <div className="product-photo">
+                    <div className="product-card card" style={{ height: '100%', cursor: 'pointer' }}>
+                      <div className="card-photo">
                         <ProductSVG cat={m.cat} seed={m.id * 3 + i} />
                       </div>
-                      <div className="product-body" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100% - 150px)', justifyContent: 'space-between' }}>
+                      <div className="card-body" style={{ display: 'flex', flexDirection: 'column', height: 'calc(100% - 150px)', justifyContent: 'space-between' }}>
                         <div>
                           <div className="pname" style={{ fontWeight: 700, fontSize: '0.92rem' }}>{p.name}</div>
                           <div className="pdesc" style={{ fontSize: '0.78rem', color: 'var(--ink-soft)', marginTop: '4px', minHeight: '36px', display: '-webkit-box', WebkitLineClamp: '2', WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{p.desc}</div>
                         </div>
                         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
-                          <div className="pprice" style={{ fontWeight: 700, color: 'var(--soil)' }}>{formatRupiah(p.price)}{p.unit ? `/${p.unit}` : ''}</div>
+                          <div className="pprice" style={{ fontWeight: 700, color: 'var(--soil)', fontFamily: 'IBM Plex Mono, monospace' }}>{formatRupiah(p.price)}{p.unit ? `/${p.unit}` : ''}</div>
                           {p.rating && (
                             <div style={{ display: 'flex', alignItems: 'center', gap: '3px', fontSize: '0.78rem', color: 'var(--soil)', fontWeight: 600 }}>
                               <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" strokeWidth="2" style={{ color: '#FBBF24' }}>
@@ -235,7 +235,7 @@ export default async function DetailPage({ params }) {
             )}
           </div>
 
-          <div>
+          <div className="reveal reveal-right">
             {/* LOCATION MAP */}
             <div className="panel">
               <h3>

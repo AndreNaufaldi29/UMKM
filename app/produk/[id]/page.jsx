@@ -135,7 +135,7 @@ export default async function ProductDetailPage({ params }) {
   return (
     <main className='home-page'>
       {/* BREADCRUMB */}
-      <div className="wrap">
+      <div className="wrap reveal reveal-left">
         <div className="breadcrumb">
           <Link href="/">Beranda</Link>
           <span className="sep">/</span>
@@ -148,8 +148,8 @@ export default async function ProductDetailPage({ params }) {
       <div className="wrap section" style={{ paddingTop: '8px' }}>
         <div className="detail-layout">
           {/* LEFT: PHOTO & METRICS */}
-          <div>
-            <div className="panel" style={{ padding: 0, overflow: 'hidden', aspectRatio: '4/3' }}>
+          <div className="reveal reveal-left">
+            <div className="panel detail-photo-panel" style={{ padding: 0, overflow: 'hidden', aspectRatio: '4/3' }}>
               <ProductSVG 
                 cat={p.cat} 
                 seed={p.name.length + p.price} 
@@ -231,7 +231,7 @@ export default async function ProductDetailPage({ params }) {
           </div>
 
           {/* RIGHT: DETAILS & ACTIONS */}
-          <div>
+          <div className="reveal reveal-right">
             <div className="panel" style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
               <div>
                 <h1 style={{ fontSize: '1.9rem', fontWeight: 600, color: 'var(--ink)', lineHeight: '1.2', marginBottom: '6px' }}>{p.name}</h1>
@@ -248,6 +248,7 @@ export default async function ProductDetailPage({ params }) {
                   {variants.map((v, idx) => (
                     <div 
                       key={idx} 
+                      className="variant-chip"
                       style={{ 
                         padding: '8px 14px', 
                         border: idx === 0 ? '2px solid var(--forest)' : '1px solid var(--line)', 
@@ -355,20 +356,20 @@ export default async function ProductDetailPage({ params }) {
 
         {/* RELATED PRODUCTS */}
         {relatedProducts.length > 0 && (
-          <div style={{ marginTop: '48px' }}>
+          <div className="reveal reveal-scale" style={{ marginTop: '48px' }}>
             <div className="section-head" style={{ marginBottom: '20px' }}>
               <div>
                 <h3 style={{ fontSize: '1.3rem', fontWeight: 600 }}>Produk Lain dari Toko Ini</h3>
                 <div className="sub">Telusuri keragaman produk dari pelaku usaha yang sama</div>
               </div>
             </div>
-            <div className="products-grid">
+            <div className="products-grid reveal-stagger">
               {relatedProducts.map((rp) => (
-                <div className="product-card" key={rp.id} style={{ display: 'flex', flexDirection: 'column' }}>
-                  <div className="product-photo" style={{ aspectRatio: '1/1', position: 'relative' }}>
+                <div className="product-card card" key={rp.id} style={{ display: 'flex', flexDirection: 'column' }}>
+                  <div className="card-photo" style={{ aspectRatio: '1/1', position: 'relative' }}>
                     <ProductSVG cat={rp.cat} seed={rp.name.length + rp.price} />
                   </div>
-                  <div className="product-body" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                  <div className="card-body" style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
                     <div>
                       <div className="pname" style={{ fontWeight: 700, fontSize: '0.92rem' }}>{rp.name}</div>
                       <div className="pdesc" style={{ fontSize: '0.78rem', color: 'var(--ink-soft)', marginTop: '4px', minHeight: '36px', display: '-webkit-box', WebkitLineClamp: '2', WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
@@ -376,7 +377,7 @@ export default async function ProductDetailPage({ params }) {
                       </div>
                     </div>
                     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginTop: '12px' }}>
-                      <div className="pprice" style={{ fontWeight: 700, color: 'var(--soil)' }}>{formatRupiah(rp.price)}</div>
+                      <div className="pprice" style={{ fontWeight: 700, color: 'var(--soil)', fontFamily: 'IBM Plex Mono, monospace' }}>{formatRupiah(rp.price)}</div>
                       <Link href={`/produk/${rp.id.replace('p', '').replace('_', '')}`} className="btn btn-outline" style={{ padding: '6px 12px', fontSize: '0.74rem', borderRadius: '6px' }}>
                         Detail
                       </Link>

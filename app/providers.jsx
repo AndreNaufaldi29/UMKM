@@ -2,6 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from 'react';
 import { DataProvider } from '../src/context/DataContext';
+import ScrollReveal from '../src/components/ScrollReveal';
 
 const ThemeContext = createContext({
   dark: false,
@@ -46,7 +47,7 @@ export function ThemeProvider({ children }) {
           toggleDark,
         }}
       >
-        {children}
+        <ScrollReveal>{children}</ScrollReveal>
       </ThemeContext.Provider>
     </DataProvider>
   );
