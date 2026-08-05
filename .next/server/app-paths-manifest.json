@@ -1,4 +1,5 @@
 {
+  "/admin/umkm/page": "app/admin/umkm/page.js",
   "/admin/products/page": "app/admin/products/page.js",
-  "/admin/umkm/page": "app/admin/umkm/page.js"
+  "/admin/reviews/page": "app/admin/reviews/page.js"
 }
