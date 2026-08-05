@@ -55,12 +55,12 @@ export default function AdminLayout({ children }) {
               </div>
             )}
 
-            <button className="btn btn-outline btn-sm" onClick={handleReset} title="Reset Data ke Default">
+            <button className="btn btn-outline btn-sm btn-reset" onClick={handleReset} title="Reset Data ke Default">
               <ResetIcon width="14" height="14" />
               <span>Reset Data</span>
             </button>
 
-            <button className="btn btn-outline btn-sm" onClick={handleLogout} title="Keluar dari Panel Admin" style={{ color: '#9B1C1C', borderColor: '#F8B4B4' }}>
+            <button className="btn btn-outline btn-sm btn-logout" onClick={handleLogout} title="Keluar dari Panel Admin" >
               <span>🚪 Keluar</span>
             </button>
 

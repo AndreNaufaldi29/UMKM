@@ -29,7 +29,10 @@ function AdminProductsContent() {
     price: '',
     unit: 'pcs',
     rating: 5.0,
-    isFeatured: false
+    isFeatured: false,
+
+    image: "",
+    imagePreview: ""
   };
 
   const [formData, setFormData] = useState(emptyForm);
@@ -101,6 +104,23 @@ function AdminProductsContent() {
     setDeleteConfirmId(null);
   };
 
+  const handleImageChange = (e) => {
+  const file = e.target.files?.[0];
+  if (!file) return;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    setFormData(prev => ({
+      ...prev,
+      image: file,
+      imagePreview: reader.result
+    }));
+  };
+
+  reader.readAsDataURL(file);
+};
+
   // Filter logic
   const filteredProducts = products.filter((p) => {
     const q = search.trim().toLowerCase();
@@ -125,7 +145,7 @@ function AdminProductsContent() {
           <h2>🛍️ Kelola Produk UMKM</h2>
           <p className="sub">Atur barang & jasa unggulan, harga, rating, serta status produk unggulan</p>
         </div>
-        <button className="btn btn-soil" onClick={openAddModal}>
+        <button className="btn btn-product" onClick={openAddModal}>
           <PlusIcon /> Tambah Produk Baru
         </button>
       </div>
@@ -316,18 +336,6 @@ function AdminProductsContent() {
                 </div>
 
                 <div className="form-group">
-                  <label>Rating Produk (1.0 - 5.0)</label>
-                  <input
-                    type="number"
-                    step="0.1"
-                    min="1.0"
-                    max="5.0"
-                    value={formData.rating}
-                    onChange={(e) => setFormData({ ...formData, rating: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-group">
                   <label>Tampilkan sebagai Produk Unggulan?</label>
                   <select
                     value={formData.isFeatured ? 'yes' : 'no'}
@@ -347,6 +355,24 @@ function AdminProductsContent() {
                     onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
                   />
                 </div>
+              </div>
+              <div className="form-group full">
+                  <label>Gambar Produk *</label>
+
+                  <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleImageChange}
+                  />
+
+                  {formData.imagePreview && (
+                      <div className="product-preview">
+                          <img
+                            src={formData.imagePreview}
+                            alt="Preview Produk"
+                          />
+                      </div>
+)}
               </div>
 
               <div className="modal-footer">

@@ -133,10 +133,10 @@ export default function AdminDashboardOverview() {
             <Link href="/admin/umkm?action=add" className="btn btn-soil">
               <PlusIcon /> Tambah UMKM Baru
             </Link>
-            <Link href="/admin/products?action=add" className="btn btn-outline">
+            <Link href="/admin/products?action=add" className="btn btn-product">
               <PlusIcon /> Tambah Produk Baru
             </Link>
-            <Link href="/admin/reviews?action=add" className="btn btn-outline">
+            <Link href="/admin/reviews?action=add" className="btn btn-review">
               <PlusIcon /> Tambah Review
             </Link>
           </div>

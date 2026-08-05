@@ -775,14 +775,20 @@ body.dark::before{
     margin-bottom: 8px !important;
   }
 
-  .hero p, .carousel-content p {
-    font-size: 0.8rem !important;
-    margin-bottom: 16px !important;
+ .hero p, .carousel-content p {
+    font-size: 0.8rem;
+    line-height: 1.6;
+    margin-bottom: 16px;
+
     display: -webkit-box;
-    -webkit-line-clamp: 2;
     -webkit-box-orient: vertical;
+
+    line-clamp: 2;          /* Standard property */
+    -webkit-line-clamp: 2;  /* Chrome, Edge, Safari */
+
     overflow: hidden;
-  }
+    text-overflow: ellipsis;
+}
 
   .carousel-dots {
     bottom: 88px;
@@ -2325,6 +2331,87 @@ footer{
   border-radius: 999px;
   animation: loaderBarSweep 0.75s ease-in-out infinite;
   transform-origin: left;
+}
+/* ==============================
+   ADMIN BUTTONS
+============================== */
+
+/* RESET DATA */
+.btn-reset{
+    background:#2563EB !important;
+    color:#fff !important;
+    border:1px solid #2563EB !important;
+}
+
+.btn-reset:hover{
+    background:#1D4ED8 !important;
+    border-color:#1D4ED8 !important;
+}
+
+/* KELUAR */
+.btn-logout{
+    background:#DC2626 !important;
+    color:#fff !important;
+    border:1px solid #DC2626 !important;
+}
+
+.btn-logout:hover{
+    background:#B91C1C !important;
+    border-color:#B91C1C !important;
+}
+
+/* TAMBAH PRODUK */
+.btn-product{
+    background:#16A34A !important;
+    color:#fff !important;
+    border:1px solid #15803D !important;
+}
+
+.btn-product:hover{
+    background:#15803D !important;
+}
+
+/* TAMBAH REVIEW */
+.btn-review{
+    background:#16A34A !important;
+    color:#ffffff !important;
+    border:1px solid #15803D !important;
+}
+
+.btn-review:hover{
+    background:#D97706 !important;
+}
+
+.product-preview{
+
+    margin-top:14px;
+
+    width:220px;
+
+    height:170px;
+
+    border-radius:14px;
+
+    overflow:hidden;
+
+    border:2px dashed #9AC8A5;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+}
+
+.product-preview img{
+
+    width:100%;
+
+    height:100%;
+
+    object-fit:cover;
+
 }
 
 @keyframes loaderPulse {

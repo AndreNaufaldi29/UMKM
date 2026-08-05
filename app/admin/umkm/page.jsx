@@ -313,18 +313,6 @@ function AdminUMKMContent() {
                 </div>
 
                 <div className="form-group">
-                  <label>Lokasi Dusun</label>
-                  <select
-                    value={formData.dusun}
-                    onChange={(e) => setFormData({ ...formData, dusun: e.target.value })}
-                  >
-                    {dusunList.map((d) => (
-                      <option key={d} value={d}>{d}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
                   <label>Tahun Berdiri</label>
                   <input
                     type="number"
