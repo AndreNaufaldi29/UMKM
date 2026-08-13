@@ -1,41 +1,42 @@
 'use client';
 
-import React, { createContext, useContext, useState, useEffect } from 'react';
+import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { MSMES as INITIAL_MSMES, CATEGORIES, DUSUN } from '../data/msmes';
+import { withBasePath } from '../utils/basePath';
 
 const DEFAULT_REVIEWS = [
   {
     id: 1,
     name: 'Budi Santoso',
-    role: 'Pemilik Cafe, Yogyakarta',
+    role: 'Pengunjung Desa',
     avatar: 'BS',
-    quote: '"Kopi Robusta Sangrai dari Desa Kedungsumur benar-benar luar biasa. Aroma dan konsistensi rasanya sangat disukai oleh pelanggan cafe saya. Pengisian stok selalu aman."',
+    quote: 'Kopi Robusta Sangrai dari Kopi Sunyi harum sekali dan rasanya mantap. Kemasan rapi cocok untuk oleh-oleh khas desa!',
     msmeId: 1,
-    productName: 'Kopi Robusta Sangrai',
+    productName: 'Kopi Robusta Sangrai 250g',
     rating: 5,
     status: 'approved',
     date: '2026-07-20'
   },
   {
     id: 2,
-    name: 'Dewi Lestari',
-    role: 'Wisatawan, Jakarta',
-    avatar: 'DL',
-    quote: '"Sangat terkesan dengan keindahan Kain Batik Tulis Motif Terasering. Detail cantingnya sangat rapi dan kainnya nyaman dipakai. Mahakarya asli yang bernilai tinggi!"',
+    name: 'Siti Rahmawati',
+    role: 'Wisatawan',
+    avatar: 'SR',
+    quote: 'Batik Tulis Sekar Arum halus banget kainnya dan motifnya sangat khas. Sangat puas pesan selendang sutra untuk hadiah.',
     msmeId: 2,
-    productName: 'Kain Batik Tulis',
+    productName: 'Selendang Batik Sutra',
     rating: 5,
     status: 'approved',
     date: '2026-07-22'
   },
   {
     id: 3,
-    name: 'Hendra Wijaya',
-    role: 'Pencinta Produk Lokal, Bandung',
-    avatar: 'HW',
-    quote: '"Keranjang anyaman bambunya sangat kuat dan estetik untuk dekorasi rumah. Sangat bangga bisa membeli produk lokal yang ramah lingkungan dengan kualitas premium."',
-    msmeId: 3,
-    productName: 'Anyaman Bambu',
+    name: 'Hendra Gunawan',
+    role: 'Pelanggan Lokal',
+    avatar: 'HG',
+    quote: 'Madu hutan murni dari Pak Yono terbukti asli, tenggorokan langsung lega. Langganan tiap bulan untuk keluarga.',
+    msmeId: 6,
+    productName: 'Madu Hutan Murni 500ml',
     rating: 5,
     status: 'approved',
     date: '2026-07-24'
@@ -45,7 +46,7 @@ const DEFAULT_REVIEWS = [
     name: 'Siti Aminah',
     role: 'Ibu Rumah Tangga',
     avatar: 'SA',
-    quote: '"Keripik singkong balado pedas manisnya juara banget! Bumbunya melimpah dan renyah. Anak-anak suka sekali."',
+    quote: 'Keripik singkong balado pedas manisnya juara banget! Bumbunya melimpah dan renyah. Anak-anak suka sekali.',
     msmeId: 4,
     productName: 'Keripik Singkong Balado',
     rating: 4,
@@ -61,25 +62,37 @@ export function DataProvider({ children }) {
   const [reviews, setReviews] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Load state from localStorage on mount
-  useEffect(() => {
+  // Fetch initial data dynamically from Database API using withBasePath helper
+  const fetchAllData = useCallback(async () => {
     try {
-      const savedMsmes = localStorage.getItem('umkm_data_msmes');
-      const savedReviews = localStorage.getItem('umkm_data_reviews');
+      const [umkmRes, reviewRes] = await Promise.all([
+        fetch(withBasePath('/api/umkm'), { cache: 'no-store' }),
+        fetch(withBasePath('/api/reviews'), { cache: 'no-store' })
+      ]);
 
-      if (savedMsmes) {
-        setMsmes(JSON.parse(savedMsmes));
+      if (umkmRes.ok && umkmRes.headers.get('content-type')?.includes('application/json')) {
+        const umkmData = await umkmRes.json().catch(() => null);
+        if (Array.isArray(umkmData)) {
+          setMsmes(umkmData);
+        } else {
+          setMsmes(INITIAL_MSMES);
+        }
       } else {
         setMsmes(INITIAL_MSMES);
       }
 
-      if (savedReviews) {
-        setReviews(JSON.parse(savedReviews));
+      if (reviewRes.ok && reviewRes.headers.get('content-type')?.includes('application/json')) {
+        const reviewData = await reviewRes.json().catch(() => null);
+        if (Array.isArray(reviewData)) {
+          setReviews(reviewData);
+        } else {
+          setReviews(DEFAULT_REVIEWS);
+        }
       } else {
         setReviews(DEFAULT_REVIEWS);
       }
-    } catch (e) {
-      console.error('Error loading data from localStorage', e);
+    } catch (error) {
+      console.error('Error fetching data dynamically from API:', error);
       setMsmes(INITIAL_MSMES);
       setReviews(DEFAULT_REVIEWS);
     } finally {
@@ -87,26 +100,15 @@ export function DataProvider({ children }) {
     }
   }, []);
 
-  // Save to localStorage when state changes
   useEffect(() => {
-    if (!isLoaded) return;
-    try {
-      localStorage.setItem('umkm_data_msmes', JSON.stringify(msmes));
-    } catch (e) {
-      console.error('Error saving msmes to localStorage', e);
-    }
-  }, [msmes, isLoaded]);
+    fetchAllData();
 
-  useEffect(() => {
-    if (!isLoaded) return;
-    try {
-      localStorage.setItem('umkm_data_reviews', JSON.stringify(reviews));
-    } catch (e) {
-      console.error('Error saving reviews to localStorage', e);
-    }
-  }, [reviews, isLoaded]);
+    const onFocus = () => fetchAllData();
+    window.addEventListener('focus', onFocus);
+    return () => window.removeEventListener('focus', onFocus);
+  }, [fetchAllData]);
 
-  // Derive products list from MSMEs
+  // Derive products list from MSMEs dynamically
   const products = msmes.flatMap((m) =>
     (m.products || []).map((p) => ({
       ...p,
@@ -120,7 +122,20 @@ export function DataProvider({ children }) {
   );
 
   // UMKM CRUD Handlers
-  const addMsme = (newMsme) => {
+  const addMsme = async (newMsme) => {
+    try {
+      const res = await fetch(withBasePath('/api/umkm'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newMsme)
+      });
+      if (res.ok) {
+        await fetchAllData();
+        return;
+      }
+    } catch (e) {
+      console.error('Error adding UMKM:', e);
+    }
     const nextId = msmes.length > 0 ? Math.max(...msmes.map((x) => x.id)) + 1 : 1;
     const formatted = {
       ...newMsme,
@@ -131,143 +146,148 @@ export function DataProvider({ children }) {
       products: newMsme.products || []
     };
     setMsmes((prev) => [formatted, ...prev]);
-    return formatted;
   };
 
-  const updateMsme = (id, updatedFields) => {
+  const updateMsme = async (id, updatedFields) => {
+    try {
+      const res = await fetch(withBasePath(`/api/umkm/${id}`), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedFields)
+      });
+      if (res.ok) {
+        await fetchAllData();
+        return;
+      }
+    } catch (e) {
+      console.error('Error updating UMKM:', e);
+    }
     setMsmes((prev) =>
-      prev.map((m) => {
-        if (m.id === id) {
-          const certs = typeof updatedFields.certs === 'string' 
-            ? updatedFields.certs.split('\n').filter(Boolean) 
-            : (updatedFields.certs || m.certs);
-          return {
-            ...m,
-            ...updatedFields,
-            certs,
-            est: parseInt(updatedFields.est || m.est, 10)
-          };
-        }
-        return m;
-      })
+      prev.map((m) => (m.id === id ? { ...m, ...updatedFields } : m))
     );
   };
 
-  const deleteMsme = (id) => {
+  const deleteMsme = async (id) => {
+    try {
+      await fetch(withBasePath(`/api/umkm/${id}`), { method: 'DELETE' });
+      await fetchAllData();
+      return;
+    } catch (e) {
+      console.error('Error deleting UMKM:', e);
+    }
     setMsmes((prev) => prev.filter((m) => m.id !== id));
   };
 
   // Product CRUD Handlers
-  const addProduct = (msmeId, newProduct) => {
-    const targetMsme = msmes.find((m) => m.id === Number(msmeId));
-    if (!targetMsme) return null;
-
-    const newProdId = `p${msmeId}_${(targetMsme.products || []).length + 1}_${Date.now().toString().slice(-3)}`;
-    const formattedProd = {
-      id: newProdId,
-      name: newProduct.name,
-      desc: newProduct.desc || '',
-      price: parseFloat(newProduct.price) || 0,
-      unit: newProduct.unit || 'pcs',
-      rating: parseFloat(newProduct.rating) || 5.0,
-      sales: parseInt(newProduct.sales || '0', 10),
-      views: parseInt(newProduct.views || '10', 10),
-      isFeatured: !!newProduct.isFeatured
-    };
-
-    setMsmes((prev) =>
-      prev.map((m) => {
-        if (m.id === Number(msmeId)) {
-          return {
-            ...m,
-            products: [...(m.products || []), formattedProd]
-          };
-        }
-        return m;
-      })
-    );
-    return formattedProd;
+  const addProduct = async (msmeId, newProduct) => {
+    try {
+      const res = await fetch(withBasePath('/api/products'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ msmeId, ...newProduct })
+      });
+      if (res.ok) {
+        await fetchAllData();
+        return;
+      }
+    } catch (e) {
+      console.error('Error adding product:', e);
+    }
   };
 
-  const updateProduct = (productId, updatedFields) => {
-    setMsmes((prev) =>
-      prev.map((m) => {
-        const hasProd = (m.products || []).some((p) => p.id === productId);
-        if (hasProd) {
-          return {
-            ...m,
-            products: m.products.map((p) => {
-              if (p.id === productId) {
-                return {
-                  ...p,
-                  ...updatedFields,
-                  price: parseFloat(updatedFields.price ?? p.price),
-                  rating: parseFloat(updatedFields.rating ?? p.rating),
-                  isFeatured: updatedFields.isFeatured !== undefined ? updatedFields.isFeatured : p.isFeatured
-                };
-              }
-              return p;
-            })
-          };
-        }
-        return m;
-      })
-    );
+  const updateProduct = async (productId, updatedFields) => {
+    try {
+      const res = await fetch(withBasePath(`/api/products/${productId}`), {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedFields)
+      });
+      if (res.ok) {
+        await fetchAllData();
+        return;
+      }
+    } catch (e) {
+      console.error('Error updating product:', e);
+    }
   };
 
-  const deleteProduct = (productId) => {
-    setMsmes((prev) =>
-      prev.map((m) => ({
-        ...m,
-        products: (m.products || []).filter((p) => p.id !== productId)
-      }))
-    );
+  const deleteProduct = async (productId) => {
+    try {
+      await fetch(withBasePath(`/api/products/${productId}`), { method: 'DELETE' });
+      await fetchAllData();
+      return;
+    } catch (e) {
+      console.error('Error deleting product:', e);
+    }
   };
 
   // Review CRUD Handlers
-  const addReview = (newReview) => {
-    const nextId = reviews.length > 0 ? Math.max(...reviews.map((r) => r.id)) + 1 : 1;
-    const nameStr = newReview.name || 'Pengunjung';
-    const initials = nameStr.split(' ').map((n) => n[0]).join('').substring(0, 2).toUpperCase() || 'UM';
-
-    const formatted = {
-      id: nextId,
-      name: nameStr,
-      role: newReview.role || 'Pembeli Terverifikasi',
-      avatar: initials,
-      quote: newReview.quote,
-      msmeId: Number(newReview.msmeId) || 1,
-      productName: newReview.productName || 'Produk UMKM',
-      rating: parseFloat(newReview.rating) || 5,
-      status: newReview.status || 'pending',
-      date: new Date().toISOString().split('T')[0]
-    };
-    setReviews((prev) => [formatted, ...prev]);
-    return formatted;
+  const addReview = async (newReview) => {
+    try {
+      const res = await fetch(withBasePath('/api/reviews'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(newReview)
+      });
+      if (res.ok) {
+        await fetchAllData();
+        return;
+      }
+    } catch (e) {
+      console.error('Error adding review:', e);
+    }
   };
 
-  const updateReview = (id, updatedFields) => {
-    setReviews((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, ...updatedFields } : r))
-    );
+  const updateReview = async (id, updatedFields) => {
+    try {
+      const res = await fetch(withBasePath(`/api/admin/reviews/${id}`), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updatedFields)
+      });
+      if (res.ok) {
+        await fetchAllData();
+        return;
+      }
+    } catch (e) {
+      console.error('Error updating review:', e);
+    }
   };
 
-  const toggleReviewStatus = (id, status) => {
-    setReviews((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, status } : r))
-    );
+  const toggleReviewStatus = async (id, status) => {
+    try {
+      const res = await fetch(withBasePath(`/api/admin/reviews/${id}`), {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status })
+      });
+      if (res.ok) {
+        await fetchAllData();
+        return;
+      }
+    } catch (e) {
+      console.error('Error toggling review status:', e);
+    }
   };
 
-  const deleteReview = (id) => {
-    setReviews((prev) => prev.filter((r) => r.id !== id));
+  const deleteReview = async (id) => {
+    try {
+      await fetch(withBasePath(`/api/admin/reviews/${id}`), { method: 'DELETE' });
+      await fetchAllData();
+      return;
+    } catch (e) {
+      console.error('Error deleting review:', e);
+    }
   };
 
   // Reset Data Handler
-  const resetToDefault = () => {
-    setMsmes(INITIAL_MSMES);
-    setReviews(DEFAULT_REVIEWS);
-    localStorage.removeItem('umkm_data_msmes');
-    localStorage.removeItem('umkm_data_reviews');
+  const resetToDefault = async () => {
+    try {
+      await fetch(withBasePath('/api/reset'), { method: 'POST' });
+      await fetchAllData();
+    } catch (e) {
+      console.error('Error resetting database:', e);
+    }
   };
 
   return (
@@ -289,7 +309,8 @@ export function DataProvider({ children }) {
         updateReview,
         toggleReviewStatus,
         deleteReview,
-        resetToDefault
+        resetToDefault,
+        refreshData: fetchAllData
       }}
     >
       {children}
@@ -300,7 +321,6 @@ export function DataProvider({ children }) {
 export function useData() {
   const context = useContext(DataContext);
   if (!context) {
-    // Fallback if rendered outside DataProvider
     return {
       msmes: INITIAL_MSMES,
       products: INITIAL_MSMES.flatMap((m) => m.products || []),
@@ -318,7 +338,8 @@ export function useData() {
       updateReview: () => {},
       toggleReviewStatus: () => {},
       deleteReview: () => {},
-      resetToDefault: () => {}
+      resetToDefault: () => {},
+      refreshData: () => {}
     };
   }
   return context;

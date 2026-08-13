@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { PinIcon, ArrowIcon, CategoryIcon } from './Icons';
 import { PhotoSVG } from './DynamicSVGs';
+import { withBasePath } from '../utils/basePath';
 
 export default function MSMECard({ m }) {
   const router = useRouter();
@@ -12,7 +13,7 @@ export default function MSMECard({ m }) {
   return (
     <Link href={`/umkm/${m.id}`} className="card">
       <div className="card-photo">
-        <PhotoSVG cat={m.cat} seed={m.id} />
+        {m.imageUrl ? <img src={withBasePath(m.imageUrl)} alt={m.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <PhotoSVG cat={m.cat} seed={m.id} />}
         <div 
           className="card-cat"
           onClick={(e) => {

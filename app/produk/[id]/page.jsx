@@ -1,21 +1,25 @@
 import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import prisma from '@/lib/db';
 import { PRODUCTS, MSMES } from '../../../src/data/msmes';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
 import { ProductSVG } from '../../../src/components/DynamicSVGs';
 import { 
   StarIcon, 
   EyeIcon, 
-  PhoneIcon, 
   CategoryIcon, 
   PinIcon, 
   ArrowIcon,
-  CheckIcon
 } from '../../../src/components/Icons';
 import { formatRupiah } from '../../../src/utils/formatter';
+import { withBasePath } from '../../../src/utils/basePath';
 import WAFloatButton from '../../../src/components/WAFloatButton';
 import ProductCard from '../../../src/components/ProductCard';
 import ProductVariantSelector from '../../../src/components/ProductVariantSelector';
+import ProductGallery from '../../../src/components/ProductGallery';
 
 function getOriginalProductId(mappedId) {
   if (!mappedId || mappedId.length < 2) return null;
@@ -25,53 +29,131 @@ function getOriginalProductId(mappedId) {
   return `p${mappedId[0]}_${mappedId[1]}`;
 }
 
+async function getProductDetail(id) {
+  const decodedId = decodeURIComponent(id);
+  const originalId = getOriginalProductId(decodedId);
+
+  try {
+    // 1. Direct ID Lookup (e.g. 'p2_1786598503806' or 'p1_1')
+    let p = await prisma.product.findUnique({
+      where: { id: decodedId },
+      include: {
+        umkm: {
+          include: {
+            category: true,
+            dusun: true
+          }
+        }
+      }
+    });
+
+    // 2. Fallback to legacy mapped ID if direct lookup returns null (e.g. '11' -> 'p1_1')
+    if (!p && originalId && originalId !== decodedId) {
+      p = await prisma.product.findUnique({
+        where: { id: originalId },
+        include: {
+          umkm: {
+            include: {
+              category: true,
+              dusun: true
+            }
+          }
+        }
+      });
+    }
+
+    // 3. Fallback to in-memory PRODUCTS array
+    if (!p) {
+      p = PRODUCTS.find((x) => x.id === decodedId || x.id === originalId);
+    }
+
+    if (!p) return null;
+
+    let processedImages = [];
+    if (Array.isArray(p.images) && p.images.length > 0) {
+      processedImages = p.images;
+    } else if (p.imageUrl) {
+      const trimmed = p.imageUrl.trim();
+      if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+        try {
+          processedImages = JSON.parse(trimmed);
+        } catch (e) {}
+      }
+      if (processedImages.length === 0) {
+        processedImages = trimmed.split(',').map((s) => s.trim()).filter(Boolean);
+      }
+    }
+
+    return {
+      id: p.id,
+      name: p.name,
+      desc: p.desc,
+      price: p.price,
+      unit: p.unit,
+      rating: p.rating,
+      sales: p.sales,
+      views: p.views,
+      isFeatured: p.isFeatured,
+      imageUrl: p.imageUrl || '',
+      images: processedImages,
+      msmeId: p.umkmId || p.msmeId,
+      msmeName: p.umkm ? p.umkm.name : (p.msmeName || ''),
+      cat: p.umkm && p.umkm.category ? p.umkm.category.name : (p.cat || 'Lainnya'),
+      dusun: p.umkm && p.umkm.dusun ? p.umkm.dusun.name : (p.dusun || 'Desa'),
+      est: p.umkm ? p.umkm.est : (p.est || 2020),
+      status: p.umkm ? p.umkm.status : (p.status || 'active'),
+      wa: p.umkm ? p.umkm.wa : (p.wa || '')
+    };
+  } catch (error) {
+    console.error('Error fetching product from DB:', error);
+    return PRODUCTS.find((x) => x.id === decodedId || x.id === originalId) || null;
+  }
+}
+
+async function getRelatedProducts(msmeId, currentProdId) {
+  try {
+    const prods = await prisma.product.findMany({
+      where: { umkmId: msmeId, NOT: { id: currentProdId } },
+      include: { umkm: { include: { category: true, dusun: true } } },
+      take: 4
+    });
+    return prods.map((p) => ({
+      id: p.id,
+      name: p.name,
+      desc: p.desc,
+      price: p.price,
+      unit: p.unit,
+      rating: p.rating,
+      sales: p.sales,
+      views: p.views,
+      isFeatured: p.isFeatured,
+      imageUrl: p.imageUrl || '',
+      msmeId: p.umkmId,
+      msmeName: p.umkm ? p.umkm.name : '',
+      cat: p.umkm && p.umkm.category ? p.umkm.category.name : 'Lainnya',
+      dusun: p.umkm && p.umkm.dusun ? p.umkm.dusun.name : 'Desa',
+      status: p.umkm ? p.umkm.status : 'active',
+      wa: p.umkm ? p.umkm.wa : ''
+    }));
+  } catch (error) {
+    return PRODUCTS.filter((x) => x.msmeId === msmeId && x.id !== currentProdId).slice(0, 4);
+  }
+}
+
 function getProductVariants(cat) {
-  if (cat === 'Makanan & Minuman') {
+  if (cat === 'Kuliner' || cat === 'Makanan & Minuman') {
     return ['Kemasan Standar (250g)', 'Kemasan Keluarga (500g)', 'Premium Gift Box Pack'];
   }
-  if (cat === 'Fashion & Tekstil') {
+  if (cat === 'Fashion' || cat === 'Fashion & Tekstil') {
     return ['Ukuran S / M', 'Ukuran L / XL', 'Ukuran XXL Custom'];
   }
-  if (cat === 'Kerajinan & Kriya') {
+  if (cat === 'Kerajinan' || cat === 'Kerajinan & Kriya') {
     return ['Warna Natural', 'Finishing Vernis Glossy', 'Ukuran Kustom'];
   }
-  if (cat === 'Jasa & Servis') {
+  if (cat === 'Jasa' || cat === 'Jasa & Servis') {
     return ['Layanan Standar', 'Layanan Cepat (Express)', 'Paket Lengkap + Garansi'];
   }
   return ['Varian Standar', 'Varian Premium'];
-}
-
-function getProductProcess(cat, name) {
-  if (cat === 'Makanan & Minuman') {
-    return [
-      { step: 1, title: 'Pemilihan Bahan', desc: 'Memilah bahan baku alami segar berkualitas tinggi langsung dari perkebunan Desa Sukamaju.' },
-      { step: 2, title: 'Pengolahan Tradisional', desc: 'Bahan baku diproses higienis menggunakan metode turun-temurun untuk menjaga kualitas rasa khas pedesaan.' },
-      { step: 3, title: 'Uji Mutu Berkala', desc: 'Setiap batch diuji cita rasa dan standarnya untuk menjamin kelezatan dan kebersihan terbaik.' },
-      { step: 4, title: 'Pengemasan Khusus', desc: 'Dikemas rapi menggunakan wadah kedap udara ramah lingkungan demi mempertahankan aroma segar.' }
-    ];
-  }
-  if (cat === 'Fashion & Tekstil') {
-    return [
-      { step: 1, title: 'Sketsa & Pola', desc: 'Membuat sketsa hiasan gambar motif tradisional khas terasering Sukamaju pada kain mori prima.' },
-      { step: 2, title: 'Pewarnaan Canting', desc: 'Melapisi malam secara manual dengan canting lalu mewarnainya dengan pewarna alam pilihan.' },
-      { step: 3, title: 'Pelodoran Malam', desc: 'Melarutkan malam dalam air mendidih (lorot) untuk memunculkan kombinasi motif warna yang indah.' },
-      { step: 4, title: 'Penyetrikaan & Finishing', desc: 'Menyetrika kain dengan kehangatan pas dan melakukan penjahitan pinggir agar rapi siap digunakan.' }
-    ];
-  }
-  if (cat === 'Kerajinan & Kriya') {
-    return [
-      { step: 1, title: 'Penyediaan Bahan Kriya', desc: 'Memilah bilah bambu tali yang liat atau tanah liat murni dari lembah sungai Desa Sukamaju.' },
-      { step: 2, title: 'Pembentukan Kerajinan', desc: 'Menganyam serat bambu secara manual atau memutar tanah liat basah dengan meja putar manual.' },
-      { step: 3, title: 'Pengeringan Udara', desc: 'Mengeringkan produk mentah di bawah sirkulasi udara teduh selama 3-5 hari agar tidak retak.' },
-      { step: 4, title: 'Pembakaran / Pelapisan', desc: 'Membakar produk gerabah di dalam tungku arang suhu tinggi atau melumuri anyaman dengan cairan anti-rayap.' }
-    ];
-  }
-  return [
-    { step: 1, title: 'Pemeriksaan Bahan Baku', desc: 'Memilah bahan berkualitas tinggi dari hasil alam terbaik Desa Sukamaju.' },
-    { step: 2, title: 'Proses Pengolahan', desc: 'Proses produksi secara teliti oleh pengrajin lokal berpengalaman.' },
-    { step: 3, title: 'Pemeriksaan Mutu akhir', desc: 'Pengecekan kelayakan akhir sebelum dikemas guna menjaga standar keawetan.' },
-    { step: 4, title: 'Pengemasan & Siap Kirim', desc: 'Produk dikemas dengan kemasan kokoh aman benturan siap dikirim ke pembeli.' }
-  ];
 }
 
 function getProductTestimonials(name) {
@@ -95,8 +177,7 @@ function getProductTestimonials(name) {
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
-  const originalId = getOriginalProductId(id);
-  const p = PRODUCTS.find((x) => x.id === originalId);
+  const p = await getProductDetail(id);
   if (!p) {
     return {
       title: 'Produk Tidak Ditemukan - Desa Sukamaju',
@@ -111,33 +192,30 @@ export async function generateMetadata({ params }) {
 
 export default async function ProductDetailPage({ params }) {
   const { id } = await params;
-  const originalId = getOriginalProductId(id);
-  const p = PRODUCTS.find((x) => x.id === originalId);
+  const p = await getProductDetail(id);
 
   if (!p) {
     notFound();
   }
 
-  const msme = MSMES.find((m) => m.id === p.msmeId);
-  const waUrl = p.wa 
-    ? `https://wa.me/${p.wa}?text=${encodeURIComponent(
-        `Halo, saya tertarik dengan produk "${p.name}" dari toko Anda ("${p.msmeName}"). Apakah produk ini tersedia?`
-      )}` 
-    : null;
+  // Increment view counter in DB asynchronously
+  try {
+    await prisma.product.update({
+      where: { id: p.id },
+      data: { views: { increment: 1 } }
+    });
+  } catch (e) {
+    // Ignore if counter update fails
+  }
 
-  // Get other products from the same MSME
-  const relatedProducts = PRODUCTS.filter(
-    (x) => x.msmeId === p.msmeId && x.id !== p.id
-  ).slice(0, 4);
-
+  const relatedProducts = await getRelatedProducts(p.msmeId, p.id);
   const variants = getProductVariants(p.cat);
-  const processSteps = getProductProcess(p.cat, p.name);
   const testimonials = getProductTestimonials(p.name);
 
   return (
-    <main className='home-page'>
+    <main className="container page-content detail-container">
       {/* BREADCRUMB */}
-      <div className="wrap reveal reveal-left">
+      <div>
         <div className="breadcrumb">
           <Link href="/">Beranda</Link>
           <span className="sep">/</span>
@@ -147,28 +225,29 @@ export default async function ProductDetailPage({ params }) {
         </div>
       </div>
 
-      <div className="wrap section" style={{ paddingTop: '8px' }}>
+      <div className="section" style={{ paddingTop: '8px' }}>
         <div className="detail-layout">
-          {/* LEFT: PHOTO & METRICS */}
-          <div className="reveal reveal-left">
-            <div className="panel detail-photo-panel" style={{ padding: 0, overflow: 'hidden', aspectRatio: '4/3' }}>
-              <ProductSVG 
-                cat={p.cat} 
-                seed={p.name.length + p.price} 
-                style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-              />
-            </div>
+          {/* LEFT: PHOTO GALLERY & METRICS */}
+          <div>
+            <ProductGallery 
+              images={p.images} 
+              imageUrl={p.imageUrl} 
+              name={p.name} 
+              cat={p.cat} 
+              price={p.price} 
+              id={p.id} 
+            />
 
-            <div className="panel" style={{ padding: '16px 20px' }}>
+            <div className="panel reveal reveal-left" style={{ padding: '16px 20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.9rem' }}>
                     <StarIcon style={{ color: '#FBBF24', width: '16px', height: '16px' }} />
-                    <b>{p.rating.toFixed(1)}</b> <span style={{ color: 'var(--ink-soft)' }}>/ 5.0</span>
+                    <b>{(p.rating || 5.0).toFixed(1)}</b> <span style={{ color: 'var(--ink-soft)' }}>/ 5.0</span>
                   </span>
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.9rem', color: 'var(--ink-soft)' }}>
                     <EyeIcon style={{ width: '16px', height: '16px' }} />
-                    <span>{p.views} Kali Dilihat</span>
+                    <span>{p.views + 1} Kali Dilihat</span>
                   </span>
                 </div>
                 <Link href={`/products?cat=${encodeURIComponent(p.cat)}`} className="badge" style={{ cursor: 'pointer' }}>
@@ -178,38 +257,8 @@ export default async function ProductDetailPage({ params }) {
               </div>
             </div>
 
-            {/* PROCESS MAP / PEMBUATAN */}
-            <div className="panel" style={{ marginTop: '20px' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px', borderBottom: '1px solid var(--line)', paddingBottom: '10px' }}>Proses Pembuatan</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
-                {processSteps.map((step) => (
-                  <div key={step.step} style={{ display: 'flex', gap: '12px' }}>
-                    <div style={{ 
-                      width: '28px', 
-                      height: '28px', 
-                      borderRadius: '50%', 
-                      backgroundColor: 'var(--forest-soft)', 
-                      color: 'var(--forest)', 
-                      display: 'flex', 
-                      alignItems: 'center', 
-                      justifyContent: 'center', 
-                      fontWeight: 700, 
-                      fontSize: '0.85rem',
-                      flexShrink: 0
-                    }}>
-                      {step.step}
-                    </div>
-                    <div>
-                      <h5 style={{ fontSize: '0.92rem', fontWeight: 600, color: 'var(--ink)' }}>{step.title}</h5>
-                      <p style={{ fontSize: '0.82rem', color: 'var(--ink-soft)', marginTop: '2px', lineHeight: '1.4' }}>{step.desc}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-
             {/* PURCHASING FLOW / ALUR PEMBELIAN */}
-            <div className="panel" style={{ marginTop: '20px' }}>
+            <div className="panel reveal reveal-left" style={{ marginTop: '20px' }}>
               <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px', borderBottom: '1px solid var(--line)', paddingBottom: '10px' }}>Alur Pembelian</h3>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                 <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
@@ -278,11 +327,11 @@ export default async function ProductDetailPage({ params }) {
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.78rem', color: 'var(--ink-soft)', marginTop: '6px' }}>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
                             <PinIcon style={{ width: '12px', height: '12px' }} />
-                            <span>{msme ? msme.dusun : p.dusun}</span>
+                            <span>{p.dusun}</span>
                           </span>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
                             <span>Est.</span>
-                            <b>{msme ? msme.est : p.est}</b>
+                            <b>{p.est}</b>
                           </span>
                         </div>
                       </div>
@@ -336,7 +385,7 @@ export default async function ProductDetailPage({ params }) {
 
         {/* RELATED PRODUCTS */}
         {relatedProducts.length > 0 && (
-          <div className="reveal reveal-scale" style={{ marginTop: '48px' }}>
+          <div className="reveal reveal-scale" style={{ marginTop: '24px', paddingTop: '24px', borderTop: '1px solid var(--line)' }}>
             <div className="section-head" style={{ marginBottom: '20px' }}>
               <div>
                 <h3 style={{ fontSize: '1.3rem', fontWeight: 600 }}>Produk Lain dari Toko Ini</h3>
@@ -349,8 +398,8 @@ export default async function ProductDetailPage({ params }) {
                   key={rp.id} 
                   p={{ 
                     ...rp, 
-                    msmeName: msme?.name || '', 
-                    msmeId: msme?.id || 1, 
+                    msmeName: p.msmeName, 
+                    msmeId: p.msmeId, 
                     cat: rp.cat || p.cat, 
                     status: 'active',
                     rating: rp.rating || 5.0,

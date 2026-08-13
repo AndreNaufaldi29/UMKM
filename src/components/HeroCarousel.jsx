@@ -3,10 +3,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import Link from 'next/link';
 import { ArrowIcon } from './Icons';
+import { withBasePath } from '../utils/basePath';
 
 const SLIDES = [
   {
-    image: '/umkm-kedungsumur/images/umkm-1.jpg',
+    image: withBasePath('/images/umkm-1.jpg'),
     eyebrow: 'Sistem Informasi UMKM Desa',
     title: 'Katalog UMKM Desa Kedungsumur',
     desc: 'Temukan produk dan jasa unggulan yang ditawarkan oleh para pelaku usaha lokal desa kami.',
@@ -14,7 +15,7 @@ const SLIDES = [
     link: '/umkm',
   },
   {
-    image: '/umkm-kedungsumur/images/umkm-2.jpg',
+    image: withBasePath('/images/umkm-2.jpg'),
     eyebrow: 'Produk Unggulan Warga',
     title: 'Kualitas Terbaik Asli Buatan Lokal',
     desc: 'Dukung kemajuan ekonomi warga desa dengan membeli produk asli buatan tangan masyarakat.',
@@ -22,7 +23,7 @@ const SLIDES = [
     link: '/products',
   },
   {
-    image: '/umkm-kedungsumur/images/umkm-3.jpg',
+    image: withBasePath('/images/umkm-3.jpg'),
     eyebrow: 'Pemberdayaan Ekonomi Desa',
     title: 'Kemandirian Usaha & Jaringan UMKM',
     desc: 'Wujudkan pertumbuhan ekonomi desa yang inklusif melalui jaringan pelaku usaha yang terintegrasi.',

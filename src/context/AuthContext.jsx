@@ -1,6 +1,7 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
+import { withBasePath } from '../utils/basePath';
 
 const AuthContext = createContext();
 
@@ -24,8 +25,33 @@ export function AuthProvider({ children }) {
     }
   }, []);
 
-  const login = (username, password) => {
-    // Kredensial Admin Default: admin / admin123
+  const login = async (username, password) => {
+    try {
+      const res = await fetch(withBasePath('/api/admin/auth/login'), {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ username, password })
+      });
+
+      const contentType = res.headers.get('content-type') || '';
+      if (res.ok && contentType.includes('application/json')) {
+        const data = await res.json().catch(() => null);
+        if (data && data.success) {
+          setIsAuthenticated(true);
+          setAdminUser(data.user);
+          localStorage.setItem('umkm_admin_auth', 'true');
+          localStorage.setItem('umkm_admin_user', JSON.stringify(data.user));
+          return { success: true };
+        }
+        if (data && data.error) {
+          return { success: false, error: data.error };
+        }
+      }
+    } catch (e) {
+      console.error('Login error:', e);
+    }
+
+    // Fallback credential check if backend API returns non-JSON or connection fails
     if (username.trim().toLowerCase() === 'admin' && password === 'admin123') {
       const userData = { username: 'admin', role: 'Super Administrator', loginTime: new Date().toISOString() };
       setIsAuthenticated(true);

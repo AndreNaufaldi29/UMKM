@@ -5,17 +5,18 @@ import { useRouter } from 'next/navigation';
 import { ProductSVG } from './DynamicSVGs';
 import { CategoryIcon, StarIcon, EyeIcon, PhoneIcon } from './Icons';
 import { formatRupiah } from '../utils/formatter';
+import { withBasePath } from '../utils/basePath';
 
 export default function ProductCard({ p }) {
   const router = useRouter();
-  const productUrl = `/produk/${p.id.replace('p', '').replace('_', '')}`;
+  const productUrl = `/produk/${encodeURIComponent(p.id)}`;
   const waUrl = p.wa
     ? `https://wa.me/${p.wa}?text=${encodeURIComponent(
         `Halo, saya tertarik dengan produk "${p.name}" dari UMKM "${p.msmeName}".`
       )}`
     : null;
 
-  const handleCardClick = (e) => {
+  const handleCardClick = () => {
     router.push(productUrl);
   };
 
@@ -24,6 +25,35 @@ export default function ProductCard({ p }) {
     router.push(`/umkm/${p.msmeId}`);
   };
 
+  const getPrimaryImage = (product) => {
+    if (!product) return '';
+    if (Array.isArray(product.images) && product.images.length > 0) {
+      if (product.images[0]) return product.images[0];
+    }
+    const imgSrc = product.imageUrl;
+    if (!imgSrc) return '';
+    if (Array.isArray(imgSrc) && imgSrc.length > 0) {
+      return imgSrc[0];
+    }
+    if (typeof imgSrc === 'string') {
+      const trimmed = imgSrc.trim();
+      if (!trimmed) return '';
+      if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+        try {
+          const parsed = JSON.parse(trimmed);
+          if (Array.isArray(parsed) && parsed.length > 0) return parsed[0];
+        } catch (e) {}
+      }
+      if (trimmed.includes(',')) {
+        return trimmed.split(',')[0].trim();
+      }
+      return trimmed;
+    }
+    return '';
+  };
+
+  const primaryImage = getPrimaryImage(p);
+
   return (
     <div 
       className="product-catalog-card card" 
@@ -31,7 +61,18 @@ export default function ProductCard({ p }) {
       style={{ display: 'flex', flexDirection: 'column', cursor: 'pointer' }}
     >
       <div className="card-photo">
-        <ProductSVG cat={p.cat} seed={p.name.length + p.price} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+        {primaryImage ? (
+          <img
+            src={withBasePath(primaryImage)}
+            alt={p.name}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            onError={(e) => {
+              e.target.style.display = 'none';
+            }}
+          />
+        ) : (
+          <ProductSVG cat={p.cat} seed={p.name ? p.name.length + (p.price || 0) : 42} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
+        )}
         <div 
           className="card-cat"
           onClick={(e) => {
@@ -70,11 +111,11 @@ export default function ProductCard({ p }) {
         <div className="product-metrics" style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '0.74rem', color: 'var(--ink-soft)', borderBottom: '1px dashed var(--line)', paddingBottom: '10px', marginBottom: '10px' }}>
           <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }} title="Rating">
             <StarIcon style={{ color: '#FBBF24' }} />
-            <b style={{ color: 'var(--ink)' }}>{p.rating.toFixed(1)}</b>
+            <b style={{ color: 'var(--ink)' }}>{p.rating ? p.rating.toFixed(1) : '5.0'}</b>
           </span>
           <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }} title="Dilihat">
             <EyeIcon />
-            <span>{p.views}</span>
+            <span>{p.views || 0}</span>
           </span>
         </div>
 

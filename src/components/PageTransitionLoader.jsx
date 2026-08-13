@@ -105,7 +105,7 @@ export default function PageTransitionLoader() {
   if (!isLoading) return null;
 
   return (
-    <div className={`page-loader-overlay ${isEntering ? 'is-entering' : ''} ${isExiting ? 'exit' : ''}`} aria-hidden="true">
+    <div className={`page-loader-overlay ${isEntering ? 'is-entering' : ''} ${isExiting ? 'exit' : ''}`} aria-hidden="true" suppressHydrationWarning>
       <div className="loader-content">
         <div className="loader-logo-wrap">
           <div className="loader-brand-mark">

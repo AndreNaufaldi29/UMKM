@@ -97,8 +97,8 @@ export default function AnimatedCounter({
   }, [hasAnimated, targetValue, duration, delay]);
 
   return (
-    <span ref={elementRef} className="animated-counter-value">
-      {mounted ? format(count) : format(targetValue)}
+    <span ref={elementRef} className="animated-counter-value" suppressHydrationWarning>
+      {mounted && hasAnimated ? format(count) : format(targetValue)}
     </span>
   );
 }

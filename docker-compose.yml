@@ -1,16 +1,45 @@
-version: '3.8'
-
 services:
+  # 1. PostgreSQL Database Service
+  db:
+    image: postgres:16-alpine
+    container_name: umkm-postgres-db
+    restart: always
+    environment:
+      POSTGRES_USER: umkm_user
+      POSTGRES_PASSWORD: umkm_password
+      POSTGRES_DB: umkm_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U umkm_user -d umkm_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Next.js Web Frontend & API Application Service
   frontend:
     build: .
     container_name: web-frontend
+    restart: always
     ports:
       - "5173:5173"
+    environment:
+      - WATCHPACK_POLLING=true
+      - DATABASE_URL=postgresql://umkm_user:umkm_password@db:5432/umkm_db?schema=public
+      - NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH:-}
+      - NODE_ENV=development
     volumes:
       # Sinkronisasi file lokal ke dalam container agar fitur Hot-Reload berjalan
       - .:/app
-      # Mencegah node_modules lokal menimpa node_modules di dalam container
+      # Mencegah node_modules & build cache lokal menimpa di dalam container
       - /app/node_modules
-    environment:
-      # Membantu memastikan hot-reload berfungsi dengan baik, terutama di Windows
-      - WATCHPACK_POLLING=true
+      - /app/.next
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    driver: local

@@ -1,0 +1,109 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model Category {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  slug        String   @unique
+  description String?
+  umkms       Umkm[]
+  createdAt   DateTime @default(now())
+}
+
+model Dusun {
+  id          Int      @id @default(autoincrement())
+  name        String   @unique
+  description String?
+  umkms       Umkm[]
+  createdAt   DateTime @default(now())
+}
+
+model AdminUser {
+  id           Int       @id @default(autoincrement())
+  username     String    @unique
+  passwordHash String
+  fullName     String
+  role         String    @default("admin")
+  lastLoginAt  DateTime?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+}
+
+model Umkm {
+  id             Int             @id @default(autoincrement())
+  name           String
+  owner          String
+  categoryId     Int?
+  category       Category?       @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  dusunId        Int?
+  dusun          Dusun?          @relation(fields: [dusunId], references: [id], onDelete: SetNull)
+  est            Int?
+  status         String          @default("active")
+  addr           String
+  hours          String?
+  desc           String
+  history        String?
+  latitude       Float?
+  longitude      Float?
+  wa             String?
+  phone          String?
+  email          String?
+  web            String?
+  fb             String?
+  ig             String?
+  tiktok         String?
+  imageUrl       String?
+  certifications Certification[]
+  products       Product[]
+  reviews        Review[]
+  createdAt      DateTime        @default(now())
+  updatedAt      DateTime        @updatedAt
+}
+
+model Certification {
+  id        Int      @id @default(autoincrement())
+  umkmId    Int
+  umkm      Umkm     @relation(fields: [umkmId], references: [id], onDelete: Cascade)
+  certName  String
+  createdAt DateTime @default(now())
+}
+
+model Product {
+  id         String   @id
+  umkmId     Int
+  umkm       Umkm     @relation(fields: [umkmId], references: [id], onDelete: Cascade)
+  name       String
+  desc       String?
+  price      Float
+  unit       String   @default("pcs")
+  rating     Float    @default(5.0)
+  sales      Int      @default(0)
+  views      Int      @default(0)
+  isFeatured Boolean  @default(false)
+  imageUrl   String?
+  reviews    Review[]
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Review {
+  id          Int      @id @default(autoincrement())
+  umkmId      Int?
+  umkm        Umkm?    @relation(fields: [umkmId], references: [id], onDelete: SetNull)
+  productId   String?
+  product     Product? @relation(fields: [productId], references: [id], onDelete: SetNull)
+  productName String?
+  name        String
+  role        String   @default("Pembeli Terverifikasi")
+  avatar      String?
+  quote       String
+  rating      Int      @default(5)
+  status      String   @default("pending")
+  createdAt   DateTime @default(now())
+}

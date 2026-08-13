@@ -26,7 +26,7 @@ export default function AdminAuthGuard({ children }) {
     return <>{children}</>;
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
 
@@ -40,13 +40,16 @@ export default function AdminAuthGuard({ children }) {
     }
 
     setIsSubmitting(true);
-    setTimeout(() => {
-      const res = login(username, password);
+    try {
+      const res = await login(username, password);
       if (!res.success) {
         setError(res.error);
         setIsSubmitting(false);
       }
-    }, 250);
+    } catch (err) {
+      setError('Terjadi kesalahan saat masuk.');
+      setIsSubmitting(false);
+    }
   };
 
   const handleFillDemo = () => {

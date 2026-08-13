@@ -26,7 +26,7 @@ export default function ScrollReveal({ children }) {
 
     observer = new IntersectionObserver(observerCallback, observerOptions);
 
-    const elements = document.querySelectorAll('.reveal, [data-reveal], .reveal-stagger');
+    const elements = document.querySelectorAll('.reveal, [data-reveal], .reveal-stagger, .reveal-left, .reveal-right, .reveal-scale');
     elements.forEach((el) => {
       const rect = el.getBoundingClientRect();
       const viewportHeight = window.innerHeight || document.documentElement.clientHeight;

@@ -13,8 +13,14 @@ RUN npm install
 # Salin seluruh sisa file proyek ke dalam container
 COPY . .
 
-# Ekspos port standar Next.js (konfigurasi dev/start menggunakan port 5173)
+# Generate Prisma Client untuk environment container
+RUN npx prisma generate
+
+# Pastikan script entrypoint dapat dieksekusi dan memiliki format LF (non-CRLF/BOM)
+RUN sed -i '1s/^\xEF\xBB\xBF//; s/\r$//' /app/docker-entrypoint.sh && chmod +x /app/docker-entrypoint.sh
+
+# Ekspos port standar Next.js
 EXPOSE 5173
 
-# Jalankan dev server Next.js
+ENTRYPOINT ["/app/docker-entrypoint.sh"]
 CMD ["npm", "run", "dev"]

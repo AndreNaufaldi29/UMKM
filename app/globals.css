@@ -111,7 +111,7 @@ main {
     min-height: 80vh;
     min-height: calc(100vh - 200px);
     position: relative;
-    z-index: 1;
+    z-index: auto;
 }
 
 body::after{
@@ -119,7 +119,7 @@ body::after{
     position: fixed;
     inset: 0;
     z-index: -2;
-    background-image:url("/umkm-kedungsumur/white_mode.jpeg");
+    background-image: var(--bg-white-img, url("/white_mode.jpeg"));
     background-size:cover;
     background-position:center;
     background-repeat:no-repeat;
@@ -127,7 +127,7 @@ body::after{
 }
 
 body.dark::after{
-    background-image:url("/umkm-kedungsumur/dark_mode.jpeg");
+    background-image: var(--bg-dark-img, url("/dark_mode.jpeg"));
 }
 body::before{
 
@@ -157,6 +157,20 @@ body.dark::before{
   img{max-width:100%; display:block;}
   button{font-family:inherit; cursor:pointer;}
   .wrap{max-width:1180px; margin:0 auto; padding:0 24px;}
+
+.container, .page-content, .detail-container {
+  max-width: 1080px;
+  margin: 0 auto;
+  padding: 0 24px;
+  width: 100%;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .container, .page-content, .detail-container {
+    padding: 0 16px;
+  }
+}
   :focus-visible{outline:3px solid var(--sky); outline-offset:2px;}
 
     body.dark h1,
@@ -397,7 +411,18 @@ body.dark::before{
   /* DETAIL PAGE */
   .detail-hero{position:relative; border-radius:var(--radius); overflow:hidden; aspect-ratio:21/8; margin-bottom:18px;}
   .detail-hero svg{width:100%; height:100%;}
-  .gallery-strip{display:flex; gap:10px; margin-bottom:36px; overflow-x:auto;}
+  .gallery-strip {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 24px;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+  padding-bottom: 4px;
+}
+.gallery-strip::-webkit-scrollbar {
+  display: none;
+}
   .gallery-strip .thumb{width:90px; height:68px; border-radius:8px; overflow:hidden; flex-shrink:0; border:1px solid var(--line);}
   .detail-top{display:flex; justify-content:space-between; align-items:flex-start; gap:20px; flex-wrap:wrap; margin-bottom:8px;}
   .detail-top h1{font-size:2.1rem; font-weight:600;}
@@ -1636,26 +1661,34 @@ body.dark::before{
 .modal-overlay {
   position: fixed;
   inset: 0;
-  z-index: 9999;
-  background: rgba(0, 0, 0, 0.55);
-  backdrop-filter: blur(4px);
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1000000;
+  background: rgba(0, 0, 0, 0.65);
+  backdrop-filter: blur(6px);
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 20px;
+  padding: 24px 16px;
+  overflow-y: auto;
 }
 
 .modal-container {
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: var(--radius);
-  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.4);
   width: 100%;
   max-width: 680px;
-  max-height: 90vh;
-  overflow-y: auto;
+  max-height: min(90vh, 780px);
   display: flex;
   flex-direction: column;
+  position: relative;
+  z-index: 1000001;
+  margin: auto;
+  overflow: hidden;
 }
 
 .modal-container.modal-sm {
@@ -1668,6 +1701,8 @@ body.dark::before{
   align-items: center;
   padding: 18px 24px;
   border-bottom: 1px solid var(--line);
+  background: var(--paper);
+  flex-shrink: 0;
 }
 
 .modal-header h3 {
@@ -1694,11 +1729,21 @@ body.dark::before{
   background: var(--sand);
 }
 
+.modal-body {
+  padding: 24px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
+}
+
 .admin-form {
   padding: 24px;
   display: flex;
   flex-direction: column;
   gap: 20px;
+  overflow-y: auto;
+  flex: 1;
+  min-height: 0;
 }
 
 .form-grid {
@@ -1757,6 +1802,14 @@ body.dark::before{
   padding: 16px 24px;
   border-top: 1px solid var(--line);
   background: var(--paper);
+  flex-shrink: 0;
+}
+
+.admin-form .modal-footer {
+  position: sticky;
+  bottom: -24px;
+  margin: auto -24px -24px -24px;
+  z-index: 10;
 }
 
 .empty-box {
@@ -1771,7 +1824,6 @@ main,
 header,
 footer{
     position:relative;
-    z-index:1;
 }
 
 /* ==========================================================================

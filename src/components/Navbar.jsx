@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from '../../app/providers';
@@ -10,6 +10,8 @@ export default function Navbar() {
   const pathname = usePathname();
   const { dark, toggleDark } = useTheme();
   const [isOpen, setIsOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => setMounted(true), []);
 
   return (
     <header className="nav">
@@ -52,10 +54,10 @@ export default function Navbar() {
             className="icon-btn"
             onClick={toggleDark}
             title="Ganti tampilan"
-            aria-label="Toggle theme"
+            aria-label="Toggle theme" suppressHydrationWarning
             style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            {dark ? <SunIcon /> : <MoonIcon />}
+            {mounted && dark ? <SunIcon /> : <MoonIcon />}
           </button>
 
           {/* HAMBURGER BUTTON */}

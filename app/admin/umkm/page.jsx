@@ -3,6 +3,8 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useData } from '../../../src/context/DataContext';
+import { withBasePath } from '../../../src/utils/basePath';
+import { CategoryIcon } from '../../../src/components/Icons';
 import { PlusIcon, EditIcon, TrashIcon, SearchIcon, XIcon, CheckCircleIcon, PinIcon } from '../../../src/components/Icons';
 
 function AdminUMKMContent() {
@@ -19,6 +21,7 @@ function AdminUMKMContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingMsme, setEditingMsme] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [urlInput, setUrlInput] = useState('');
 
   // Form State
   const emptyForm = {
@@ -31,6 +34,10 @@ function AdminUMKMContent() {
     addr: '',
     hours: '08.00 – 17.00 setiap hari',
     desc: '',
+    history: '',
+    latitude: '',
+    longitude: '',
+    imageUrl: '',
     wa: '',
     phone: '',
     email: '',
@@ -61,6 +68,7 @@ function AdminUMKMContent() {
   const openAddModal = () => {
     setEditingMsme(null);
     setFormData(emptyForm);
+    setUrlInput('');
     setIsModalOpen(true);
   };
 
@@ -76,6 +84,10 @@ function AdminUMKMContent() {
       addr: m.addr || '',
       hours: m.hours || '',
       desc: m.desc || '',
+      history: m.history || '',
+      latitude: m.latitude !== null && m.latitude !== undefined ? m.latitude : '',
+      longitude: m.longitude !== null && m.longitude !== undefined ? m.longitude : '',
+      imageUrl: m.imageUrl || '',
       wa: m.wa || '',
       phone: m.phone || '',
       email: m.email || '',
@@ -85,12 +97,14 @@ function AdminUMKMContent() {
       tiktok: m.tiktok || '',
       certs: Array.isArray(m.certs) ? m.certs.join('\n') : m.certs || ''
     });
+    setUrlInput(m.imageUrl || '');
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingMsme(null);
+    setUrlInput('');
   };
 
   const handleSubmit = (e) => {
@@ -116,6 +130,36 @@ function AdminUMKMContent() {
   const handleDelete = (id) => {
     deleteMsme(id);
     setDeleteConfirmId(null);
+  };
+
+  const handleBannerFileUpload = (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = () => {
+      setFormData((prev) => ({ ...prev, imageUrl: reader.result }));
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
+
+  const handleSetUrlBanner = () => {
+    const trimmed = urlInput.trim();
+    if (!trimmed) return;
+    setFormData((prev) => ({ ...prev, imageUrl: trimmed }));
+  };
+
+  const handleRemoveBanner = () => {
+    setFormData((prev) => ({ ...prev, imageUrl: '' }));
+    setUrlInput('');
+  };
+
+  const getPreviewSrc = (src) => {
+    if (!src) return '';
+    if (src.startsWith('data:') || src.startsWith('http://') || src.startsWith('https://')) {
+      return src;
+    }
+    return withBasePath(src);
   };
 
   // Filtering Logic
@@ -192,6 +236,7 @@ function AdminUMKMContent() {
           <table className="admin-table">
             <thead>
               <tr>
+                <th style={{ width: '64px' }}>Foto</th>
                 <th>ID</th>
                 <th>Nama UMKM & Pemilik</th>
                 <th>Kategori</th>
@@ -205,13 +250,26 @@ function AdminUMKMContent() {
             <tbody>
               {filteredMsmes.length === 0 ? (
                 <tr>
-                  <td colSpan="8" style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--ink-soft)' }}>
+                  <td colSpan="9" style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--ink-soft)' }}>
                     Tidak ada data UMKM yang cocok dengan kriteria pencarian.
                   </td>
                 </tr>
               ) : (
                 filteredMsmes.map((m) => (
                   <tr key={m.id}>
+                    <td>
+                      <div style={{ position: 'relative', width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--line)', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                        {m.imageUrl ? (
+                          <img
+                            src={getPreviewSrc(m.imageUrl)}
+                            alt={m.name}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                          />
+                        ) : (
+                          <CategoryIcon cat={m.cat} style={{ color: 'var(--forest)' }} />
+                        )}
+                      </div>
+                    </td>
                     <td className="mono">#{m.id}</td>
                     <td>
                       <b style={{ color: 'var(--ink)', display: 'block' }}>{m.name}</b>
@@ -268,7 +326,7 @@ function AdminUMKMContent() {
       {/* ADD / EDIT MODAL */}
       {isModalOpen && (
         <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-container" style={{ maxWidth: '680px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{editingMsme ? '✏️ Edit Data UMKM' : '➕ Tambah UMKM Baru'}</h3>
               <button className="modal-close-btn" onClick={closeModal}>
@@ -290,18 +348,18 @@ function AdminUMKMContent() {
                 </div>
 
                 <div className="form-group">
-                  <label>Nama Pemilik *</label>
+                  <label>Nama Pemilik Usaha *</label>
                   <input
                     type="text"
                     required
-                    placeholder="Contoh: Wardi Susanto"
+                    placeholder="Contoh: Pak Yono"
                     value={formData.owner}
                     onChange={(e) => setFormData({ ...formData, owner: e.target.value })}
                   />
                 </div>
 
                 <div className="form-group">
-                  <label>Kategori Sektor</label>
+                  <label>Kategori Usaha</label>
                   <select
                     value={formData.cat}
                     onChange={(e) => setFormData({ ...formData, cat: e.target.value })}
@@ -313,10 +371,22 @@ function AdminUMKMContent() {
                 </div>
 
                 <div className="form-group">
+                  <label>Lokasi Dusun</label>
+                  <select
+                    value={formData.dusun}
+                    onChange={(e) => setFormData({ ...formData, dusun: e.target.value })}
+                  >
+                    {dusunList.map((d) => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="form-group">
                   <label>Tahun Berdiri</label>
                   <input
                     type="number"
-                    placeholder="2019"
+                    placeholder="2015"
                     value={formData.est}
                     onChange={(e) => setFormData({ ...formData, est: e.target.value })}
                   />
@@ -328,8 +398,8 @@ function AdminUMKMContent() {
                     value={formData.status}
                     onChange={(e) => setFormData({ ...formData, status: e.target.value })}
                   >
-                    <option value="active">Aktif Beroperasi</option>
-                    <option value="inactive">Tutup Sementara</option>
+                    <option value="active">✓ Aktif Beroperasi</option>
+                    <option value="inactive">✕ Tutup Sementara</option>
                   </select>
                 </div>
 
@@ -337,14 +407,14 @@ function AdminUMKMContent() {
                   <label>Alamat Lengkap Usaha</label>
                   <input
                     type="text"
-                    placeholder="Jl. Kebun Kopi No. 12, Dusun Mekar"
+                    placeholder="Jl. Raya Desa No. 12, RT 02/RW 01"
                     value={formData.addr}
                     onChange={(e) => setFormData({ ...formData, addr: e.target.value })}
                   />
                 </div>
 
                 <div className="form-group full-width">
-                  <label>Jam Operasional</label>
+                  <label>Jam Operasional Usaha</label>
                   <input
                     type="text"
                     placeholder="07.00 – 20.00 setiap hari"
@@ -363,78 +433,233 @@ function AdminUMKMContent() {
                   />
                 </div>
 
-                <div className="form-group">
-                  <label>Nomor WhatsApp (dengan kode negara)</label>
-                  <input
-                    type="text"
-                    placeholder="6281234567801"
-                    value={formData.wa}
-                    onChange={(e) => setFormData({ ...formData, wa: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Nomor Telepon Kantor / Toko</label>
-                  <input
-                    type="text"
-                    placeholder="0274-556677"
-                    value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Email Usaha</label>
-                  <input
-                    type="email"
-                    placeholder="kontak@desasukamaju.id"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Website</label>
-                  <input
-                    type="text"
-                    placeholder="usahakita.id"
-                    value={formData.web}
-                    onChange={(e) => setFormData({ ...formData, web: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>Instagram Username</label>
-                  <input
-                    type="text"
-                    placeholder="username.ig"
-                    value={formData.ig}
-                    onChange={(e) => setFormData({ ...formData, ig: e.target.value })}
-                  />
-                </div>
-
-                <div className="form-group">
-                  <label>TikTok Username</label>
-                  <input
-                    type="text"
-                    placeholder="username_tiktok"
-                    value={formData.tiktok}
-                    onChange={(e) => setFormData({ ...formData, tiktok: e.target.value })}
-                  />
-                </div>
-
                 <div className="form-group full-width">
-                  <label>Sertifikasi & Izinkan (1 per baris)</label>
+                  <label>Sejarah Singkat Usaha</label>
                   <textarea
-                    rows="2"
-                    placeholder="Sertifikat Halal MUI&#10;Izin Usaha Mikro Kecil (IUMK)"
-                    value={formData.certs}
-                    onChange={(e) => setFormData({ ...formData, certs: e.target.value })}
+                    rows="3"
+                    placeholder="Tuliskan latar belakang berdiri dan sejarah perkembangan usaha..."
+                    value={formData.history}
+                    onChange={(e) => setFormData({ ...formData, history: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Koordinat Latitude (Gps Lintang)</label>
+                  <input
+                    type="number"
+                    step="any"
+                    placeholder="-7.250400"
+                    value={formData.latitude}
+                    onChange={(e) => setFormData({ ...formData, latitude: e.target.value })}
+                  />
+                </div>
+
+                <div className="form-group">
+                  <label>Koordinat Longitude (Gps Bujur)</label>
+                  <input
+                    type="number"
+                    step="any"
+                    placeholder="110.150200"
+                    value={formData.longitude}
+                    onChange={(e) => setFormData({ ...formData, longitude: e.target.value })}
                   />
                 </div>
               </div>
 
-              <div className="modal-footer">
+              {/* BANNER IMAGE MANAGEMENT SECTION */}
+              <div style={{ marginTop: '20px', borderTop: '1px solid var(--line)', paddingTop: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--ink)' }}>
+                    🖼️ Kelola Foto Banner UMKM
+                  </label>
+                  {formData.imageUrl && (
+                    <span style={{ fontSize: '0.78rem', color: 'var(--forest)', fontWeight: 600 }}>
+                      ✓ Banner Terpasang
+                    </span>
+                  )}
+                </div>
+
+                <div style={{ background: 'var(--soil-soft, #fdf8f4)', border: '1px solid rgba(181, 101, 29, 0.2)', padding: '10px 14px', borderRadius: '8px', fontSize: '0.8rem', color: 'var(--ink-soft)', marginBottom: '14px', lineHeight: '1.4' }}>
+                  💡 <b>Informasi:</b> Foto banner ini akan ditampilkan di halaman kartu UMKM beranda, halaman direktori, serta bagian atas profil UMKM.
+                </div>
+
+                {/* DUAL INPUT METHODS */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+                  <div>
+                    <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--ink-soft)', display: 'block', marginBottom: '4px' }}>
+                      1. Unggah File Banner (Lokal)
+                    </label>
+                    <input
+                      type="file"
+                      accept="image/*"
+                      onChange={handleBannerFileUpload}
+                      style={{ fontSize: '0.82rem', width: '100%' }}
+                    />
+                  </div>
+
+                  <div>
+                    <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--ink-soft)', display: 'block', marginBottom: '4px' }}>
+                      2. Input via URL Gambar
+                    </label>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <input
+                        type="text"
+                        placeholder="https://... atau /images/umkm-1.jpg"
+                        value={urlInput}
+                        onChange={(e) => setUrlInput(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleSetUrlBanner(); } }}
+                        style={{ fontSize: '0.82rem', padding: '6px 10px', flex: 1 }}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline"
+                        onClick={handleSetUrlBanner}
+                        style={{ padding: '6px 12px', fontSize: '0.78rem', whiteSpace: 'nowrap' }}
+                      >
+                        Set URL
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* BANNER PREVIEW CARD */}
+                {formData.imageUrl ? (
+                  <div
+                    style={{
+                      position: 'relative',
+                      borderRadius: '8px',
+                      overflow: 'hidden',
+                      border: '2px solid var(--forest, #1E4B3B)',
+                      boxShadow: '0 3px 10px rgba(30, 75, 59, 0.2)',
+                      background: '#fff',
+                      marginTop: '10px'
+                    }}
+                  >
+                    <div style={{ position: 'relative', height: '140px', width: '100%', background: '#f8f9fa' }}>
+                      <img
+                        src={getPreviewSrc(formData.imageUrl)}
+                        alt="Preview Banner UMKM"
+                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                        onError={(e) => { e.target.src = 'https://via.placeholder.com/600x200?text=Banner+Image+Error'; }}
+                      />
+
+                      <span style={{ position: 'absolute', top: '8px', left: '8px', background: 'var(--forest, #1E4B3B)', color: '#fff', fontSize: '0.7rem', fontWeight: 700, padding: '3px 8px', borderRadius: '4px', letterSpacing: '0.02em', boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
+                        ⭐ BANNER AKTIF
+                      </span>
+
+                      <button
+                        type="button"
+                        onClick={handleRemoveBanner}
+                        style={{
+                          position: 'absolute',
+                          top: '8px',
+                          right: '8px',
+                          background: 'rgba(239, 68, 68, 0.9)',
+                          color: '#fff',
+                          border: 'none',
+                          borderRadius: '6px',
+                          padding: '4px 10px',
+                          fontSize: '0.76rem',
+                          fontWeight: 600,
+                          cursor: 'pointer',
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '4px',
+                          boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                        }}
+                        title="Hapus foto banner ini"
+                      >
+                        ✕ Hapus Banner
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '24px', border: '2px dashed var(--line)', borderRadius: '8px', color: 'var(--ink-soft)', fontSize: '0.84rem' }}>
+                    Belum ada banner foto yang dipilih. Unggah file gambar atau masukkan URL di atas.
+                  </div>
+                )}
+              </div>
+
+              {/* CONTACT & SOCIAL MEDIA SECTION */}
+              <div style={{ marginTop: '20px', borderTop: '1px solid var(--line)', paddingTop: '16px' }}>
+                <h4 style={{ fontSize: '0.88rem', fontWeight: 600, color: 'var(--ink)', marginBottom: '12px' }}>
+                  📞 Kontak & Media Sosial Usaha
+                </h4>
+
+                <div className="form-grid">
+                  <div className="form-group">
+                    <label>Nomor WhatsApp (dengan kode negara)</label>
+                    <input
+                      type="text"
+                      placeholder="6281234567801"
+                      value={formData.wa}
+                      onChange={(e) => setFormData({ ...formData, wa: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Nomor Telepon Kantor / Toko</label>
+                    <input
+                      type="text"
+                      placeholder="0274-556677"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Email Usaha</label>
+                    <input
+                      type="email"
+                      placeholder="kontak@desasukamaju.id"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Website</label>
+                    <input
+                      type="text"
+                      placeholder="usahakita.id"
+                      value={formData.web}
+                      onChange={(e) => setFormData({ ...formData, web: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>Instagram Username</label>
+                    <input
+                      type="text"
+                      placeholder="username.ig"
+                      value={formData.ig}
+                      onChange={(e) => setFormData({ ...formData, ig: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group">
+                    <label>TikTok Username</label>
+                    <input
+                      type="text"
+                      placeholder="username_tiktok"
+                      value={formData.tiktok}
+                      onChange={(e) => setFormData({ ...formData, tiktok: e.target.value })}
+                    />
+                  </div>
+
+                  <div className="form-group full-width">
+                    <label>Sertifikasi & Izinkan (1 per baris)</label>
+                    <textarea
+                      rows="2"
+                      placeholder="Sertifikat Halal MUI&#10;Izin Usaha Mikro Kecil (IUMK)"
+                      value={formData.certs}
+                      onChange={(e) => setFormData({ ...formData, certs: e.target.value })}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              <div className="modal-footer" style={{ marginTop: '24px' }}>
                 <button type="button" className="btn btn-outline" onClick={closeModal}>
                   Batal
                 </button>

@@ -10,6 +10,9 @@ import AnimatedCounter from '../src/components/AnimatedCounter';
 import { MSMES, CATEGORIES, PRODUCTS } from '../src/data/msmes';
 import { ArrowIcon, CategoryIcon } from '../src/components/Icons';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export default function Home() {
   const totalUMKM = MSMES.length;
   const totalCats = CATEGORIES.length;

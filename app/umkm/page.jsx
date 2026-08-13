@@ -1,6 +1,9 @@
 import React, { Suspense } from 'react';
 import DirectoryView from '../../src/components/DirectoryView';
 
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
 export const metadata = {
   title: 'Direktori UMKM Desa Sukamaju',
   description: 'Jelajahi, cari, dan filter berbagai usaha mikro, kecil, dan menengah di Desa Sukamaju.',

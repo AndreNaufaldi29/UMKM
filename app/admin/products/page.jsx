@@ -4,6 +4,8 @@ import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { useData } from '../../../src/context/DataContext';
 import { formatRupiah } from '../../../src/utils/formatter';
+import { withBasePath } from '../../../src/utils/basePath';
+import { ProductSVG } from '../../../src/components/DynamicSVGs';
 import { PlusIcon, EditIcon, TrashIcon, SearchIcon, XIcon, CheckCircleIcon, StarIcon } from '../../../src/components/Icons';
 
 function AdminProductsContent() {
@@ -20,6 +22,7 @@ function AdminProductsContent() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingProduct, setEditingProduct] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
+  const [urlInput, setUrlInput] = useState('');
 
   // Form State
   const emptyForm = {
@@ -30,9 +33,8 @@ function AdminProductsContent() {
     unit: 'pcs',
     rating: 5.0,
     isFeatured: false,
-
-    image: "",
-    imagePreview: ""
+    images: [],
+    imagePreviews: []
   };
 
   const [formData, setFormData] = useState(emptyForm);
@@ -58,11 +60,27 @@ function AdminProductsContent() {
       ...emptyForm,
       msmeId: msmes[0]?.id || 1
     });
+    setUrlInput('');
     setIsModalOpen(true);
   };
 
   const openEditModal = (p) => {
     setEditingProduct(p);
+    let existingImages = [];
+    if (Array.isArray(p.images) && p.images.length > 0) {
+      existingImages = p.images;
+    } else if (p.imageUrl) {
+      const trimmed = p.imageUrl.trim();
+      if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+        try {
+          existingImages = JSON.parse(trimmed);
+        } catch (e) {}
+      }
+      if (existingImages.length === 0) {
+        existingImages = trimmed.split(',').map((s) => s.trim()).filter(Boolean);
+      }
+    }
+
     setFormData({
       msmeId: p.msmeId,
       name: p.name || '',
@@ -70,14 +88,18 @@ function AdminProductsContent() {
       price: p.price || 0,
       unit: p.unit || 'pcs',
       rating: p.rating || 5.0,
-      isFeatured: !!p.isFeatured
+      isFeatured: !!p.isFeatured,
+      images: existingImages,
+      imagePreviews: existingImages
     });
+    setUrlInput('');
     setIsModalOpen(true);
   };
 
   const closeModal = () => {
     setIsModalOpen(false);
     setEditingProduct(null);
+    setUrlInput('');
   };
 
   const handleSubmit = (e) => {
@@ -87,10 +109,15 @@ function AdminProductsContent() {
       return;
     }
 
+    const payload = {
+      ...formData,
+      images: formData.images || []
+    };
+
     if (editingProduct) {
-      updateProduct(editingProduct.id, formData);
+      updateProduct(editingProduct.id, payload);
     } else {
-      addProduct(formData.msmeId, formData);
+      addProduct(formData.msmeId, payload);
     }
     closeModal();
   };
@@ -105,21 +132,95 @@ function AdminProductsContent() {
   };
 
   const handleImageChange = (e) => {
-  const file = e.target.files?.[0];
-  if (!file) return;
+    const files = Array.from(e.target.files || []);
+    if (files.length === 0) return;
 
-  const reader = new FileReader();
+    const newPreviews = [];
+    let readCount = 0;
 
-  reader.onload = () => {
-    setFormData(prev => ({
-      ...prev,
-      image: file,
-      imagePreview: reader.result
-    }));
+    files.forEach((file) => {
+      const reader = new FileReader();
+      reader.onload = () => {
+        newPreviews.push(reader.result);
+        readCount++;
+        if (readCount === files.length) {
+          setFormData((prev) => {
+            const updated = [...(prev.images || []), ...newPreviews];
+            return {
+              ...prev,
+              images: updated,
+              imagePreviews: updated
+            };
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
   };
 
-  reader.readAsDataURL(file);
-};
+  const handleAddUrlImage = () => {
+    const trimmed = urlInput.trim();
+    if (!trimmed) return;
+    setFormData((prev) => {
+      const updated = [...(prev.images || []), trimmed];
+      return {
+        ...prev,
+        images: updated,
+        imagePreviews: updated
+      };
+    });
+    setUrlInput('');
+  };
+
+  const removeImagePreview = (index) => {
+    setFormData((prev) => {
+      const updated = (prev.images || []).filter((_, i) => i !== index);
+      return {
+        ...prev,
+        images: updated,
+        imagePreviews: updated
+      };
+    });
+  };
+
+  const setAsPrimaryImage = (index) => {
+    if (index === 0) return;
+    setFormData((prev) => {
+      const list = [...(prev.images || [])];
+      const item = list.splice(index, 1)[0];
+      list.unshift(item);
+      return {
+        ...prev,
+        images: list,
+        imagePreviews: list
+      };
+    });
+  };
+
+  const moveImage = (index, direction) => {
+    setFormData((prev) => {
+      const list = [...(prev.images || [])];
+      const targetIndex = index + direction;
+      if (targetIndex < 0 || targetIndex >= list.length) return prev;
+      const temp = list[index];
+      list[index] = list[targetIndex];
+      list[targetIndex] = temp;
+      return {
+        ...prev,
+        images: list,
+        imagePreviews: list
+      };
+    });
+  };
+
+  const getPreviewSrc = (src) => {
+    if (!src) return '';
+    if (src.startsWith('data:') || src.startsWith('http://') || src.startsWith('https://')) {
+      return src;
+    }
+    return withBasePath(src);
+  };
 
   // Filter logic
   const filteredProducts = products.filter((p) => {
@@ -143,7 +244,7 @@ function AdminProductsContent() {
       <div className="admin-page-header">
         <div>
           <h2>🛍️ Kelola Produk UMKM</h2>
-          <p className="sub">Atur barang & jasa unggulan, harga, rating, serta status produk unggulan</p>
+          <p className="sub">Atur barang & jasa unggulan, harga, rating, galeri foto produk, serta status produk unggulan</p>
         </div>
         <button className="btn btn-product" onClick={openAddModal}>
           <PlusIcon /> Tambah Produk Baru
@@ -197,6 +298,7 @@ function AdminProductsContent() {
           <table className="admin-table">
             <thead>
               <tr>
+                <th style={{ width: '64px' }}>Foto</th>
                 <th>ID</th>
                 <th>Nama Produk</th>
                 <th>Toko UMKM</th>
@@ -210,66 +312,100 @@ function AdminProductsContent() {
             <tbody>
               {filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan="8" style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--ink-soft)' }}>
+                  <td colSpan="9" style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--ink-soft)' }}>
                     Tidak ada produk yang cocok dengan kriteria pencarian.
                   </td>
                 </tr>
               ) : (
-                filteredProducts.map((p) => (
-                  <tr key={p.id}>
-                    <td className="mono" style={{ fontSize: '0.75rem' }}>{p.id}</td>
-                    <td>
-                      <b style={{ color: 'var(--ink)', display: 'block' }}>{p.name}</b>
-                      <span className="text-muted text-ellipsis" style={{ fontSize: '0.76rem', maxWidth: '240px', display: 'block' }}>
-                        {p.desc}
-                      </span>
-                    </td>
-                    <td>
-                      <b>{p.msmeName}</b>
-                      <div className="text-muted" style={{ fontSize: '0.75rem' }}>{p.dusun}</div>
-                    </td>
-                    <td>
-                      <span className="badge">{p.cat}</span>
-                    </td>
-                    <td className="mono" style={{ fontWeight: 700, color: 'var(--soil)' }}>
-                      {formatRupiah(p.price)}
-                      {p.unit && <span className="text-muted" style={{ fontSize: '0.72rem' }}>/{p.unit}</span>}
-                    </td>
-                    <td>
-                      <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                        <StarIcon style={{ color: '#FBBF24', width: '13px', height: '13px' }} />
-                        <b>{p.rating}</b>
-                      </span>
-                    </td>
-                    <td>
-                      <button
-                        className={`status-pill btn-toggle ${p.isFeatured ? 'active' : 'inactive'}`}
-                        onClick={() => handleToggleFeatured(p)}
-                        title="Klik untuk mengubah status unggulan"
-                      >
-                        {p.isFeatured ? '⭐ Ya' : 'Tidak'}
-                      </button>
-                    </td>
-                    <td style={{ textAlign: 'right' }}>
-                      <div style={{ display: 'inline-flex', gap: '6px' }}>
+                filteredProducts.map((p) => {
+                  let imgList = [];
+                  if (Array.isArray(p.images) && p.images.length > 0) {
+                    imgList = p.images;
+                  } else if (p.imageUrl) {
+                    const trimmed = p.imageUrl.trim();
+                    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+                      try { imgList = JSON.parse(trimmed); } catch (e) {}
+                    }
+                    if (imgList.length === 0) {
+                      imgList = trimmed.split(',').map(s => s.trim()).filter(Boolean);
+                    }
+                  }
+                  const coverImg = imgList[0];
+
+                  return (
+                    <tr key={p.id}>
+                      <td>
+                        <div style={{ position: 'relative', width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--line)', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                          {coverImg ? (
+                            <img
+                              src={getPreviewSrc(coverImg)}
+                              alt={p.name}
+                              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            />
+                          ) : (
+                            <ProductSVG cat={p.cat} seed={p.name.length} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                          )}
+                          {imgList.length > 1 && (
+                            <span style={{ position: 'absolute', bottom: '2px', right: '2px', background: 'rgba(0,0,0,0.75)', color: '#fff', fontSize: '0.62rem', padding: '1px 4px', borderRadius: '4px', fontFamily: 'IBM Plex Mono, monospace', fontWeight: 600 }}>
+                              {imgList.length}
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="mono" style={{ fontSize: '0.75rem' }}>{p.id}</td>
+                      <td>
+                        <b style={{ color: 'var(--ink)', display: 'block' }}>{p.name}</b>
+                        <span className="text-muted text-ellipsis" style={{ fontSize: '0.76rem', maxWidth: '240px', display: 'block' }}>
+                          {p.desc}
+                        </span>
+                      </td>
+                      <td>
+                        <b>{p.msmeName}</b>
+                        <div className="text-muted" style={{ fontSize: '0.75rem' }}>{p.dusun}</div>
+                      </td>
+                      <td>
+                        <span className="badge">{p.cat}</span>
+                      </td>
+                      <td className="mono" style={{ fontWeight: 700, color: 'var(--soil)' }}>
+                        {formatRupiah(p.price)}
+                        {p.unit && <span className="text-muted" style={{ fontSize: '0.72rem' }}>/{p.unit}</span>}
+                      </td>
+                      <td>
+                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
+                          <StarIcon style={{ color: '#FBBF24', width: '13px', height: '13px' }} />
+                          <b>{p.rating}</b>
+                        </span>
+                      </td>
+                      <td>
                         <button
-                          className="btn btn-outline btn-xs"
-                          onClick={() => openEditModal(p)}
-                          title="Edit Produk"
+                          className={`status-pill btn-toggle ${p.isFeatured ? 'active' : 'inactive'}`}
+                          onClick={() => handleToggleFeatured(p)}
+                          title="Klik untuk mengubah status unggulan"
                         >
-                          <EditIcon width="13" height="13" /> Edit
+                          {p.isFeatured ? '⭐ Ya' : 'Tidak'}
                         </button>
-                        <button
-                          className="btn btn-outline-danger btn-xs"
-                          onClick={() => setDeleteConfirmId(p.id)}
-                          title="Hapus Produk"
-                        >
-                          <TrashIcon width="13" height="13" />
-                        </button>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                      </td>
+                      <td style={{ textAlign: 'right' }}>
+                        <div style={{ display: 'inline-flex', gap: '6px' }}>
+                          <button
+                            className="btn btn-outline btn-xs"
+                            onClick={() => openEditModal(p)}
+                            title="Edit Produk"
+                          >
+                            <EditIcon width="13" height="13" /> Edit
+                          </button>
+                          <button
+                            className="btn btn-outline-danger btn-xs"
+                            onClick={() => setDeleteConfirmId(p.id)}
+                            title="Hapus Produk"
+                          >
+                            <TrashIcon width="13" height="13" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })
               )}
             </tbody>
           </table>
@@ -279,7 +415,7 @@ function AdminProductsContent() {
       {/* ADD / EDIT MODAL */}
       {isModalOpen && (
         <div className="modal-overlay" onClick={closeModal}>
-          <div className="modal-container" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-container" style={{ maxWidth: '680px' }} onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <h3>{editingProduct ? '✏️ Edit Produk' : '➕ Tambah Produk Baru'}</h3>
               <button className="modal-close-btn" onClick={closeModal}>
@@ -326,7 +462,7 @@ function AdminProductsContent() {
                 </div>
 
                 <div className="form-group">
-                  <label>Satuan Satuan</label>
+                  <label>Satuan Produk</label>
                   <input
                     type="text"
                     placeholder="pack / pcs / bungkus / lembar"
@@ -356,26 +492,171 @@ function AdminProductsContent() {
                   />
                 </div>
               </div>
-              <div className="form-group full">
-                  <label>Gambar Produk *</label>
 
-                  <input
+              {/* IMAGE MANAGEMENT SECTION */}
+              <div style={{ marginTop: '20px', borderTop: '1px solid var(--line)', paddingTop: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--ink)' }}>
+                    🖼️ Galeri & Kelola Foto Produk
+                  </label>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--ink-soft)' }}>
+                    Total: <b>{formData.images?.length || 0}</b> Foto
+                  </span>
+                </div>
+
+                <div style={{ background: 'var(--soil-soft, #fdf8f4)', border: '1px solid rgba(181, 101, 29, 0.2)', padding: '10px 14px', borderRadius: '8px', fontSize: '0.8rem', color: 'var(--ink-soft)', marginBottom: '14px', lineHeight: '1.4' }}>
+                  💡 <b>Informasi:</b> Foto di urutan pertama (paling kiri/atas) akan digunakan sebagai <b>Foto Utama (Sampul)</b> produk pada katalog. Anda dapat mengubah urutan foto atau menetapkan foto utama menggunakan tombol di bawah.
+                </div>
+
+                {/* DUAL INPUT METHODS */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+                  <div>
+                    <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--ink-soft)', display: 'block', marginBottom: '4px' }}>
+                      1. Unggah File Foto (Lokal)
+                    </label>
+                    <input
                       type="file"
                       accept="image/*"
+                      multiple
                       onChange={handleImageChange}
-                  />
+                      style={{ fontSize: '0.82rem', width: '100%' }}
+                    />
+                  </div>
 
-                  {formData.imagePreview && (
-                      <div className="product-preview">
+                  <div>
+                    <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--ink-soft)', display: 'block', marginBottom: '4px' }}>
+                      2. Tambah via URL Gambar
+                    </label>
+                    <div style={{ display: 'flex', gap: '6px' }}>
+                      <input
+                        type="text"
+                        placeholder="https://... atau /uploads/foto.jpg"
+                        value={urlInput}
+                        onChange={(e) => setUrlInput(e.target.value)}
+                        onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); handleAddUrlImage(); } }}
+                        style={{ fontSize: '0.82rem', padding: '6px 10px', flex: 1 }}
+                      />
+                      <button
+                        type="button"
+                        className="btn btn-outline"
+                        onClick={handleAddUrlImage}
+                        style={{ padding: '6px 12px', fontSize: '0.78rem', whiteSpace: 'nowrap' }}
+                      >
+                        + Tambah
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                {/* IMAGES GRID & CARDS */}
+                {formData.images && formData.images.length > 0 ? (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: '12px', marginTop: '10px' }}>
+                    {formData.images.map((img, idx) => (
+                      <div
+                        key={idx}
+                        style={{
+                          position: 'relative',
+                          borderRadius: '8px',
+                          overflow: 'hidden',
+                          border: idx === 0 ? '2px solid var(--forest, #1E4B3B)' : '1px solid var(--line)',
+                          boxShadow: idx === 0 ? '0 3px 10px rgba(30, 75, 59, 0.25)' : 'none',
+                          background: '#fff',
+                          display: 'flex',
+                          flexDirection: 'column'
+                        }}
+                      >
+                        {/* IMAGE PREVIEW AREA */}
+                        <div style={{ position: 'relative', height: '95px', width: '100%', background: '#f8f9fa' }}>
                           <img
-                            src={formData.imagePreview}
-                            alt="Preview Produk"
+                            src={getPreviewSrc(img)}
+                            alt={`Foto ${idx + 1}`}
+                            style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                            onError={(e) => { e.target.src = 'https://via.placeholder.com/150?text=Error'; }}
                           />
+
+                          {/* COVER BADGE OR INDEX BADGE */}
+                          {idx === 0 ? (
+                            <span style={{ position: 'absolute', top: '4px', left: '4px', background: 'var(--forest, #1E4B3B)', color: '#fff', fontSize: '0.66rem', fontWeight: 700, padding: '2px 6px', borderRadius: '4px', letterSpacing: '0.02em', boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }}>
+                              ⭐ UTAMA
+                            </span>
+                          ) : (
+                            <span style={{ position: 'absolute', top: '4px', left: '4px', background: 'rgba(0,0,0,0.65)', color: '#fff', fontSize: '0.66rem', fontWeight: 600, padding: '2px 5px', borderRadius: '4px', fontFamily: 'IBM Plex Mono, monospace' }}>
+                              #{idx + 1}
+                            </span>
+                          )}
+
+                          {/* DELETE BUTTON */}
+                          <button
+                            type="button"
+                            onClick={() => removeImagePreview(idx)}
+                            style={{
+                              position: 'absolute',
+                              top: '4px',
+                              right: '4px',
+                              background: 'rgba(239, 68, 68, 0.9)',
+                              color: '#fff',
+                              border: 'none',
+                              borderRadius: '50%',
+                              width: '20px',
+                              height: '20px',
+                              fontSize: '11px',
+                              cursor: 'pointer',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              boxShadow: '0 2px 4px rgba(0,0,0,0.2)'
+                            }}
+                            title="Hapus foto ini"
+                          >
+                            ✕
+                          </button>
+                        </div>
+
+                        {/* ACTION TOOLBAR UNDER IMAGE */}
+                        <div style={{ padding: '6px 8px', background: '#fafafa', borderTop: '1px solid var(--line)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: '4px' }}>
+                          <div style={{ display: 'flex', gap: '2px' }}>
+                            <button
+                              type="button"
+                              disabled={idx === 0}
+                              onClick={() => moveImage(idx, -1)}
+                              style={{ padding: '2px 6px', fontSize: '0.72rem', borderRadius: '4px', border: '1px solid var(--line)', background: idx === 0 ? '#eee' : '#fff', cursor: idx === 0 ? 'not-allowed' : 'pointer' }}
+                              title="Geser ke kiri / naikkan urutan"
+                            >
+                              ⬅️
+                            </button>
+                            <button
+                              type="button"
+                              disabled={idx === formData.images.length - 1}
+                              onClick={() => moveImage(idx, 1)}
+                              style={{ padding: '2px 6px', fontSize: '0.72rem', borderRadius: '4px', border: '1px solid var(--line)', background: idx === formData.images.length - 1 ? '#eee' : '#fff', cursor: idx === formData.images.length - 1 ? 'not-allowed' : 'pointer' }}
+                              title="Geser ke kanan / turunkan urutan"
+                            >
+                              ➡️
+                            </button>
+                          </div>
+
+                          {idx !== 0 && (
+                            <button
+                              type="button"
+                              onClick={() => setAsPrimaryImage(idx)}
+                              style={{ padding: '2px 6px', fontSize: '0.68rem', fontWeight: 600, color: 'var(--forest, #1E4B3B)', borderRadius: '4px', border: '1px solid var(--forest, #1E4B3B)', background: '#fff', cursor: 'pointer' }}
+                              title="Jadikan Foto Utama"
+                            >
+                              ⭐ Utama
+                            </button>
+                          )}
+                        </div>
                       </div>
-)}
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ textAlign: 'center', padding: '20px', border: '2px dashed var(--line)', borderRadius: '8px', color: 'var(--ink-soft)', fontSize: '0.84rem' }}>
+                    Belum ada foto yang ditambahkan. Unggah file foto atau masukkan URL gambar di atas.
+                  </div>
+                )}
               </div>
 
-              <div className="modal-footer">
+              <div className="modal-footer" style={{ marginTop: '24px' }}>
                 <button type="button" className="btn btn-outline" onClick={closeModal}>
                   Batal
                 </button>

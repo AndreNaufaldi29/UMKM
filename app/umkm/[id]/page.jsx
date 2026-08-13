@@ -1,12 +1,13 @@
+import { withBasePath } from '../../../src/utils/basePath';
 import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
+import prisma from '@/lib/db';
 import { MSMES } from '../../../src/data/msmes';
-import { PhotoSVG, ProductSVG } from '../../../src/components/DynamicSVGs';
+import { PhotoSVG } from '../../../src/components/DynamicSVGs';
 import DetailActions from '../../../src/components/DetailActions';
 import WAFloatButton from '../../../src/components/WAFloatButton';
 import ProductCard from '../../../src/components/ProductCard';
-import { formatRupiah } from '../../../src/utils/formatter';
 import {
   PinIcon,
   CheckIcon,
@@ -19,175 +20,304 @@ import {
   FbIcon,
   IgIcon,
   TiktokIcon,
+  ClockIcon,
+  UserIcon,
+  CalendarIcon,
+  ShoppingBagIcon
 } from '../../../src/components/Icons';
+
+export const dynamic = 'force-dynamic';
+export const revalidate = 0;
+
+async function getUmkmDetail(id) {
+  const umkmId = parseInt(id, 10);
+  if (isNaN(umkmId)) return null;
+
+  try {
+    const u = await prisma.umkm.findUnique({
+      where: { id: umkmId },
+      include: {
+        category: true,
+        dusun: true,
+        certifications: true,
+        products: true
+      }
+    });
+
+    if (!u) return null;
+
+    return {
+      id: u.id,
+      name: u.name,
+      owner: u.owner,
+      cat: u.category ? u.category.name : 'Lainnya',
+      dusun: u.dusun ? u.dusun.name : 'Desa',
+      est: u.est,
+      status: u.status,
+      addr: u.addr,
+      hours: u.hours || '',
+      desc: u.desc,
+      history: u.history || '',
+      latitude: u.latitude ?? null,
+      longitude: u.longitude ?? null,
+      imageUrl: u.imageUrl || '',
+      wa: u.wa,
+      phone: u.phone,
+      email: u.email,
+      web: u.web,
+      fb: u.fb,
+      ig: u.ig,
+      tiktok: u.tiktok,
+      certs: u.certifications.map((c) => c.certName),
+      products: u.products.map((p) => {
+        let imageList = [];
+        if (p.imageUrl) {
+          const trimmed = p.imageUrl.trim();
+          if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+            try {
+              imageList = JSON.parse(trimmed);
+            } catch (e) {}
+          }
+          if (imageList.length === 0) {
+            imageList = trimmed.split(',').map((s) => s.trim()).filter(Boolean);
+          }
+        }
+        return {
+          id: p.id,
+          name: p.name,
+          desc: p.desc,
+          price: p.price,
+          unit: p.unit,
+          rating: p.rating,
+          sales: p.sales,
+          views: p.views,
+          isFeatured: p.isFeatured,
+          imageUrl: p.imageUrl || '',
+          images: imageList
+        };
+      })
+    };
+  } catch (error) {
+    console.error('Error fetching UMKM detail from DB:', error);
+    return MSMES.find((x) => x.id === umkmId) || null;
+  }
+}
 
 export async function generateMetadata({ params }) {
   const { id } = await params;
-  const m = MSMES.find((x) => x.id === Number(id));
+  const m = await getUmkmDetail(id);
   if (!m) {
     return {
-      title: 'UMKM Tidak Ditemukan - Desa Sukamaju',
-      description: 'Detail profil usaha tidak ditemukan.',
+      title: 'UMKM Tidak Ditemukan - Kedungsumur'
     };
   }
   return {
-    title: `${m.name} - Katalog UMKM Desa Sukamaju`,
-    description: m.desc,
+    title: `${m.name} - UMKM Desa Kedungsumur`,
+    description: m.desc
   };
 }
 
-export default async function DetailPage({ params }) {
+export default async function UMKMDetailPage({ params }) {
   const { id } = await params;
-  const m = MSMES.find((x) => x.id === Number(id));
+  const m = await getUmkmDetail(id);
 
   if (!m) {
     notFound();
   }
 
-  const gallery = [m.id, m.id + 10, m.id + 20, m.id + 30];
-
   const contacts = [
-    m.wa && { ic: 'wa', lbl: 'WhatsApp', val: '+' + m.wa, href: `https://wa.me/${m.wa}` },
-    m.phone && { ic: 'phone', lbl: 'Telepon', val: m.phone },
-    m.email && { ic: 'email', lbl: 'Email', val: m.email, href: `mailto:${m.email}` },
-    m.web && { ic: 'web', lbl: 'Website', val: m.web, href: m.web.startsWith('http') ? m.web : `https://${m.web}` },
-    m.fb && { ic: 'fb', lbl: 'Facebook', val: m.fb, href: `https://facebook.com/${m.fb}` },
-    m.ig && { ic: 'ig', lbl: 'Instagram', val: '@' + m.ig, href: `https://instagram.com/${m.ig}` },
-    m.tiktok && { ic: 'tiktok', lbl: 'TikTok', val: '@' + m.tiktok, href: `https://tiktok.com/@${m.tiktok}` },
-  ].filter(Boolean);
+    { ic: 'wa', val: m.wa, href: m.wa ? `https://wa.me/${m.wa}` : null, lbl: 'WhatsApp' },
+    { ic: 'phone', val: m.phone, href: m.phone ? `tel:${m.phone}` : null, lbl: 'Telepon' },
+    { ic: 'email', val: m.email, href: m.email ? `mailto:${m.email}` : null, lbl: 'Email' },
+    { ic: 'web', val: m.web, href: m.web ? (m.web.startsWith('http') ? m.web : `https://${m.web}`) : null, lbl: 'Website' },
+    { ic: 'ig', val: m.ig ? `@${m.ig.replace('@', '')}` : '', href: m.ig ? `https://instagram.com/${m.ig.replace('@', '')}` : null, lbl: 'Instagram' },
+    { ic: 'tiktok', val: m.tiktok ? `@${m.tiktok.replace('@', '')}` : '', href: m.tiktok ? `https://tiktok.com/@${m.tiktok.replace('@', '')}` : null, lbl: 'TikTok' },
+    { ic: 'fb', val: m.fb, href: m.fb ? `https://facebook.com/${m.fb}` : null, lbl: 'Facebook' },
+  ].filter((c) => c.val);
 
-  const getContactIcon = (icType) => {
-    switch (icType) {
-      case 'wa':
-      case 'phone':
-        return <PhoneIcon />;
-      case 'email':
-        return <MailIcon />;
-      case 'web':
-        return <GlobeIcon />;
-      case 'fb':
-        return <FbIcon />;
-      case 'ig':
-        return <IgIcon />;
-      case 'tiktok':
-        return <TiktokIcon />;
-      default:
-        return null;
+  const getContactIcon = (ic) => {
+    switch (ic) {
+      case 'wa': return <PhoneIcon />;
+      case 'phone': return <PhoneIcon />;
+      case 'email': return <MailIcon />;
+      case 'web': return <GlobeIcon />;
+      case 'ig': return <IgIcon />;
+      case 'tiktok': return <TiktokIcon />;
+      case 'fb': return <FbIcon />;
+      default: return null;
     }
   };
 
+  const lat = m.latitude !== null && m.latitude !== undefined ? m.latitude : (-7.2504 - (m.id * 0.0011)).toFixed(6);
+  const lng = m.longitude !== null && m.longitude !== undefined ? m.longitude : (110.1502 + (m.id * 0.0013)).toFixed(6);
+
   return (
-    <main>
+    <main className="container page-content detail-container">
       {/* BREADCRUMB */}
-      <div className="wrap reveal reveal-left">
-        <div className="breadcrumb">
-          <Link href="/">Beranda</Link>
-          <span className="sep">/</span>
-          <Link href="/umkm">UMKM Desa</Link>
-          <span className="sep">/</span>
-          <span className="current">{m.name}</span>
+      <nav className="breadcrumb reveal" aria-label="Breadcrumb">
+        <Link href="/">Beranda</Link>
+        <span className="sep">/</span>
+        <Link href="/umkm">Direktori UMKM</Link>
+        <span className="sep">/</span>
+        <span className="current">{m.name}</span>
+      </nav>
+
+      {/* HERO BANNER & PROFILES */}
+      <div 
+        className="panel detail-hero-panel reveal reveal-scale" 
+        style={{ 
+          padding: 0, 
+          overflow: 'hidden', 
+          borderRadius: 'var(--radius)', 
+          position: 'relative', 
+          background: 'var(--card-bg)',
+          border: '1px solid var(--line)'
+        }}
+      >
+        {/* BANNER PHOTO CONTAINER */}
+        <div style={{ position: 'relative', width: '100%', height: '320px', background: '#2D3748' }}>
+          {m.imageUrl ? (
+            <img
+              src={withBasePath(m.imageUrl)}
+              alt={m.name}
+              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+            />
+          ) : (
+            <PhotoSVG cat={m.cat} seed={m.id} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+          )}
+
+          {/* GRADIENT OVERLAY */}
+          <div 
+            style={{ 
+              position: 'absolute', 
+              inset: 0, 
+              background: 'linear-gradient(to top, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.4) 60%, transparent 100%)', 
+              display: 'flex', 
+              flexDirection: 'column', 
+              justifyContent: 'flex-end', 
+              padding: '24px 28px' 
+            }}
+          >
+            <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
+              <span className="badge" style={{ background: 'var(--soil)', color: '#fff', border: 'none', fontWeight: 700 }}>
+                <CategoryIcon cat={m.cat} /> {m.cat}
+              </span>
+              <span className="badge" style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(4px)', color: '#fff', border: 'none' }}>
+                <PinIcon width="12" height="12" /> {m.dusun}
+              </span>
+              <span className="badge" style={{ background: m.status === 'inactive' ? 'rgba(239,68,68,0.85)' : 'rgba(34,197,94,0.85)', color: '#fff', border: 'none' }}>
+                {m.status === 'inactive' ? '✕ Tutup Sementara' : '✓ Aktif Beroperasi'}
+              </span>
+            </div>
+
+            <h1 style={{ color: '#fff', fontSize: '2.1rem', fontWeight: 700, margin: '4px 0 8px', textShadow: '0 2px 6px rgba(0,0,0,0.6)', lineHeight: '1.2' }}>
+              {m.name}
+            </h1>
+
+            <p style={{ margin: 0, color: 'rgba(255,255,255,0.92)', fontSize: '0.96rem', display: 'flex', gap: '16px', flexWrap: 'wrap', alignItems: 'center' }}>
+              <span>Pemilik: <b>{m.owner}</b></span>
+              <span>•</span>
+              <span>Berdiri Sejak: <b>{m.est}</b></span>
+            </p>
+          </div>
+        </div>
+
+        {/* HERO TOOLBAR & QUICK STATS */}
+        <div 
+          style={{ 
+            padding: '16px 28px', 
+            background: 'var(--card-bg)', 
+            borderTop: '1px solid var(--line)', 
+            display: 'flex', 
+            justifyContent: 'space-between', 
+            alignItems: 'center', 
+            flexWrap: 'wrap', 
+            gap: '16px' 
+          }}
+        >
+          <div style={{ display: 'flex', gap: '20px', alignItems: 'center', flexWrap: 'wrap' }}>
+            <div style={{ fontSize: '0.86rem', color: 'var(--ink-soft)' }}>
+              <span style={{ display: 'block', fontSize: '0.72rem', textTransform: 'uppercase', letterSpacing: '0.04em' }}>Alamat Utama</span>
+              <b style={{ color: 'var(--ink)' }}>{m.addr}</b>
+            </div>
+          </div>
+
+          <DetailActions name={m.name} wa={m.wa} />
         </div>
       </div>
 
-      <div className="wrap section" style={{ paddingTop: '8px' }}>
-        {/* HERO IMAGE */}
-        <div className="detail-hero reveal reveal-scale">
-          <PhotoSVG cat={m.cat} seed={m.id} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-        </div>
+      {/* DETAIL LAYOUT: MAIN + SIDEBAR */}
+      <div className="detail-layout" style={{ marginTop: '28px' }}>
+        {/* MAIN COLUMN */}
+        <div className="detail-main">
+          {/* PROFILE DESCRIPTION */}
+          <div className="panel reveal">
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--ink)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              🏪 Profil Usaha
+            </h3>
+            <p style={{ fontSize: '1.02rem', color: 'var(--ink)', lineHeight: '1.7', margin: 0 }}>
+              {m.desc}
+            </p>
 
-        {/* GALLERY STRIP */}
-        <div className="gallery-strip reveal reveal-scale">
-          {gallery.map((g, index) => (
-            <div key={index} className="thumb">
-              <PhotoSVG cat={m.cat} seed={g} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            </div>
-          ))}
-        </div>
-
-        {/* TOP META & ACTION BUTTONS */}
-        <div className="detail-top reveal reveal-left">
-          <div>
-            <h1>{m.name}</h1>
-            <div className="detail-meta">
-              <Link href={`/products?cat=${encodeURIComponent(m.cat)}`} className="badge" style={{ cursor: 'pointer' }}>
-                <CategoryIcon cat={m.cat} />
-                <span style={{ marginLeft: '6px' }}>{m.cat}</span>
-              </Link>
-              <span className="badge sky">
-                <PinIcon />
-                <span style={{ marginLeft: '6px' }}>{m.dusun}</span>
-              </span>
-              <span className="badge soil">
-                <CheckIcon />
-                <span style={{ marginLeft: '6px' }}>{m.status === 'inactive' ? 'Tidak Aktif' : 'Aktif Beroperasi'}</span>
-              </span>
-            </div>
-          </div>
-          <DetailActions name={m.name} wa={m.wa} />
-        </div>
-
-        {/* MAIN PANEL AND SIDEBAR */}
-        <div className="detail-layout" style={{ marginTop: '20px' }}>
-          <div className="reveal reveal-left">
-            {/* ABOUT */}
-            <div className="panel">
-              <h3>Tentang Usaha</h3>
-              <p>{m.desc}</p>
-              <div style={{ marginTop: '16px' }}>
-                <div className="info-row">
-                  <span className="k">Pemilik</span>
-                  <span className="v">{m.owner}</span>
-                </div>
-                <div className="info-row">
-                  <span className="k">Tahun Berdiri</span>
-                  <span className="v mono">{m.est}</span>
-                </div>
-                {m.hours.includes('–') ? (
-                  <>
-                    <div className="info-row">
-                      <span className="k">Jam Buka</span>
-                      <span className="v">{m.hours.split('–')[0].trim()}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="k">Jam Tutup</span>
-                      <span className="v">{m.hours.split('–')[1].trim()}</span>
-                    </div>
-                  </>
-                ) : m.hours.includes('/') ? (
-                  <>
-                    <div className="info-row">
-                      <span className="k">Buka (Check-in)</span>
-                      <span className="v">{m.hours.split('/')[0].replace('Check-in', '').trim()}</span>
-                    </div>
-                    <div className="info-row">
-                      <span className="k">Tutup (Check-out)</span>
-                      <span className="v">{m.hours.split('/')[1].replace('Check-out', '').trim()}</span>
-                    </div>
-                  </>
-                ) : (
-                  <div className="info-row">
-                    <span className="k">Status Jam Operasional</span>
-                    <span className="v">{m.hours}</span>
-                  </div>
-                )}
-                <div className="info-row">
-                  <span className="k">Status</span>
-                  <span className="v">{m.status === 'inactive' ? 'Tidak Aktif' : 'Aktif'}</span>
-                </div>
+            <div className="info-grid" style={{ marginTop: '24px', borderTop: '1px solid var(--line)', paddingTop: '16px' }}>
+              <div className="info-row">
+                <span className="k" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <UserIcon width="14" height="14" /> Nama Pemilik Usaha
+                </span>
+                <span className="v">{m.owner}</span>
+              </div>
+              <div className="info-row">
+                <span className="k" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <CategoryIcon cat={m.cat} /> Kategori Usaha
+                </span>
+                <span className="v">{m.cat}</span>
+              </div>
+              <div className="info-row">
+                <span className="k" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <PinIcon width="14" height="14" /> Lokasi Dusun
+                </span>
+                <span className="v">{m.dusun}</span>
+              </div>
+              <div className="info-row">
+                <span className="k" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <CalendarIcon width="14" height="14" /> Tahun Berdiri
+                </span>
+                <span className="v">{m.est}</span>
+              </div>
+              <div className="info-row">
+                <span className="k" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+                  <ClockIcon width="14" height="14" /> Jam Operasional
+                </span>
+                <span className="v">{m.hours || '08.00 – 17.00 setiap hari'}</span>
+              </div>
+              <div className="info-row">
+                <span className="k">Status Operasional</span>
+                <span className="v" style={{ color: m.status === 'inactive' ? 'var(--red, #ef4444)' : 'var(--forest)' }}>
+                  {m.status === 'inactive' ? 'Tutup Sementara' : 'Aktif Beroperasi'}
+                </span>
               </div>
             </div>
+          </div>
 
-            {/* BRIEF HISTORY */}
-            <div className="panel">
-              <h3>Sejarah Singkat</h3>
-              <p style={{ color: 'var(--ink-soft)', fontSize: '0.94rem', lineHeight: '1.6' }}>
-                {`Didirikan oleh ${m.owner} pada tahun ${m.est}, ${m.name} bermula dari industri rumah tangga kecil yang didasari keinginan luhur untuk memajukan potensi daerah. Berkat konsistensi dalam mempertahankan mutu produk ${m.cat} pilihan, kini usaha ini telah berkembang pesat sebagai salah satu penyedia produk lokal tepercaya di wilayah ${m.dusun}, Desa Sukamaju, sekaligus berkontribusi aktif dalam meningkatkan taraf hidup warga dan memberdayakan para pemuda desa.`}
-              </p>
+          {/* BRIEF HISTORY */}
+          <div className="panel reveal">
+            <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--ink)', marginBottom: '14px' }}>
+              📖 Sejarah Singkat Usaha
+            </h3>
+            <p style={{ color: 'var(--ink-soft)', fontSize: '0.95rem', lineHeight: '1.7', margin: 0 }}>
+              {m.history || `Didirikan oleh ${m.owner} pada tahun ${m.est}, ${m.name} bermula dari industri rumah tangga kecil yang didasari keinginan luhur untuk memajukan potensi daerah. Berkat konsistensi dalam mempertahankan mutu produk ${m.cat} pilihan, kini usaha ini telah berkembang pesat sebagai salah satu penyedia produk lokal tepercaya di wilayah ${m.dusun}, Desa Sukamaju, sekaligus berkontribusi aktif dalam meningkatkan taraf hidup warga dan memberdayakan para pemuda desa.`}
+            </p>
+          </div>
+
+          {/* PRODUCTS CATALOG */}
+          <div className="panel reveal">
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '18px' }}>
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--ink)', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <ShoppingBagIcon width="18" height="18" /> Katalog Produk ({m.products?.length || 0})
+              </h3>
             </div>
 
-            {/* PRODUCTS */}
-            <div className="panel">
-              <h3>Daftar Produk</h3>
+            {m.products && m.products.length > 0 ? (
               <div className="products-grid reveal-stagger">
                 {m.products.map((p, i) => (
                   <ProductCard 
@@ -204,116 +334,132 @@ export default async function DetailPage({ params }) {
                   />
                 ))}
               </div>
-            </div>
-
-            {/* CERTS & AWARDS */}
-            {m.certs && m.certs.length > 0 && (
-              <div className="panel">
-                <h3>
-                  <AwardIcon style={{ marginRight: '8px' }} /> Sertifikasi & Penghargaan
-                </h3>
-                <div className="cert-list">
-                  {m.certs.map((c, index) => (
-                    <div className="cert-item" key={index}>
-                      <CheckIcon style={{ color: 'var(--forest-light)' }} />
-                      <span>{c}</span>
-                    </div>
-                  ))}
-                </div>
+            ) : (
+              <div style={{ textAlign: 'center', padding: '32px 20px', border: '1px dashed var(--line)', borderRadius: '8px', color: 'var(--ink-soft)', fontSize: '0.9rem' }}>
+                Belum ada produk yang didaftarkan untuk UMKM ini.
               </div>
             )}
           </div>
 
-          <div className="reveal reveal-right">
-            {/* LOCATION MAP */}
-            <div className="panel">
-              <h3>
-                <PinIcon style={{ marginRight: '8px' }} /> Lokasi & Koordinat
+          {/* CERTS & AWARDS */}
+          {m.certs && m.certs.length > 0 && (
+            <div className="panel reveal">
+              <h3 style={{ fontSize: '1.15rem', fontWeight: 600, color: 'var(--ink)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <AwardIcon style={{ color: 'var(--soil)' }} /> Sertifikasi & Izin Usaha
               </h3>
-              <div className="map-box" style={{ height: '250px', minHeight: '220px', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--line)', marginBottom: '14px', position: 'relative' }}>
-                <iframe
-                  title={`Peta Lokasi ${m.name}`}
-                  width="100%"
-                  height="100%"
-                  style={{ border: 0, width: '100%', height: '100%', display: 'block' }}
-                  loading="lazy"
-                  allowFullScreen
-                  referrerPolicy="no-referrer-when-downgrade"
-                  src={`https://maps.google.com/maps?q=${(-7.2504 - (m.id * 0.0011)).toFixed(6)},${(110.1502 + (m.id * 0.0013)).toFixed(6)}&hl=id&z=15&output=embed`}
-                />
+              <div className="cert-list">
+                {m.certs.map((c, index) => (
+                  <div className="cert-item" key={index} style={{ padding: '8px 12px', background: 'var(--soil-soft)', borderRadius: '8px', border: '1px solid var(--line)' }}>
+                    <CheckIcon style={{ color: 'var(--forest-light)', marginTop: '2px' }} />
+                    <span style={{ fontWeight: 600, color: 'var(--ink)', fontSize: '0.88rem' }}>{c}</span>
+                  </div>
+                ))}
               </div>
-              <p style={{ marginBottom: '14px', fontSize: '0.9rem', color: 'var(--ink)' }}>
-                <b>Alamat Lengkap:</b> {m.addr}
-              </p>
-              
-              <div style={{ marginBottom: '14px', padding: '10px 12px', background: 'var(--sand)', borderRadius: '8px', fontSize: '0.82rem' }}>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
-                  <span style={{ color: 'var(--ink-soft)' }}>Latitude</span>
-                  <span style={{ fontFamily: 'IBM Plex Mono, monospace', fontWeight: 600 }}>{(-7.2504 - (m.id * 0.0011)).toFixed(6)}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
-                  <span style={{ color: 'var(--ink-soft)' }}>Longitude</span>
-                  <span style={{ fontFamily: 'IBM Plex Mono, monospace', fontWeight: 600 }}>{(110.1502 + (m.id * 0.0013)).toFixed(6)}</span>
-                </div>
-                <div style={{ display: 'flex', justifyContent: 'space-between', padding: '4px 0' }}>
-                  <span style={{ color: 'var(--ink-soft)' }}>Altitude (Ketinggian)</span>
-                  <span style={{ fontWeight: 600 }}>{(450 + (m.id * 8))} mdpl</span>
-                </div>
-              </div>
+            </div>
+          )}
+        </div>
 
-              <a
-                className="btn btn-soil"
-                style={{ width: '100%', padding: '12px 16px', justifyContent: 'center', boxSizing: 'border-box', display: 'flex', alignItems: 'center', fontSize: '0.86rem' }}
-                href={`https://www.google.com/maps/search/?api=1&query=${(-7.2504 - (m.id * 0.0011)).toFixed(6)},${(110.1502 + (m.id * 0.0013)).toFixed(6)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <RouteIcon style={{ marginRight: '8px', flexShrink: 0 }} />
-                <span>Buka Arah di Google Maps</span>
-              </a>
+        {/* SIDEBAR COLUMN */}
+        <div className="reveal reveal-right">
+          {/* LOCATION MAP */}
+          <div className="panel" style={{ marginBottom: '24px' }}>
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--ink)', marginBottom: '14px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <PinIcon style={{ color: 'var(--soil)' }} /> Lokasi & Peta Gps
+            </h3>
+            
+            <div className="map-box" style={{ height: '230px', minHeight: '200px', borderRadius: '12px', overflow: 'hidden', border: '1px solid var(--line)', marginBottom: '14px', position: 'relative' }}>
+              <iframe
+                title={`Peta Lokasi ${m.name}`}
+                width="100%"
+                height="100%"
+                style={{ border: 0, width: '100%', height: '100%', display: 'block' }}
+                loading="lazy"
+                allowFullScreen
+                referrerPolicy="no-referrer-when-downgrade"
+                src={`https://maps.google.com/maps?q=${lat},${lng}&hl=id&z=15&output=embed`}
+              />
             </div>
 
-            {/* CONTACT INFO */}
-            <div className="panel">
-              <h3>Kontak</h3>
+            <p style={{ marginBottom: '12px', fontSize: '0.88rem', color: 'var(--ink)', lineHeight: '1.5' }}>
+              <b>Alamat:</b> {m.addr}
+            </p>
+            
+            <div style={{ marginBottom: '16px', padding: '10px 12px', background: 'var(--sand)', border: '1px solid var(--line)', borderRadius: '8px', fontSize: '0.8rem' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}>
+                <span style={{ color: 'var(--ink-soft)' }}>Latitude</span>
+                <span style={{ fontFamily: 'IBM Plex Mono, monospace', fontWeight: 600 }}>{lat}</span>
+              </div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', padding: '3px 0' }}>
+                <span style={{ color: 'var(--ink-soft)' }}>Longitude</span>
+                <span style={{ fontFamily: 'IBM Plex Mono, monospace', fontWeight: 600 }}>{lng}</span>
+              </div>
+            </div>
+
+            <a
+              className="btn btn-soil"
+              style={{ width: '100%', padding: '10px 14px', justifyContent: 'center', boxSizing: 'border-box', display: 'flex', alignItems: 'center', fontSize: '0.84rem' }}
+              href={`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <RouteIcon style={{ marginRight: '6px', flexShrink: 0 }} />
+              <span>Petunjuk Arah Google Maps</span>
+            </a>
+          </div>
+
+          {/* CONTACT INFO */}
+          <div className="panel">
+            <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--ink)', marginBottom: '14px' }}>
+              📞 Kontak & Media Sosial
+            </h3>
+            
+            {contacts.length > 0 ? (
               <div className="contact-list">
                 {contacts.map((c, index) => (
                   <div className="contact-item" key={index}>
                     <div className="ic">{getContactIcon(c.ic)}</div>
-                    <div>
+                    <div style={{ minWidth: 0, flex: 1 }}>
                       <span className="lbl">{c.lbl}</span>
                       {c.href ? (
-                        <a className="val" href={c.href} target="_blank" rel="noopener noreferrer">
+                        <a className="val" href={c.href} target="_blank" rel="noopener noreferrer" style={{ textDecoration: 'none', color: 'var(--forest)', wordBreak: 'break-all' }}>
                           {c.val}
                         </a>
                       ) : (
-                        <span className="val">{c.val}</span>
+                        <span className="val" style={{ wordBreak: 'break-all' }}>{c.val}</span>
                       )}
                     </div>
                   </div>
                 ))}
               </div>
-              {m.wa && (
-                <a
-                  href={`https://wa.me/${m.wa}?text=${encodeURIComponent(`Halo ${m.name}, saya ingin bertanya tentang produk dan layanan usaha Anda.`)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="btn"
-                  style={{
-                    width: '100%',
-                    marginTop: '16px',
-                    backgroundColor: '#25D366',
-                    borderColor: '#25D366',
-                    color: '#fff',
-                    justifyContent: 'center',
-                    gap: '8px'
-                  }}
-                >
-                  <PhoneIcon style={{ width: '16px', height: '16px' }} />
-                  <span>Hubungi via WhatsApp</span>
-                </a>
-              )}
-            </div>
+            ) : (
+              <p style={{ fontSize: '0.84rem', color: 'var(--ink-soft)', margin: 0 }}>
+                Belum ada informasi kontak tambahan.
+              </p>
+            )}
+
+            {m.wa && (
+              <a
+                href={`https://wa.me/${m.wa}?text=${encodeURIComponent(`Halo ${m.name}, saya ingin bertanya tentang produk dan layanan usaha Anda.`)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="btn"
+                style={{
+                  width: '100%',
+                  marginTop: '16px',
+                  backgroundColor: '#25D366',
+                  borderColor: '#25D366',
+                  color: '#fff',
+                  justifyContent: 'center',
+                  gap: '8px',
+                  padding: '10px 14px',
+                  fontSize: '0.86rem',
+                  fontWeight: 600
+                }}
+              >
+                <PhoneIcon style={{ width: '16px', height: '16px' }} />
+                <span>Hubungi via WhatsApp</span>
+              </a>
+            )}
           </div>
         </div>
       </div>
