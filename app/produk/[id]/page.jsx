@@ -241,10 +241,7 @@ export default async function ProductDetailPage({ params }) {
             <div className="panel reveal reveal-left" style={{ padding: '16px 20px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                 <div style={{ display: 'flex', gap: '16px', alignItems: 'center' }}>
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.9rem' }}>
-                    <StarIcon style={{ color: '#FBBF24', width: '16px', height: '16px' }} />
-                    <b>{(p.rating || 5.0).toFixed(1)}</b> <span style={{ color: 'var(--ink-soft)' }}>/ 5.0</span>
-                  </span>
+
                   <span style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '0.9rem', color: 'var(--ink-soft)' }}>
                     <EyeIcon style={{ width: '16px', height: '16px' }} />
                     <span>{p.views + 1} Kali Dilihat</span>
@@ -352,33 +349,7 @@ export default async function ProductDetailPage({ params }) {
                 </Link>
               </div>
 
-              {/* PRODUCT TESTIMONIALS */}
-              <div style={{ borderTop: '1px solid var(--line)', paddingTop: '18px', marginTop: '6px' }}>
-                <h4 style={{ fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--ink-soft)', marginBottom: '12px' }}>Ulasan Pembeli ({testimonials.length})</h4>
-                <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                  {testimonials.map((t) => (
-                    <div key={t.id} style={{ borderBottom: t.id === 1 ? '1px dashed var(--line)' : 'none', paddingBottom: t.id === 1 ? '14px' : '0' }}>
-                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <b style={{ fontSize: '0.88rem', color: 'var(--ink)' }}>{t.buyer}</b>
-                        <span style={{ fontSize: '0.72rem', color: 'var(--ink-soft)' }}>{t.date}</span>
-                      </div>
-                      <div style={{ display: 'flex', gap: '3px', margin: '4px 0' }}>
-                        {Array.from({ length: 5 }).map((_, starIdx) => (
-                          <StarIcon 
-                            key={starIdx} 
-                            style={{ 
-                              color: starIdx < Math.floor(t.rating) ? '#FBBF24' : 'var(--line)', 
-                              width: '12px', 
-                              height: '12px' 
-                            }} 
-                          />
-                        ))}
-                      </div>
-                      <p style={{ fontSize: '0.84rem', color: 'var(--ink-soft)', lineHeight: '1.4', fontStyle: 'italic' }}>{t.comment}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
+
             </div>
           </div>
         </div>

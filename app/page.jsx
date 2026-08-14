@@ -5,7 +5,6 @@ import HomeSearch from '../src/components/HomeSearch';
 import MSMECard from '../src/components/MSMECard';
 import LatestMSMECarousel from '../src/components/LatestMSMECarousel';
 import ProductCard from '../src/components/ProductCard';
-import TestimonialCarousel from '../src/components/TestimonialCarousel';
 import AnimatedCounter from '../src/components/AnimatedCounter';
 import { MSMES, CATEGORIES, PRODUCTS } from '../src/data/msmes';
 import { ArrowIcon, CategoryIcon } from '../src/components/Icons';
@@ -38,17 +37,7 @@ export default function Home() {
         <HomeSearch />
       </div>
 
-      {/* TESTIMONIALS SECTION */}
-      <div className="wrap section reveal" style={{ paddingBottom: 0 }}>
-        <div className="section-head" style={{ marginBottom: '24px', justifyContent: 'center', textAlign: 'center' }}>
-          <div>
-            <h2 style={{ fontSize: '1.6rem', fontWeight: 600 }}>Apa Kata Mereka?</h2>
-            <div className="sub">Ulasan tulus dari para pembeli produk unggulan UMKM kami</div>
-          </div>
-        </div>
 
-        <TestimonialCarousel />
-      </div>
 
       {/* STATS SECTION */}
       <div className="wrap section reveal">

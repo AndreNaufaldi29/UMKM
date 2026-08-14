@@ -304,7 +304,6 @@ function AdminProductsContent() {
                 <th>Toko UMKM</th>
                 <th>Kategori</th>
                 <th>Harga</th>
-                <th>Rating</th>
                 <th>Unggulan</th>
                 <th style={{ textAlign: 'right' }}>Aksi</th>
               </tr>
@@ -312,7 +311,7 @@ function AdminProductsContent() {
             <tbody>
               {filteredProducts.length === 0 ? (
                 <tr>
-                  <td colSpan="9" style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--ink-soft)' }}>
+                  <td colSpan="8" style={{ textAlign: 'center', padding: '40px 20px', color: 'var(--ink-soft)' }}>
                     Tidak ada produk yang cocok dengan kriteria pencarian.
                   </td>
                 </tr>
@@ -370,12 +369,7 @@ function AdminProductsContent() {
                         {formatRupiah(p.price)}
                         {p.unit && <span className="text-muted" style={{ fontSize: '0.72rem' }}>/{p.unit}</span>}
                       </td>
-                      <td>
-                        <span style={{ display: 'inline-flex', alignItems: 'center', gap: '3px' }}>
-                          <StarIcon style={{ color: '#FBBF24', width: '13px', height: '13px' }} />
-                          <b>{p.rating}</b>
-                        </span>
-                      </td>
+
                       <td>
                         <button
                           className={`status-pill btn-toggle ${p.isFeatured ? 'active' : 'inactive'}`}

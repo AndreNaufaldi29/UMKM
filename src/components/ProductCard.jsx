@@ -109,10 +109,7 @@ export default function ProductCard({ p }) {
 
         {/* METRICS */}
         <div className="product-metrics" style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '0.74rem', color: 'var(--ink-soft)', borderBottom: '1px dashed var(--line)', paddingBottom: '10px', marginBottom: '10px' }}>
-          <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }} title="Rating">
-            <StarIcon style={{ color: '#FBBF24' }} />
-            <b style={{ color: 'var(--ink)' }}>{p.rating ? p.rating.toFixed(1) : '5.0'}</b>
-          </span>
+
           <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }} title="Dilihat">
             <EyeIcon />
             <span>{p.views || 0}</span>

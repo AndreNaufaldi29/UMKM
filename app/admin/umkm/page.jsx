@@ -220,7 +220,23 @@ function AdminUMKMContent() {
             <option value="all">Semua Status</option>
             <option value="active">Aktif Beroperasi</option>
             <option value="inactive">Tutup Sementara</option>
-          </select>
+                    </select>
+
+          {(search || catFilter !== 'all' || dusunFilter !== 'all' || statusFilter !== 'all') && (
+            <button
+              className="btn btn-outline btn-sm"
+              onClick={() => {
+                setSearch('');
+                setCatFilter('all');
+                setDusunFilter('all');
+                setStatusFilter('all');
+              }}
+              title="Reset Filter"
+              style={{ height: '42px', padding: '0 14px', whiteSpace: 'nowrap', display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+            >
+              <XIcon width="14" height="14" /> Reset Filter
+            </button>
+          )}
         </div>
       </div>
 
@@ -258,7 +274,7 @@ function AdminUMKMContent() {
                 filteredMsmes.map((m) => (
                   <tr key={m.id}>
                     <td>
-                      <div style={{ position: 'relative', width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--line)', background: '#f5f5f5', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                      <div style={{ position: 'relative', width: '48px', height: '48px', borderRadius: '8px', overflow: 'hidden', border: '1px solid var(--line)', background: 'var(--sand)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                         {m.imageUrl ? (
                           <img
                             src={getPreviewSrc(m.imageUrl)}

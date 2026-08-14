@@ -4,56 +4,7 @@ import React, { createContext, useContext, useState, useEffect, useCallback } fr
 import { MSMES as INITIAL_MSMES, CATEGORIES, DUSUN } from '../data/msmes';
 import { withBasePath } from '../utils/basePath';
 
-const DEFAULT_REVIEWS = [
-  {
-    id: 1,
-    name: 'Budi Santoso',
-    role: 'Pengunjung Desa',
-    avatar: 'BS',
-    quote: 'Kopi Robusta Sangrai dari Kopi Sunyi harum sekali dan rasanya mantap. Kemasan rapi cocok untuk oleh-oleh khas desa!',
-    msmeId: 1,
-    productName: 'Kopi Robusta Sangrai 250g',
-    rating: 5,
-    status: 'approved',
-    date: '2026-07-20'
-  },
-  {
-    id: 2,
-    name: 'Siti Rahmawati',
-    role: 'Wisatawan',
-    avatar: 'SR',
-    quote: 'Batik Tulis Sekar Arum halus banget kainnya dan motifnya sangat khas. Sangat puas pesan selendang sutra untuk hadiah.',
-    msmeId: 2,
-    productName: 'Selendang Batik Sutra',
-    rating: 5,
-    status: 'approved',
-    date: '2026-07-22'
-  },
-  {
-    id: 3,
-    name: 'Hendra Gunawan',
-    role: 'Pelanggan Lokal',
-    avatar: 'HG',
-    quote: 'Madu hutan murni dari Pak Yono terbukti asli, tenggorokan langsung lega. Langganan tiap bulan untuk keluarga.',
-    msmeId: 6,
-    productName: 'Madu Hutan Murni 500ml',
-    rating: 5,
-    status: 'approved',
-    date: '2026-07-24'
-  },
-  {
-    id: 4,
-    name: 'Siti Aminah',
-    role: 'Ibu Rumah Tangga',
-    avatar: 'SA',
-    quote: 'Keripik singkong balado pedas manisnya juara banget! Bumbunya melimpah dan renyah. Anak-anak suka sekali.',
-    msmeId: 4,
-    productName: 'Keripik Singkong Balado',
-    rating: 4,
-    status: 'pending',
-    date: '2026-07-25'
-  }
-];
+const DEFAULT_REVIEWS = [];
 
 const DataContext = createContext(null);
 

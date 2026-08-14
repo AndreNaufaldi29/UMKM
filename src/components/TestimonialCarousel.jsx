@@ -8,7 +8,15 @@ import { useData } from '../context/DataContext';
 export default function TestimonialCarousel() {
   const { reviews } = useData();
   const approvedReviews = reviews.filter((r) => r.status === 'approved');
-  const TESTIMONIALS = approvedReviews.length > 0 ? approvedReviews : reviews;
+  const TESTIMONIALS = approvedReviews;
+
+  if (!TESTIMONIALS || TESTIMONIALS.length === 0) {
+    return (
+      <div className="panel" style={{ textAlign: 'center', padding: '36px 20px', color: 'var(--ink-soft)', fontSize: '0.9rem' }}>
+        Belum ada ulasan atau testimoni publik saat ini.
+      </div>
+    );
+  }
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isHovered, setIsHovered] = useState(false);

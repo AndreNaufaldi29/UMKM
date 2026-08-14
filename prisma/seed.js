@@ -409,7 +409,7 @@ async function main() {
   console.log('✅ UMKMs & Products seeded');
 
   // 5. Seed Reviews
-  await prisma.review.deleteMany({});
+  await prisma.review.deleteMany({}); return;
   for (const r of DEFAULT_REVIEWS) {
     await prisma.review.create({
       data: {

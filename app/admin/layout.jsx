@@ -29,7 +29,6 @@ export default function AdminLayout({ children }) {
     { href: '/admin', label: 'Overview', icon: '📊' },
     { href: '/admin/umkm', label: 'Kelola UMKM', count: msmes.length, icon: '🏪' },
     { href: '/admin/products', label: 'Kelola Produk', count: products.length, icon: '🛍️' },
-    { href: '/admin/reviews', label: 'Kelola Review', count: reviews.length, icon: '⭐' },
   ];
 
   const pendingCount = reviews.filter((r) => r.status === 'pending').length;
