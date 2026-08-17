@@ -1,18 +1,15 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { MSMES } from '../src/data/msmes.js';
 
 const prisma = new PrismaClient();
 
-const CATEGORIES = [
+const DEFAULT_CATEGORIES = [
   { name: 'Kuliner', slug: 'kuliner', description: 'Usaha bidang makanan dan minuman khas desa' },
   { name: 'Kerajinan', slug: 'kerajinan', description: 'Kerajinan tangan, batik, dan karya seni tradisional' },
   { name: 'Fashion', slug: 'fashion', description: 'Pakaian, konveksi, dan aksesoris' },
   { name: 'Pertanian', slug: 'pertanian', description: 'Hasil tani, peternakan, madu, dan olahan perkebunan' },
-  { name: 'Jasa', slug: 'jasa', description: 'Layanan jasa bengkel, perbaikan, dan keahlian lokal' }
-];
-
-const INITIAL_MSMES = [
-
+  { name: 'Jasa', slug: 'jasa', description: 'Layanan jasa bengkel, perbaikan, dan keahlian lokal' },
 ];
 
 async function main() {
@@ -20,11 +17,11 @@ async function main() {
 
   // 1. Seed Categories
   const categoryMap = {};
-  for (const cat of CATEGORIES) {
+  for (const cat of DEFAULT_CATEGORIES) {
     const created = await prisma.category.upsert({
       where: { name: cat.name },
       update: cat,
-      create: cat
+      create: cat,
     });
     categoryMap[cat.name] = created.id;
   }
@@ -36,51 +33,51 @@ async function main() {
     where: { username: 'admin' },
     update: {
       passwordHash,
-      fullName: 'Super Administrator'
+      fullName: 'Super Administrator',
     },
     create: {
       username: 'admin',
       passwordHash,
       fullName: 'Super Administrator',
-      role: 'admin'
-    }
+      role: 'admin',
+    },
   });
-  console.log('✅ Admin user seeded (admin / admin123)');
+  console.log('✅ Admin user seeded (admin / kedungsumur2026#)');
 
-  // 3. Seed UMKMs & Products
-  for (const m of INITIAL_MSMES) {
-    const categoryId = categoryMap[m.categoryName];
+  // 3. Seed UMKMs & Products from MSMES
+  for (const m of MSMES) {
+    const categoryId = categoryMap[m.cat] || categoryMap['Kuliner'];
 
     const umkmData = {
       name: m.name,
       owner: m.owner,
       categoryId,
       est: m.est,
-      status: m.status,
+      status: m.status || 'active',
       addr: m.addr,
       hours: m.hours,
       desc: m.desc,
       imageUrl: m.imageUrl || '',
-      wa: m.wa,
-      phone: m.phone,
-      email: m.email,
-      web: m.web,
-      fb: m.fb,
-      ig: m.ig,
-      tiktok: m.tiktok
+      wa: m.wa || '',
+      phone: m.phone || '',
+      email: m.email || '',
+      web: m.web || '',
+      fb: m.fb || '',
+      ig: m.ig || '',
+      tiktok: m.tiktok || '',
     };
 
     const createdUmkm = await prisma.umkm.upsert({
       where: { id: m.id },
       update: umkmData,
-      create: { id: m.id, ...umkmData }
+      create: { id: m.id, ...umkmData },
     });
 
     // Seed certifications
     await prisma.certification.deleteMany({ where: { umkmId: createdUmkm.id } });
     if (m.certs && m.certs.length > 0) {
       await prisma.certification.createMany({
-        data: m.certs.map((c) => ({ umkmId: createdUmkm.id, certName: c }))
+        data: m.certs.map((c) => ({ umkmId: createdUmkm.id, certName: c })),
       });
     }
 
@@ -91,40 +88,46 @@ async function main() {
           where: { id: p.id },
           update: {
             name: p.name,
-            desc: p.desc,
-            price: p.price,
-            unit: p.unit,
-            rating: p.rating,
-            sales: p.sales,
-            views: p.views,
-            isFeatured: p.isFeatured,
+            desc: p.desc || '',
+            price: p.price || 0,
+            unit: p.unit || 'pcs',
+            rating: p.rating || 5.0,
+            sales: p.sales || 0,
+            views: p.views || 0,
+            isFeatured: !!p.isFeatured,
             imageUrl: p.imageUrl || '',
-            umkmId: createdUmkm.id
+            umkmId: createdUmkm.id,
           },
           create: {
             id: p.id,
             name: p.name,
-            desc: p.desc,
-            price: p.price,
-            unit: p.unit,
-            rating: p.rating,
-            sales: p.sales,
-            views: p.views,
-            isFeatured: p.isFeatured,
+            desc: p.desc || '',
+            price: p.price || 0,
+            unit: p.unit || 'pcs',
+            rating: p.rating || 5.0,
+            sales: p.sales || 0,
+            views: p.views || 0,
+            isFeatured: !!p.isFeatured,
             imageUrl: p.imageUrl || '',
-            umkmId: createdUmkm.id
-          }
+            umkmId: createdUmkm.id,
+          },
         });
       }
     }
   }
-  console.log('✅ UMKMs & Products seeded');
+  console.log(`✅ ${MSMES.length} UMKMs & all Products seeded`);
 
   // 4. Reset PostgreSQL auto-increment sequence counters
   try {
-    await prisma.$executeRawUnsafe(`SELECT setval(pg_get_serial_sequence('"Umkm"', 'id'), coalesce(max(id), 1)) FROM "Umkm";`);
-    await prisma.$executeRawUnsafe(`SELECT setval(pg_get_serial_sequence('"Category"', 'id'), coalesce(max(id), 1)) FROM "Category";`);
-    await prisma.$executeRawUnsafe(`SELECT setval(pg_get_serial_sequence('"Certification"', 'id'), coalesce(max(id), 1)) FROM "Certification";`);
+    await prisma.$executeRawUnsafe(
+      `SELECT setval(pg_get_serial_sequence('"Umkm"', 'id'), coalesce((SELECT max(id) FROM "Umkm"), 1));`
+    );
+    await prisma.$executeRawUnsafe(
+      `SELECT setval(pg_get_serial_sequence('"Category"', 'id'), coalesce((SELECT max(id) FROM "Category"), 1));`
+    );
+    await prisma.$executeRawUnsafe(
+      `SELECT setval(pg_get_serial_sequence('"Certification"', 'id'), coalesce((SELECT max(id) FROM "Certification"), 1));`
+    );
     console.log('✅ PostgreSQL auto-increment sequences synced');
   } catch (seqError) {
     console.warn('⚠️ Sequence reset warning (non-fatal):', seqError.message);

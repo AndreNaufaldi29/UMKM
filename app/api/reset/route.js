@@ -41,7 +41,7 @@ export async function POST(request) {
       });
     }
 
-    const passwordHash = await bcrypt.hash('admin123', 10);
+    const passwordHash = await bcrypt.hash('kedungsumur2026#', 10);
     await prisma.adminUser.upsert({
       where:  { username: 'admin' },
       update: { passwordHash, fullName: 'Super Administrator' },

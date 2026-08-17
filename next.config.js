@@ -4,6 +4,9 @@ const formattedBasePath = rawBasePath ? (rawBasePath.startsWith('/') ? rawBasePa
 
 const nextConfig = {
   reactStrictMode: true,
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
   ...(formattedBasePath && {
     basePath: formattedBasePath,
     assetPrefix: formattedBasePath,

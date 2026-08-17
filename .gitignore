@@ -1,4 +1,44 @@
-# Logs
+# ==============================================================================
+# Git Ignore - UMKM Kedungsumur (Next.js + Prisma + Docker)
+# ==============================================================================
+
+# 📦 Dependencies
+/node_modules
+/.pnp
+.pnp.js
+.yarn/install-state.gz
+
+# 🚀 Next.js Production Build Outputs & Caches
+/.next/
+/out/
+/build/
+/dist/
+/dist-ssr/
+
+# 🔐 Environment Variables (Keep .env.example tracked)
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+!.env.example
+
+# 🖼️ User Dynamic Uploads (Keep directory structure via .gitkeep)
+/public/uploads/*
+!/public/uploads/.gitkeep
+
+# 🐳 Docker Archives & Deployment Tarballs
+*.tar
+*.tar.gz
+docker-compose.override.yml
+
+# 🗄️ Database & Prisma Local SQLite / Caches
+prisma/*.db
+prisma/*.db-journal
+*.sqlite
+*.sqlite-journal
+
+# 📋 Debug Logs & Diagnostic Outputs
 logs
 *.log
 npm-debug.log*
@@ -7,18 +47,34 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
-*.local
+# ⚙️ Next.js / Vercel Build Traces & Telemetry
+.vercel
+next-env.d.ts
+.turbo
 
-# Editor directories and files
+# 💻 IDE & Editor Configuration
 .vscode/*
 !.vscode/extensions.json
-.idea
-.DS_Store
+!.vscode/settings.json
+.idea/
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# 🖥️ OS Generated Files & Metadata
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+[Tt]humbs.db
+*Zone.Identifier
+*Zone.Identifier:*
+
+# 🧪 Temporary Scratch Scripts & Tests
+*.tmp
+*.bak
