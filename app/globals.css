@@ -16,6 +16,7 @@
   --radius: 14px;
   --shadow: 0 8px 24px -12px rgba(30, 75, 59, 0.25);
   --nav-height: 63px;
+  --card-bg: rgba(255, 255, 255, 0.95);
 }
 
 .dark {
@@ -32,6 +33,7 @@
   --paper: #1A1E16;
   --line: #31372A;
   --shadow: 0 8px 28px -12px rgba(0, 0, 0, 0.55);
+  --card-bg: rgba(26, 30, 22, 0.95);
 }
 
 /* =========================================
@@ -112,6 +114,8 @@ body {
   position: relative;
   min-height: 100vh;
   overflow-anchor: none;
+  color: var(--ink);
+  background-color: var(--paper);
 }
 
 main {
@@ -257,6 +261,13 @@ body.dark small {
   font-family: 'Fraunces', serif;
   font-weight: 600;
   font-size: 1.15rem;
+  color: var(--ink);
+  text-decoration: none;
+}
+
+body.dark .brand,
+.dark .brand {
+  color: #F5F4EF !important;
 }
 
 .brand-mark {
@@ -285,6 +296,11 @@ body.dark small {
   letter-spacing: .08em;
   text-transform: uppercase;
   color: var(--ink-soft);
+}
+
+body.dark .brand small,
+.dark .brand small {
+  color: #A4DCBD !important;
 }
 
 .nav-links {
@@ -3703,4 +3719,180 @@ footer {
 
 .admin-table tbody tr:last-child td {
   border-bottom: none;
+}
+/* =========================================
+   DETAIL PAGES (PRODUCT & UMKM) CONTRAST RULES
+   ========================================= */
+
+/* Panels in Dark Mode */
+.dark .panel,
+body.dark .panel {
+  background: rgba(26, 30, 22, 0.95) !important;
+  border-color: var(--line) !important;
+  color: #F5F4EF !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+}
+
+.dark .panel h1,
+.dark .panel h2,
+.dark .panel h3,
+.dark .panel h4,
+.dark .panel h5,
+.dark .panel h6,
+body.dark .panel h1,
+body.dark .panel h2,
+body.dark .panel h3,
+body.dark .panel h4,
+body.dark .panel h5,
+body.dark .panel h6 {
+  color: #F5F4EF !important;
+}
+
+.dark .panel p,
+body.dark .panel p {
+  color: #D9D7CF !important;
+}
+
+.dark .panel b,
+.dark .panel strong,
+body.dark .panel b,
+body.dark .panel strong {
+  color: #F5F4EF !important;
+}
+
+/* Detail Hero Panel */
+.dark .detail-hero-panel,
+body.dark .detail-hero-panel {
+  background: rgba(26, 30, 22, 0.95) !important;
+  border-color: var(--line) !important;
+}
+
+/* Info Grid & Rows (UMKM Profile) */
+.dark .info-row,
+body.dark .info-row {
+  border-bottom-color: var(--line) !important;
+}
+
+.dark .info-row .k,
+body.dark .info-row .k {
+  color: #B4AFA0 !important;
+}
+
+.dark .info-row .v,
+body.dark .info-row .v {
+  color: #F5F4EF !important;
+}
+
+.dark .info-row:hover,
+body.dark .info-row:hover {
+  background-color: rgba(49, 55, 42, 0.5) !important;
+}
+
+/* Certifications (UMKM Detail) */
+.dark .cert-item,
+body.dark .cert-item {
+  background: rgba(40, 30, 21, 0.75) !important;
+  border-color: var(--line) !important;
+}
+
+.dark .cert-item span,
+body.dark .cert-item span {
+  color: #F5F4EF !important;
+}
+
+/* Contact Items (UMKM Detail) */
+.dark .contact-item,
+body.dark .contact-item {
+  border-bottom-color: var(--line) !important;
+}
+
+.dark .contact-item .lbl,
+body.dark .contact-item .lbl {
+  color: #B4AFA0 !important;
+}
+
+.dark .contact-item .val,
+body.dark .contact-item .val {
+  color: #F5F4EF !important;
+}
+
+.dark .contact-item .ic,
+body.dark .contact-item .ic {
+  background: #1C2A22 !important;
+  color: var(--forest) !important;
+  border: 1px solid var(--line);
+}
+
+/* Product Detail Specifics */
+.dark .pprice,
+body.dark .pprice {
+  color: #E2B887 !important;
+}
+
+.dark .pprice span,
+body.dark .pprice span {
+  color: #B4AFA0 !important;
+}
+
+/* Variant Chips (Product Detail) */
+.dark .variant-chip,
+body.dark .variant-chip {
+  background: rgba(26, 30, 22, 0.95) !important;
+  color: #D9D7CF !important;
+  border-color: var(--line) !important;
+}
+
+.dark .variant-chip.active,
+body.dark .variant-chip.active {
+  background: #1C2A22 !important;
+  color: var(--forest) !important;
+  border-color: var(--forest) !important;
+}
+
+/* Breadcrumbs in Dark Mode */
+.dark .breadcrumb,
+body.dark .breadcrumb {
+  color: #B4AFA0 !important;
+}
+
+.dark .breadcrumb a,
+.dark .breadcrumb button,
+body.dark .breadcrumb a,
+body.dark .breadcrumb button {
+  color: #B4AFA0 !important;
+}
+
+.dark .breadcrumb a:hover,
+body.dark .breadcrumb a:hover {
+  color: var(--forest) !important;
+}
+
+.dark .breadcrumb .sep,
+body.dark .breadcrumb .sep {
+  color: var(--line) !important;
+}
+
+.dark .breadcrumb .current,
+body.dark .breadcrumb .current {
+  color: #F5F4EF !important;
+}
+
+/* Badges in Dark Mode */
+.dark .badge,
+body.dark .badge {
+  background: #1C2A22 !important;
+  color: var(--forest) !important;
+  border: 1px solid var(--line);
+}
+
+.dark .badge.soil,
+body.dark .badge.soil {
+  background: #281E15 !important;
+  color: #E2B887 !important;
+}
+
+.dark .badge.sky,
+body.dark .badge.sky {
+  background: #182A32 !important;
+  color: #89C6E5 !important;
 }

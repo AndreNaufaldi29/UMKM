@@ -14,18 +14,12 @@ const ThemeContext = createContext({
 export function ThemeProvider({ children }) {
   const [dark, setDark] = useState(false);
 
-  // Load theme ketika aplikasi dibuka
+  // Load theme ketika aplikasi dibuka (Default: Light Mode)
   useEffect(() => {
     const savedTheme = localStorage.getItem('theme');
 
-    let isDark;
-
-    if (savedTheme) {
-      isDark = savedTheme === 'dark';
-    } else {
-      // Ikuti tema sistem jika belum pernah memilih
-      isDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-    }
+    // Default ke light mode jika pengguna belum pernah memilih
+    const isDark = savedTheme ? savedTheme === 'dark' : false;
 
     setDark(isDark);
     document.body.classList.toggle('dark', isDark);

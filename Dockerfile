@@ -12,6 +12,8 @@ RUN npm config set fetch-retries 5 && npm config set fetch-retry-mintimeout 2000
 FROM base AS builder
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
+ARG NEXT_PUBLIC_BASE_PATH=""
+ENV NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH}
 RUN npx prisma generate
 ENV NODE_ENV=production
 RUN npm run build

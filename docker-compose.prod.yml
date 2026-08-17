@@ -28,7 +28,7 @@ services:
       target: runner
       args:
         PORT: ${PORT:-5173}
-    container_name: web-frontend
+    container_name: web-umkm-frontend
     restart: always
     env_file:
       - .env
