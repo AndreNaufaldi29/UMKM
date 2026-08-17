@@ -20,10 +20,11 @@ services:
       timeout: 5s
       retries: 5
 
-  # 2. Next.js Web Frontend & API Application Service
+  # 2. Next.js Web Frontend & API Application Service (Development)
   frontend:
     build:
       context: .
+      target: development
       args:
         PORT: ${PORT:-5173}
     container_name: web-frontend
@@ -44,10 +45,13 @@ services:
       # Mencegah node_modules & build cache lokal menimpa di dalam container
       - /app/node_modules
       - /app/.next
+      - uploads_data:/app/public/uploads
     depends_on:
       db:
         condition: service_healthy
 
 volumes:
   postgres_data:
+    driver: local
+  uploads_data:
     driver: local

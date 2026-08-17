@@ -1,25 +1,31 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { MSMES as INITIAL_MSMES, CATEGORIES, DUSUN } from '../data/msmes';
+import { MSMES as INITIAL_MSMES, CATEGORIES } from '../data/msmes';
 import { withBasePath } from '../utils/basePath';
-
-const DEFAULT_REVIEWS = [];
 
 const DataContext = createContext(null);
 
 export function DataProvider({ children }) {
   const [msmes, setMsmes] = useState([]);
-  const [reviews, setReviews] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
   // Fetch initial data dynamically from Database API using withBasePath helper
   const fetchAllData = useCallback(async () => {
     try {
-      const [umkmRes, reviewRes] = await Promise.all([
-        fetch(withBasePath('/api/umkm'), { cache: 'no-store' }),
-        fetch(withBasePath('/api/reviews'), { cache: 'no-store' })
-      ]);
+      // Gunakan URL absolut agar fetch() selalu berhasil (origin + path)
+      const base = typeof window !== 'undefined' ? window.location.origin : '';
+      const apiPath = withBasePath('/api/umkm');
+      const url = apiPath.startsWith('http') ? apiPath : `${base}${apiPath}`;
+
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 10000); // 10 detik timeout
+
+      const umkmRes = await fetch(url, {
+        cache: 'no-store',
+        signal: controller.signal,
+      });
+      clearTimeout(timeout);
 
       if (umkmRes.ok && umkmRes.headers.get('content-type')?.includes('application/json')) {
         const umkmData = await umkmRes.json().catch(() => null);
@@ -31,21 +37,13 @@ export function DataProvider({ children }) {
       } else {
         setMsmes(INITIAL_MSMES);
       }
-
-      if (reviewRes.ok && reviewRes.headers.get('content-type')?.includes('application/json')) {
-        const reviewData = await reviewRes.json().catch(() => null);
-        if (Array.isArray(reviewData)) {
-          setReviews(reviewData);
-        } else {
-          setReviews(DEFAULT_REVIEWS);
-        }
-      } else {
-        setReviews(DEFAULT_REVIEWS);
-      }
     } catch (error) {
-      console.error('Error fetching data dynamically from API:', error);
+      if (error.name === 'AbortError') {
+        console.warn('Fetch /api/umkm timed out, falling back to static data.');
+      } else {
+        console.error('Error fetching data dynamically from API:', error);
+      }
       setMsmes(INITIAL_MSMES);
-      setReviews(DEFAULT_REVIEWS);
     } finally {
       setIsLoaded(true);
     }
@@ -66,7 +64,6 @@ export function DataProvider({ children }) {
       msmeId: m.id,
       msmeName: m.name,
       cat: m.cat,
-      dusun: m.dusun,
       status: m.status,
       wa: m.wa
     }))
@@ -78,6 +75,7 @@ export function DataProvider({ children }) {
       const res = await fetch(withBasePath('/api/umkm'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(newMsme)
       });
       if (res.ok) {
@@ -104,6 +102,7 @@ export function DataProvider({ children }) {
       const res = await fetch(withBasePath(`/api/umkm/${id}`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(updatedFields)
       });
       if (res.ok) {
@@ -120,7 +119,7 @@ export function DataProvider({ children }) {
 
   const deleteMsme = async (id) => {
     try {
-      await fetch(withBasePath(`/api/umkm/${id}`), { method: 'DELETE' });
+      await fetch(withBasePath(`/api/umkm/${id}`), { method: 'DELETE', credentials: 'include' });
       await fetchAllData();
       return;
     } catch (e) {
@@ -135,6 +134,7 @@ export function DataProvider({ children }) {
       const res = await fetch(withBasePath('/api/products'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify({ msmeId, ...newProduct })
       });
       if (res.ok) {
@@ -151,6 +151,7 @@ export function DataProvider({ children }) {
       const res = await fetch(withBasePath(`/api/products/${productId}`), {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
         body: JSON.stringify(updatedFields)
       });
       if (res.ok) {
@@ -164,7 +165,7 @@ export function DataProvider({ children }) {
 
   const deleteProduct = async (productId) => {
     try {
-      await fetch(withBasePath(`/api/products/${productId}`), { method: 'DELETE' });
+      await fetch(withBasePath(`/api/products/${productId}`), { method: 'DELETE', credentials: 'include' });
       await fetchAllData();
       return;
     } catch (e) {
@@ -172,72 +173,20 @@ export function DataProvider({ children }) {
     }
   };
 
-  // Review CRUD Handlers
-  const addReview = async (newReview) => {
-    try {
-      const res = await fetch(withBasePath('/api/reviews'), {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(newReview)
-      });
-      if (res.ok) {
-        await fetchAllData();
-        return;
-      }
-    } catch (e) {
-      console.error('Error adding review:', e);
-    }
-  };
-
-  const updateReview = async (id, updatedFields) => {
-    try {
-      const res = await fetch(withBasePath(`/api/admin/reviews/${id}`), {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(updatedFields)
-      });
-      if (res.ok) {
-        await fetchAllData();
-        return;
-      }
-    } catch (e) {
-      console.error('Error updating review:', e);
-    }
-  };
-
-  const toggleReviewStatus = async (id, status) => {
-    try {
-      const res = await fetch(withBasePath(`/api/admin/reviews/${id}`), {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ status })
-      });
-      if (res.ok) {
-        await fetchAllData();
-        return;
-      }
-    } catch (e) {
-      console.error('Error toggling review status:', e);
-    }
-  };
-
-  const deleteReview = async (id) => {
-    try {
-      await fetch(withBasePath(`/api/admin/reviews/${id}`), { method: 'DELETE' });
-      await fetchAllData();
-      return;
-    } catch (e) {
-      console.error('Error deleting review:', e);
-    }
-  };
-
   // Reset Data Handler
   const resetToDefault = async () => {
     try {
-      await fetch(withBasePath('/api/reset'), { method: 'POST' });
-      await fetchAllData();
+      const res = await fetch(withBasePath('/api/reset'), { method: 'POST', credentials: 'include' });
+      const data = await res.json().catch(() => null);
+      if (res.ok && data?.success) {
+        await fetchAllData();
+        return { success: true, message: data.message, deleted: data.deleted };
+      }
+      const errMsg = data?.error || `Server error (${res.status})`;
+      return { success: false, error: errMsg };
     } catch (e) {
       console.error('Error resetting database:', e);
+      return { success: false, error: e.message || 'Gagal terhubung ke server.' };
     }
   };
 
@@ -246,21 +195,15 @@ export function DataProvider({ children }) {
       value={{
         msmes: isLoaded ? msmes : INITIAL_MSMES,
         products: isLoaded ? products : INITIAL_MSMES.flatMap((m) => m.products || []),
-        reviews: isLoaded ? reviews : DEFAULT_REVIEWS,
-        categories: CATEGORIES,
-        dusunList: DUSUN,
-        isLoaded,
+                categories: CATEGORIES,
+                isLoaded,
         addMsme,
         updateMsme,
         deleteMsme,
         addProduct,
         updateProduct,
         deleteProduct,
-        addReview,
-        updateReview,
-        toggleReviewStatus,
-        deleteReview,
-        resetToDefault,
+                resetToDefault,
         refreshData: fetchAllData
       }}
     >
@@ -275,21 +218,15 @@ export function useData() {
     return {
       msmes: INITIAL_MSMES,
       products: INITIAL_MSMES.flatMap((m) => m.products || []),
-      reviews: DEFAULT_REVIEWS,
-      categories: CATEGORIES,
-      dusunList: DUSUN,
-      isLoaded: true,
+            categories: CATEGORIES,
+            isLoaded: true,
       addMsme: () => {},
       updateMsme: () => {},
       deleteMsme: () => {},
       addProduct: () => {},
       updateProduct: () => {},
       deleteProduct: () => {},
-      addReview: () => {},
-      updateReview: () => {},
-      toggleReviewStatus: () => {},
-      deleteReview: () => {},
-      resetToDefault: () => {},
+            resetToDefault: () => {},
       refreshData: () => {}
     };
   }

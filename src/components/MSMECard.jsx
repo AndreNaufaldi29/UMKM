@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { PinIcon, ArrowIcon, CategoryIcon } from './Icons';
@@ -9,11 +9,21 @@ import { withBasePath } from '../utils/basePath';
 
 export default function MSMECard({ m }) {
   const router = useRouter();
+  const [imgError, setImgError] = useState(false);
 
   return (
-    <Link href={`/umkm/${m.id}`} className="card">
+    <Link href={`/umkm/${m.id}`} className="card" style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
       <div className="card-photo">
-        {m.imageUrl ? <img src={withBasePath(m.imageUrl)} alt={m.name} style={{ width: "100%", height: "100%", objectFit: "cover" }} /> : <PhotoSVG cat={m.cat} seed={m.id} />}
+        {m.imageUrl && !imgError ? (
+          <img
+            src={withBasePath(m.imageUrl)}
+            alt={m.name}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+            onError={() => setImgError(true)}
+          />
+        ) : (
+          <PhotoSVG cat={m.cat} seed={m.id} />
+        )}
         <div 
           className="card-cat"
           onClick={(e) => {
@@ -31,10 +41,10 @@ export default function MSMECard({ m }) {
         </div>
       </div>
       <div className="card-body">
-        <h3>{m.name}</h3>
+        <h3 title={m.name}>{m.name}</h3>
         <div className="card-owner">Pemilik: {m.owner}</div>
         <div className="card-addr">
-          <PinIcon />
+          <PinIcon style={{ flexShrink: 0, marginTop: '3px' }} />
           <span>{m.addr}</span>
         </div>
         <div className="card-foot">

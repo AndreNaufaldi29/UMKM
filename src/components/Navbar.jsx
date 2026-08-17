@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useTheme } from '../../app/providers';
 import { SunIcon, MoonIcon, AdminIcon } from './Icons';
+import { withBasePath } from '../utils/basePath';
 
 export default function Navbar() {
   const pathname = usePathname();
@@ -17,23 +18,17 @@ export default function Navbar() {
     <header className="nav">
       <div className="nav-inner">
         <Link href="/" className="brand" onClick={() => setIsOpen(false)}>
-          <div className="brand-mark">
-            <svg
-              width="18"
-              height="18"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path d="M3 21h18M5 21V9l7-6 7 6v12M9 21v-6h6v6" />
-            </svg>
+          <div className="">
+            <img
+              src={withBasePath('/logo.png')}
+              alt="Logo Desa Kedungsumur"
+              width="30"
+              height="30"
+            />
           </div>
           <div>
             Desa Kedungsumur
-            <small>Website Profil Desa</small>
+            <small>Website UMKM Desa</small>
           </div>
         </Link>
 
@@ -44,7 +39,7 @@ export default function Navbar() {
           <Link href="/umkm" className={pathname.startsWith('/umkm') ? 'active' : ''}>
             UMKM Desa
           </Link>
-          <Link href="/products" className={pathname.startsWith('/products') ? 'active' : ''}>
+          <Link href="/produk" className={pathname.startsWith('/produk') ? 'active' : ''}>
             Katalog Produk
           </Link>
         </nav>
@@ -88,7 +83,7 @@ export default function Navbar() {
             <Link href="/umkm" className={pathname.startsWith('/umkm') ? 'active' : ''} onClick={() => setIsOpen(false)}>
               UMKM Desa
             </Link>
-            <Link href="/products" className={pathname.startsWith('/products') ? 'active' : ''} onClick={() => setIsOpen(false)}>
+            <Link href="/produk" className={pathname.startsWith('/produk') ? 'active' : ''} onClick={() => setIsOpen(false)}>
               Katalog Produk
             </Link>
           </nav>

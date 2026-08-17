@@ -2,16 +2,8 @@
   "version": 3,
   "pages404": true,
   "caseSensitive": false,
-  "basePath": "/umkm-kedungsumur",
+  "basePath": "",
   "redirects": [
-    {
-      "source": "/umkm-kedungsumur/",
-      "destination": "/umkm-kedungsumur",
-      "basePath": false,
-      "internal": true,
-      "statusCode": 308,
-      "regex": "^/umkm-kedungsumur/$"
-    },
     {
       "source": "/:path+/",
       "destination": "/:path+",
@@ -27,14 +19,6 @@
     "fallback": []
   },
   "dynamicRoutes": [
-    {
-      "page": "/api/admin/reviews/[id]",
-      "regex": "^/api/admin/reviews/([^/]+?)(?:/)?$",
-      "routeKeys": {
-        "nxtPid": "nxtPid"
-      },
-      "namedRegex": "^/api/admin/reviews/(?<nxtPid>[^/]+?)(?:/)?$"
-    },
     {
       "page": "/api/products/[id]",
       "regex": "^/api/products/([^/]+?)(?:/)?$",
@@ -74,6 +58,14 @@
         "nxtPid": "nxtPid"
       },
       "namedRegex": "^/umkm/(?<nxtPid>[^/]+?)(?:/)?$"
+    },
+    {
+      "page": "/uploads/[filename]",
+      "regex": "^/uploads/([^/]+?)(?:/)?$",
+      "routeKeys": {
+        "nxtPfilename": "nxtPfilename"
+      },
+      "namedRegex": "^/uploads/(?<nxtPfilename>[^/]+?)(?:/)?$"
     }
   ],
   "staticRoutes": [
@@ -100,12 +92,6 @@
       "regex": "^/admin/products(?:/)?$",
       "routeKeys": {},
       "namedRegex": "^/admin/products(?:/)?$"
-    },
-    {
-      "page": "/admin/reviews",
-      "regex": "^/admin/reviews(?:/)?$",
-      "routeKeys": {},
-      "namedRegex": "^/admin/reviews(?:/)?$"
     },
     {
       "page": "/admin/umkm",

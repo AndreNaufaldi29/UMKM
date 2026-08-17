@@ -7,6 +7,7 @@ import { ChevronLeftIcon, ChevronRightIcon } from './Icons';
 
 export default function ProductGallery({ images = [], imageUrl = '', name = '', cat = '', price = 0, id = 1 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [failedImages, setFailedImages] = useState({});
 
   // 1. Helper to extract array of image URLs from props
   const getProcessedImages = () => {
@@ -34,22 +35,18 @@ export default function ProductGallery({ images = [], imageUrl = '', name = '', 
 
   const rawImages = getProcessedImages();
 
-  // 2. Build gallery items array (minimum 4 items to mirror UMKM detail gallery strip)
+  // 2. Build gallery items — hanya tampilkan gambar yang benar-benar ada.
+  // Jika tidak ada gambar sama sekali, tampilkan 1 SVG fallback saja.
   const baseSeed = name ? name.length + (price || 10) : 42;
-  const seeds = [baseSeed, baseSeed + 10, baseSeed + 20, baseSeed + 30];
 
   let galleryItems = [];
 
-  if (rawImages.length >= 4) {
+  if (rawImages.length > 0) {
+    // Hanya pakai gambar yang tersedia
     galleryItems = rawImages.map((src) => ({ type: 'image', src }));
-  } else if (rawImages.length > 0) {
-    // Fill up to 4 items with seeds/variations if less than 4 real images
-    const realItems = rawImages.map((src) => ({ type: 'image', src }));
-    const fillSeeds = seeds.slice(rawImages.length).map((seed) => ({ type: 'svg', seed }));
-    galleryItems = [...realItems, ...fillSeeds];
   } else {
-    // Default 4 SVG seeds if no images available
-    galleryItems = seeds.map((seed) => ({ type: 'svg', seed }));
+    // Tidak ada gambar — tampilkan 1 SVG fallback
+    galleryItems = [{ type: 'svg', seed: baseSeed }];
   }
 
   const handlePrev = (e) => {
@@ -78,7 +75,7 @@ export default function ProductGallery({ images = [], imageUrl = '', name = '', 
           marginBottom: '16px'
         }}
       >
-        {currentItem.type === 'image' ? (
+        {currentItem.type === 'image' && !failedImages[currentIndex] ? (
           <img
             src={withBasePath(currentItem.src)}
             alt={`${name} - Foto ${currentIndex + 1}`}
@@ -88,11 +85,12 @@ export default function ProductGallery({ images = [], imageUrl = '', name = '', 
               objectFit: 'cover',
               transition: 'opacity 0.3s ease, transform 0.4s ease'
             }}
+            onError={() => setFailedImages((prev) => ({ ...prev, [currentIndex]: true }))}
           />
         ) : (
           <ProductSVG 
             cat={cat} 
-            seed={currentItem.seed} 
+            seed={currentItem.type === 'svg' ? currentItem.seed : baseSeed + currentIndex} 
             style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
           />
         )}
@@ -181,10 +179,11 @@ export default function ProductGallery({ images = [], imageUrl = '', name = '', 
         )}
       </div>
 
-      {/* THUMBNAIL GALLERY STRIP (Identical to UMKM Detail Gallery) */}
+      {/* THUMBNAIL GALLERY STRIP */}
       <div className="gallery-strip reveal reveal-left" style={{ marginBottom: '20px' }}>
         {galleryItems.map((item, idx) => {
           const isActive = idx === currentIndex;
+          const isFailed = failedImages[idx];
           return (
             <div
               key={idx}
@@ -204,16 +203,17 @@ export default function ProductGallery({ images = [], imageUrl = '', name = '', 
                 transition: 'all 0.25s cubic-bezier(0.16, 1, 0.3, 1)'
               }}
             >
-              {item.type === 'image' ? (
+              {item.type === 'image' && !isFailed ? (
                 <img
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }}
                   src={withBasePath(item.src)}
                   alt={`${name} thumbnail ${idx + 1}`}
+                  onError={() => setFailedImages((prev) => ({ ...prev, [idx]: true }))}
                 />
               ) : (
                 <ProductSVG 
                   cat={cat} 
-                  seed={item.seed} 
+                  seed={item.type === 'svg' ? item.seed : baseSeed + idx} 
                   style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
                 />
               )}

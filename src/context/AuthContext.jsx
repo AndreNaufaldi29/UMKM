@@ -10,19 +10,29 @@ export function AuthProvider({ children }) {
   const [adminUser, setAdminUser] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
+  // Verify session from server cookie on mount (replaces localStorage-only check)
   useEffect(() => {
-    try {
-      const savedAuth = localStorage.getItem('umkm_admin_auth');
-      const savedUser = localStorage.getItem('umkm_admin_user');
-      if (savedAuth === 'true' && savedUser) {
-        setIsAuthenticated(true);
-        setAdminUser(JSON.parse(savedUser));
+    async function checkSession() {
+      try {
+        const res = await fetch(withBasePath('/api/admin/auth/me'), {
+          method: 'GET',
+          credentials: 'include', // send HttpOnly cookie
+        });
+        if (res.ok) {
+          const data = await res.json().catch(() => null);
+          if (data && data.authenticated && data.user) {
+            setIsAuthenticated(true);
+            setAdminUser(data.user);
+          }
+        }
+      } catch (e) {
+        // Network error — session remains unauthenticated
+        console.warn('Session check failed:', e);
+      } finally {
+        setIsInitialized(true);
       }
-    } catch (e) {
-      console.error('Failed to load admin auth session:', e);
-    } finally {
-      setIsInitialized(true);
     }
+    checkSession();
   }, []);
 
   const login = async (username, password) => {
@@ -30,44 +40,48 @@ export function AuthProvider({ children }) {
       const res = await fetch(withBasePath('/api/admin/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ username, password })
+        credentials: 'include', // receive HttpOnly cookie in response
+        body: JSON.stringify({ username, password }),
       });
 
       const contentType = res.headers.get('content-type') || '';
-      if (res.ok && contentType.includes('application/json')) {
+      if (contentType.includes('application/json')) {
         const data = await res.json().catch(() => null);
-        if (data && data.success) {
+
+        if (res.status === 429) {
+          return { success: false, error: data?.error || 'Terlalu banyak percobaan. Coba lagi nanti.' };
+        }
+
+        if (res.ok && data && data.success) {
           setIsAuthenticated(true);
           setAdminUser(data.user);
-          localStorage.setItem('umkm_admin_auth', 'true');
-          localStorage.setItem('umkm_admin_user', JSON.stringify(data.user));
           return { success: true };
         }
+
         if (data && data.error) {
           return { success: false, error: data.error };
         }
       }
+
+      return { success: false, error: 'Terjadi kesalahan. Silakan coba lagi.' };
     } catch (e) {
       console.error('Login error:', e);
+      return { success: false, error: 'Tidak dapat terhubung ke server. Periksa koneksi Anda.' };
     }
-
-    // Fallback credential check if backend API returns non-JSON or connection fails
-    if (username.trim().toLowerCase() === 'admin' && password === 'admin123') {
-      const userData = { username: 'admin', role: 'Super Administrator', loginTime: new Date().toISOString() };
-      setIsAuthenticated(true);
-      setAdminUser(userData);
-      localStorage.setItem('umkm_admin_auth', 'true');
-      localStorage.setItem('umkm_admin_user', JSON.stringify(userData));
-      return { success: true };
-    }
-    return { success: false, error: 'Username atau password yang Anda masukkan salah.' };
   };
 
-  const logout = () => {
-    setIsAuthenticated(false);
-    setAdminUser(null);
-    localStorage.removeItem('umkm_admin_auth');
-    localStorage.removeItem('umkm_admin_user');
+  const logout = async () => {
+    try {
+      await fetch(withBasePath('/api/admin/auth/logout'), {
+        method: 'POST',
+        credentials: 'include',
+      });
+    } catch (e) {
+      console.warn('Logout request failed:', e);
+    } finally {
+      setIsAuthenticated(false);
+      setAdminUser(null);
+    }
   };
 
   return (

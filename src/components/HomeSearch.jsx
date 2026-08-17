@@ -3,11 +3,12 @@
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { SearchIcon, CategoryIcon } from './Icons';
-import { CATEGORIES } from '../data/msmes';
+import { useData } from '../context/DataContext';
 
 export default function HomeSearch() {
   const [query, setQuery] = useState('');
   const router = useRouter();
+  const { categories: CATEGORIES } = useData();
 
   const handleSearchSubmit = (e) => {
     e.preventDefault();
@@ -15,7 +16,7 @@ export default function HomeSearch() {
   };
 
   const handleCategoryClick = (cat) => {
-    router.push(`/products?cat=${encodeURIComponent(cat)}`);
+    router.push(`/produk?cat=${encodeURIComponent(cat)}`);
   };
 
   return (
@@ -36,7 +37,7 @@ export default function HomeSearch() {
       </form>
 
       <div className="chip-row">
-        <button className="chip" onClick={() => router.push('/products')}>
+        <button className="chip" onClick={() => router.push('/produk')}>
           Semua Kategori
         </button>
         {CATEGORIES.map((c) => (

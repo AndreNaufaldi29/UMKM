@@ -100,31 +100,6 @@ export default function AdminAuthGuard({ children }) {
           </p>
         </div>
 
-        {/* DEMO BADGE FILL */}
-        <div
-          onClick={handleFillDemo}
-          style={{
-            background: 'var(--sand)',
-            border: '1px dashed var(--forest)',
-            borderRadius: '12px',
-            padding: '10px 14px',
-            marginBottom: '22px',
-            cursor: 'pointer',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            transition: 'all 0.2s ease'
-          }}
-          title="Klik untuk mengisi akun demo otomatis"
-        >
-          <div style={{ fontSize: '0.8rem', color: 'var(--ink)' }}>
-            <strong>💡 Akun Demo:</strong> Username: <code style={{ fontWeight: '700', color: 'var(--forest)' }}>admin</code> | Pass: <code style={{ fontWeight: '700', color: 'var(--forest)' }}>admin123</code>
-          </div>
-          <span style={{ fontSize: '0.74rem', background: 'var(--forest)', color: '#fff', padding: '3px 8px', borderRadius: '6px', fontWeight: '600', whiteSpace: 'nowrap' }}>
-            Isi Demo
-          </span>
-        </div>
-
         {/* ERROR ALERT */}
         {error && (
           <div

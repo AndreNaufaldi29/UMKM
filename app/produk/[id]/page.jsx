@@ -41,7 +41,6 @@ async function getProductDetail(id) {
         umkm: {
           include: {
             category: true,
-            dusun: true
           }
         }
       }
@@ -55,7 +54,6 @@ async function getProductDetail(id) {
           umkm: {
             include: {
               category: true,
-              dusun: true
             }
           }
         }
@@ -99,7 +97,6 @@ async function getProductDetail(id) {
       msmeId: p.umkmId || p.msmeId,
       msmeName: p.umkm ? p.umkm.name : (p.msmeName || ''),
       cat: p.umkm && p.umkm.category ? p.umkm.category.name : (p.cat || 'Lainnya'),
-      dusun: p.umkm && p.umkm.dusun ? p.umkm.dusun.name : (p.dusun || 'Desa'),
       est: p.umkm ? p.umkm.est : (p.est || 2020),
       status: p.umkm ? p.umkm.status : (p.status || 'active'),
       wa: p.umkm ? p.umkm.wa : (p.wa || '')
@@ -114,7 +111,7 @@ async function getRelatedProducts(msmeId, currentProdId) {
   try {
     const prods = await prisma.product.findMany({
       where: { umkmId: msmeId, NOT: { id: currentProdId } },
-      include: { umkm: { include: { category: true, dusun: true } } },
+      include: { umkm: { include: { category: true } } },
       take: 4
     });
     return prods.map((p) => ({
@@ -131,7 +128,6 @@ async function getRelatedProducts(msmeId, currentProdId) {
       msmeId: p.umkmId,
       msmeName: p.umkm ? p.umkm.name : '',
       cat: p.umkm && p.umkm.category ? p.umkm.category.name : 'Lainnya',
-      dusun: p.umkm && p.umkm.dusun ? p.umkm.dusun.name : 'Desa',
       status: p.umkm ? p.umkm.status : 'active',
       wa: p.umkm ? p.umkm.wa : ''
     }));
@@ -154,25 +150,6 @@ function getProductVariants(cat) {
     return ['Layanan Standar', 'Layanan Cepat (Express)', 'Paket Lengkap + Garansi'];
   }
   return ['Varian Standar', 'Varian Premium'];
-}
-
-function getProductTestimonials(name) {
-  return [
-    {
-      id: 1,
-      buyer: 'Andi Pratama',
-      date: '3 hari yang lalu',
-      rating: 5,
-      comment: `Sangat puas beli "${name}" ini! Pengirimannya cepat sekali dan kualitas produknya jauh di atas ekspektasi saya. Pasti bakal beli lagi dari toko ini.`
-    },
-    {
-      id: 2,
-      buyer: 'Siti Aminah',
-      date: '1 minggu yang lalu',
-      rating: 4.8,
-      comment: `Produknya rapi sekali dan pelayanannya ramah. Senang sekali bisa mendukung perekonomian lokal UMKM Desa Sukamaju.`
-    }
-  ];
 }
 
 export async function generateMetadata({ params }) {
@@ -210,7 +187,6 @@ export default async function ProductDetailPage({ params }) {
 
   const relatedProducts = await getRelatedProducts(p.msmeId, p.id);
   const variants = getProductVariants(p.cat);
-  const testimonials = getProductTestimonials(p.name);
 
   return (
     <main className="container page-content detail-container">
@@ -219,7 +195,7 @@ export default async function ProductDetailPage({ params }) {
         <div className="breadcrumb">
           <Link href="/">Beranda</Link>
           <span className="sep">/</span>
-          <Link href="/products">Katalog Produk</Link>
+          <Link href="/produk">Katalog Produk</Link>
           <span className="sep">/</span>
           <span className="current">{p.name}</span>
         </div>
@@ -247,7 +223,7 @@ export default async function ProductDetailPage({ params }) {
                     <span>{p.views + 1} Kali Dilihat</span>
                   </span>
                 </div>
-                <Link href={`/products?cat=${encodeURIComponent(p.cat)}`} className="badge" style={{ cursor: 'pointer' }}>
+                <Link href={`/produk?cat=${encodeURIComponent(p.cat)}`} className="badge" style={{ cursor: 'pointer' }}>
                   <CategoryIcon cat={p.cat} />
                   <span style={{ marginLeft: '6px' }}>{p.cat}</span>
                 </Link>
@@ -284,7 +260,7 @@ export default async function ProductDetailPage({ params }) {
               <div>
                 <div style={{ marginBottom: '10px' }}>
                   <Link 
-                    href={`/products?cat=${encodeURIComponent(p.cat)}`} 
+                   href={`/produk?cat=${encodeURIComponent(p.cat)}`} 
                     className="badge" 
                     style={{ cursor: 'pointer', display: 'inline-flex' }}
                   >
@@ -322,10 +298,6 @@ export default async function ProductDetailPage({ params }) {
                       <div>
                         <h4 className="num" style={{ fontSize: '1.1rem', color: 'var(--forest)' }}>{p.msmeName}</h4>
                         <div style={{ display: 'flex', alignItems: 'center', gap: '10px', fontSize: '0.78rem', color: 'var(--ink-soft)', marginTop: '6px' }}>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
-                            <PinIcon style={{ width: '12px', height: '12px' }} />
-                            <span>{p.dusun}</span>
-                          </span>
                           <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }}>
                             <span>Est.</span>
                             <b>{p.est}</b>

@@ -52,7 +52,7 @@ function AdminProductsContent() {
         openEditModal(target);
       }
     }
-  }, [searchParams, products]);
+  }, [searchParams]);
 
   const openAddModal = () => {
     setEditingProduct(null);
@@ -74,7 +74,7 @@ function AdminProductsContent() {
       if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
         try {
           existingImages = JSON.parse(trimmed);
-        } catch (e) {}
+        } catch (e) { }
       }
       if (existingImages.length === 0) {
         existingImages = trimmed.split(',').map((s) => s.trim()).filter(Boolean);
@@ -323,7 +323,7 @@ function AdminProductsContent() {
                   } else if (p.imageUrl) {
                     const trimmed = p.imageUrl.trim();
                     if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
-                      try { imgList = JSON.parse(trimmed); } catch (e) {}
+                      try { imgList = JSON.parse(trimmed); } catch (e) { }
                     }
                     if (imgList.length === 0) {
                       imgList = trimmed.split(',').map(s => s.trim()).filter(Boolean);

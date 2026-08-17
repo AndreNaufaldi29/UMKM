@@ -18,14 +18,12 @@ export default function DirectoryView() {
   // Load initial state from URL query parameters
   const initialQ = searchParams.get('q') || '';
   const initialCat = searchParams.get('cat') || 'all';
-  const initialDusun = searchParams.get('dusun') || 'all';
   const initialSort = searchParams.get('sort') || 'newest';
   const initialPage = parseInt(searchParams.get('page') || '1', 10);
 
   // States
   const [query, setQuery] = useState(initialQ);
   const [cat, setCat] = useState(initialCat);
-  const [dusun, setDusun] = useState(initialDusun);
   const [sort, setSort] = useState(initialSort);
   const [page, setPage] = useState(initialPage);
 
@@ -33,7 +31,6 @@ export default function DirectoryView() {
   useEffect(() => {
     setQuery(searchParams.get('q') || '');
     setCat(searchParams.get('cat') || 'all');
-    setDusun(searchParams.get('dusun') || 'all');
     setSort(searchParams.get('sort') || 'newest');
     setPage(parseInt(searchParams.get('page') || '1', 10));
   }, [searchParams]);
@@ -42,20 +39,13 @@ export default function DirectoryView() {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    return (
-      <div className="wrap section">
-        <p>Memuat direktori...</p>
-      </div>
-    );
-  }
+  // Render full component directly
 
   // Update URL parameters when state changes
-  const updateUrl = (newQ, newCat, newDusun, newSort, newPage) => {
+  const updateUrl = (newQ, newCat, newSort, newPage) => {
     const params = new URLSearchParams();
     if (newQ.trim()) params.set('q', newQ.trim());
     if (newCat !== 'all') params.set('cat', newCat);
-    if (newDusun !== 'all') params.set('dusun', newDusun);
     if (newSort !== 'newest') params.set('sort', newSort);
     if (newPage > 1) params.set('page', newPage.toString());
 
@@ -68,37 +58,30 @@ export default function DirectoryView() {
     const val = e.target.value;
     setQuery(val);
     setPage(1);
-    updateUrl(val, cat, dusun, sort, 1);
+    updateUrl(val, cat, sort, 1);
   };
 
   const handleCatChange = (newCat) => {
     setCat(newCat);
     setPage(1);
-    updateUrl(query, newCat, dusun, sort, 1);
-  };
-
-  const handleDusunChange = (newDusun) => {
-    setDusun(newDusun);
-    setPage(1);
-    updateUrl(query, cat, newDusun, sort, 1);
+    updateUrl(query, newCat, sort, 1);
   };
 
   const handleSortChange = (e) => {
     const newSort = e.target.value;
     setSort(newSort);
     setPage(1);
-    updateUrl(query, cat, dusun, newSort, 1);
+    updateUrl(query, cat, newSort, 1);
   };
 
   const handlePageChange = (newPage) => {
     setPage(newPage);
-    updateUrl(query, cat, dusun, sort, newPage);
+    updateUrl(query, cat, sort, newPage);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   // Helper counts
   const getCatCount = (c) => MSMES.filter((m) => (c === 'all' ? true : m.cat === c)).length;
-  const getDusunCount = (d) => MSMES.filter((m) => (d === 'all' ? true : m.dusun === d)).length;
 
   // Filter & sort logic
   const filteredList = MSMES.filter((m) => {
@@ -109,8 +92,7 @@ export default function DirectoryView() {
       m.owner.toLowerCase().includes(q) ||
       m.cat.toLowerCase().includes(q);
     const matchCat = cat === 'all' || m.cat === cat;
-    const matchDusun = dusun === 'all' || m.dusun === dusun;
-    return matchQ && matchCat && matchDusun;
+    return matchQ && matchCat;
   });
 
   const sortedList = [...filteredList];

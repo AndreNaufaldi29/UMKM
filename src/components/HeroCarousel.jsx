@@ -20,7 +20,7 @@ const SLIDES = [
     title: 'Kualitas Terbaik Asli Buatan Lokal',
     desc: 'Dukung kemajuan ekonomi warga desa dengan membeli produk asli buatan tangan masyarakat.',
     btnText: 'Lihat Katalog Produk',
-    link: '/products',
+    link: '/produk',
   },
   {
     image: withBasePath('/images/umkm-3.jpg'),

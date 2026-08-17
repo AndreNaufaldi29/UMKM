@@ -1,3 +1,4 @@
+import UMKMBannerImage from '../../../src/components/UMKMBannerImage';
 import { withBasePath } from '../../../src/utils/basePath';
 import React from 'react';
 import Link from 'next/link';
@@ -38,7 +39,6 @@ async function getUmkmDetail(id) {
       where: { id: umkmId },
       include: {
         category: true,
-        dusun: true,
         certifications: true,
         products: true
       }
@@ -51,7 +51,6 @@ async function getUmkmDetail(id) {
       name: u.name,
       owner: u.owner,
       cat: u.category ? u.category.name : 'Lainnya',
-      dusun: u.dusun ? u.dusun.name : 'Desa',
       est: u.est,
       status: u.status,
       addr: u.addr,
@@ -176,15 +175,7 @@ export default async function UMKMDetailPage({ params }) {
       >
         {/* BANNER PHOTO CONTAINER */}
         <div style={{ position: 'relative', width: '100%', height: '320px', background: '#2D3748' }}>
-          {m.imageUrl ? (
-            <img
-              src={withBasePath(m.imageUrl)}
-              alt={m.name}
-              style={{ width: '100%', height: '100%', objectFit: 'cover' }}
-            />
-          ) : (
-            <PhotoSVG cat={m.cat} seed={m.id} style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-          )}
+          <UMKMBannerImage imageUrl={m.imageUrl} name={m.name} cat={m.cat} id={m.id} />
 
           {/* GRADIENT OVERLAY */}
           <div 
@@ -201,9 +192,6 @@ export default async function UMKMDetailPage({ params }) {
             <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
               <span className="badge" style={{ background: 'var(--soil)', color: '#fff', border: 'none', fontWeight: 700 }}>
                 <CategoryIcon cat={m.cat} /> {m.cat}
-              </span>
-              <span className="badge" style={{ background: 'rgba(255,255,255,0.25)', backdropFilter: 'blur(4px)', color: '#fff', border: 'none' }}>
-                <PinIcon width="12" height="12" /> {m.dusun}
               </span>
               <span className="badge" style={{ background: m.status === 'inactive' ? 'rgba(239,68,68,0.85)' : 'rgba(34,197,94,0.85)', color: '#fff', border: 'none' }}>
                 {m.status === 'inactive' ? '✕ Tutup Sementara' : '✓ Aktif Beroperasi'}
@@ -274,12 +262,6 @@ export default async function UMKMDetailPage({ params }) {
               </div>
               <div className="info-row">
                 <span className="k" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                  <PinIcon width="14" height="14" /> Lokasi Dusun
-                </span>
-                <span className="v">{m.dusun}</span>
-              </div>
-              <div className="info-row">
-                <span className="k" style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
                   <CalendarIcon width="14" height="14" /> Tahun Berdiri
                 </span>
                 <span className="v">{m.est}</span>
@@ -305,7 +287,7 @@ export default async function UMKMDetailPage({ params }) {
               📖 Sejarah Singkat Usaha
             </h3>
             <p style={{ color: 'var(--ink-soft)', fontSize: '0.95rem', lineHeight: '1.7', margin: 0 }}>
-              {m.history || `Didirikan oleh ${m.owner} pada tahun ${m.est}, ${m.name} bermula dari industri rumah tangga kecil yang didasari keinginan luhur untuk memajukan potensi daerah. Berkat konsistensi dalam mempertahankan mutu produk ${m.cat} pilihan, kini usaha ini telah berkembang pesat sebagai salah satu penyedia produk lokal tepercaya di wilayah ${m.dusun}, Desa Sukamaju, sekaligus berkontribusi aktif dalam meningkatkan taraf hidup warga dan memberdayakan para pemuda desa.`}
+              {m.history || `Didirikan oleh ${m.owner} pada tahun ${m.est}, ${m.name} bermula dari industri rumah tangga kecil yang didasari keinginan luhur untuk memajukan potensi daerah. Berkat konsistensi dalam mempertahankan mutu produk ${m.cat} pilihan, kini usaha ini telah berkembang pesat sebagai salah satu penyedia produk lokal tepercaya di Desa Sukamaju, sekaligus berkontribusi aktif dalam meningkatkan taraf hidup warga dan memberdayakan para pemuda desa.`}
             </p>
           </div>
 

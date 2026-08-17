@@ -1,14 +1,16 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { ProductSVG } from './DynamicSVGs';
-import { CategoryIcon, StarIcon, EyeIcon, PhoneIcon } from './Icons';
+import { CategoryIcon, EyeIcon, PhoneIcon } from './Icons';
 import { formatRupiah } from '../utils/formatter';
 import { withBasePath } from '../utils/basePath';
 
 export default function ProductCard({ p }) {
   const router = useRouter();
+  const [imgError, setImgError] = useState(false);
+
   const productUrl = `/produk/${encodeURIComponent(p.id)}`;
   const waUrl = p.wa
     ? `https://wa.me/${p.wa}?text=${encodeURIComponent(
@@ -61,14 +63,12 @@ export default function ProductCard({ p }) {
       style={{ display: 'flex', flexDirection: 'column', cursor: 'pointer' }}
     >
       <div className="card-photo">
-        {primaryImage ? (
+        {primaryImage && !imgError ? (
           <img
             src={withBasePath(primaryImage)}
             alt={p.name}
             style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            onError={(e) => {
-              e.target.style.display = 'none';
-            }}
+            onError={() => setImgError(true)}
           />
         ) : (
           <ProductSVG cat={p.cat} seed={p.name ? p.name.length + (p.price || 0) : 42} style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -77,7 +77,7 @@ export default function ProductCard({ p }) {
           className="card-cat"
           onClick={(e) => {
             e.stopPropagation();
-            router.push(`/products?cat=${encodeURIComponent(p.cat)}`);
+            router.push(`/produk?cat=${encodeURIComponent(p.cat)}`);
           }}
           style={{ cursor: 'pointer' }}
         >
@@ -109,7 +109,6 @@ export default function ProductCard({ p }) {
 
         {/* METRICS */}
         <div className="product-metrics" style={{ display: 'flex', gap: '10px', alignItems: 'center', fontSize: '0.74rem', color: 'var(--ink-soft)', borderBottom: '1px dashed var(--line)', paddingBottom: '10px', marginBottom: '10px' }}>
-
           <span style={{ display: 'flex', alignItems: 'center', gap: '3px' }} title="Dilihat">
             <EyeIcon />
             <span>{p.views || 0}</span>

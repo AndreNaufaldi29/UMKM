@@ -1,14 +1,11 @@
 export const CATEGORIES = ['Kuliner', 'Kerajinan', 'Fashion', 'Pertanian', 'Jasa'];
 
-export const DUSUN = ['Dusun Mekar', 'Dusun Sejahtera', 'Dusun Indah', 'Dusun Makmur'];
-
 export const MSMES = [
   {
     id: 1,
     name: 'Kopi Sunyi Kaki Gunung',
     owner: 'Wardi Susanto',
     cat: 'Kuliner',
-    dusun: 'Dusun Mekar',
     est: 2019,
     status: 'active',
     addr: 'Jl. Kebun Kopi No. 12, Dusun Mekar',
@@ -34,7 +31,6 @@ export const MSMES = [
     name: 'Batik Tulis Sekar Arum',
     owner: 'Sri Wahyuni',
     cat: 'Kerajinan',
-    dusun: 'Dusun Indah',
     est: 2015,
     status: 'active',
     addr: 'Jl. Melati Raya No. 4, Dusun Indah',
@@ -59,7 +55,6 @@ export const MSMES = [
     name: 'Anyaman Bambu Lestari',
     owner: 'Karta Wijaya',
     cat: 'Kerajinan',
-    dusun: 'Dusun Makmur',
     est: 2012,
     status: 'active',
     addr: 'Jl. Bambu Kuning No. 9, Dusun Makmur',
@@ -85,7 +80,6 @@ export const MSMES = [
     name: 'Keripik Singkong Bu Darmi',
     owner: 'Darmi Astuti',
     cat: 'Kuliner',
-    dusun: 'Dusun Sejahtera',
     est: 2018,
     status: 'active',
     addr: 'Jl. Singkong Manis No. 21, Dusun Sejahtera',
@@ -110,7 +104,6 @@ export const MSMES = [
     name: 'Konveksi Jaya Abadi',
     owner: 'Slamet Riyadi',
     cat: 'Fashion',
-    dusun: 'Dusun Mekar',
     est: 2020,
     status: 'active',
     addr: 'Jl. Jahit Terampil No. 3, Dusun Mekar',
@@ -134,7 +127,6 @@ export const MSMES = [
     name: 'Madu Hutan Asli Desa',
     owner: 'Yono Prasetyo',
     cat: 'Pertanian',
-    dusun: 'Dusun Indah',
     est: 2016,
     status: 'active',
     addr: 'Jl. Lebah Manis No. 7, Dusun Indah',
@@ -159,7 +151,6 @@ export const MSMES = [
     name: 'Bengkel Motor Barokah',
     owner: 'Dedi Kurniawan',
     cat: 'Jasa',
-    dusun: 'Dusun Makmur',
     est: 2014,
     status: 'active',
     addr: 'Jl. Raya Makmur No. 15, Dusun Makmur',
@@ -183,7 +174,6 @@ export const MSMES = [
     name: 'Peternakan Lele Makmur Jaya',
     owner: 'Agus Setiawan',
     cat: 'Pertanian',
-    dusun: 'Dusun Sejahtera',
     est: 2017,
     status: 'inactive',
     addr: 'Jl. Kolam Ikan No. 18, Dusun Sejahtera',
@@ -206,7 +196,6 @@ export const MSMES = [
     name: 'Sanggar Gerabah Tanah Liat',
     owner: 'Ningsih Handayani',
     cat: 'Kerajinan',
-    dusun: 'Dusun Mekar',
     est: 2011,
     status: 'active',
     addr: 'Jl. Tembikar Indah No. 6, Dusun Mekar',
@@ -236,7 +225,6 @@ export const PRODUCTS = MSMES.flatMap((m, mIndex) =>
     msmeId: m.id,
     msmeName: m.name,
     cat: m.cat,
-    dusun: m.dusun,
     status: m.status,
     wa: m.wa
   }))

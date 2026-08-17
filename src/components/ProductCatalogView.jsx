@@ -39,13 +39,7 @@ export default function ProductCatalogView() {
     setMounted(true);
   }, []);
 
-  if (!mounted) {
-    return (
-      <div className="wrap section">
-        <p>Memuat katalog produk...</p>
-      </div>
-    );
-  }
+  // Render full component directly
 
   // Update URL parameters when state changes
   const updateUrl = (newQ, newCat, newSort, newPage) => {
@@ -55,7 +49,7 @@ export default function ProductCatalogView() {
     if (newSort !== 'rating') params.set('sort', newSort);
     if (newPage > 1) params.set('page', newPage.toString());
 
-    const urlString = params.toString() ? `/products?${params.toString()}` : '/products';
+    const urlString = params.toString() ? `/produk?${params.toString()}` : '/produk';
     router.push(urlString, { scroll: false });
   };
 
@@ -223,7 +217,7 @@ export default function ProductCatalogView() {
                 <h3 style={{ fontFamily: "'Fraunces', serif", fontWeight: 600, marginBottom: '6px' }}>
                   Produk tidak ditemukan
                 </h3>
-                <p>Coba ubah kata kunci pencarian atau bersihkan filter Kategori / Dusun.</p>
+                <p>Coba ubah kata kunci pencarian atau bersihkan filter Kategori.</p>
               </div>
             )}
 

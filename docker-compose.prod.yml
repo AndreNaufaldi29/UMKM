@@ -1,0 +1,52 @@
+services:
+  # 1. PostgreSQL Database Service
+  db:
+    image: postgres:16-alpine
+    container_name: umkm-postgres-db
+    restart: always
+    env_file:
+      - .env
+    environment:
+      POSTGRES_USER: ${DB_USER:-umkm_user}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-umkm_password}
+      POSTGRES_DB: ${DB_NAME:-umkm_db}
+    ports:
+      - "${DB_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-umkm_user} -d ${DB_NAME:-umkm_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # 2. Next.js Production Application Service
+  frontend:
+    image: ${DOCKER_IMAGE:-umkm-web:latest}
+    build:
+      context: .
+      target: runner
+      args:
+        PORT: ${PORT:-5173}
+    container_name: web-frontend
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "${PORT:-5173}:${PORT:-5173}"
+    environment:
+      - PORT=${PORT:-5173}
+      - DATABASE_URL=postgresql://${DB_USER:-umkm_user}:${DB_PASSWORD:-umkm_password}@db:5432/${DB_NAME:-umkm_db}?schema=public
+      - NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH:-}
+      - NODE_ENV=production
+    volumes:
+      - uploads_data:/app/public/uploads
+    depends_on:
+      db:
+        condition: service_healthy
+
+volumes:
+  postgres_data:
+    driver: local
+  uploads_data:
+    driver: local

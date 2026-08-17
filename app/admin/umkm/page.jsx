@@ -9,12 +9,11 @@ import { PlusIcon, EditIcon, TrashIcon, SearchIcon, XIcon, CheckCircleIcon, PinI
 
 function AdminUMKMContent() {
   const searchParams = useSearchParams();
-  const { msmes, categories, dusunList, addMsme, updateMsme, deleteMsme } = useData();
+  const { msmes, categories, addMsme, updateMsme, deleteMsme } = useData();
 
   // Search & Filter state
   const [search, setSearch] = useState('');
   const [catFilter, setCatFilter] = useState('all');
-  const [dusunFilter, setDusunFilter] = useState('all');
   const [statusFilter, setStatusFilter] = useState('all');
 
   // Modal State
@@ -28,7 +27,6 @@ function AdminUMKMContent() {
     name: '',
     owner: '',
     cat: categories[0] || 'Kuliner',
-    dusun: dusunList[0] || 'Dusun Mekar',
     est: new Date().getFullYear(),
     status: 'active',
     addr: '',
@@ -63,7 +61,7 @@ function AdminUMKMContent() {
         openEditModal(target);
       }
     }
-  }, [searchParams, msmes]);
+  }, [searchParams]);
 
   const openAddModal = () => {
     setEditingMsme(null);
@@ -78,7 +76,6 @@ function AdminUMKMContent() {
       name: m.name || '',
       owner: m.owner || '',
       cat: m.cat || categories[0],
-      dusun: m.dusun || dusunList[0],
       est: m.est || new Date().getFullYear(),
       status: m.status || 'active',
       addr: m.addr || '',
@@ -171,9 +168,8 @@ function AdminUMKMContent() {
       m.owner.toLowerCase().includes(q) ||
       m.addr.toLowerCase().includes(q);
     const matchCat = catFilter === 'all' || m.cat === catFilter;
-    const matchDusun = dusunFilter === 'all' || m.dusun === dusunFilter;
     const matchStatus = statusFilter === 'all' || m.status === statusFilter;
-    return matchQ && matchCat && matchDusun && matchStatus;
+    return matchQ && matchCat && matchStatus;
   });
 
   return (
@@ -209,26 +205,18 @@ function AdminUMKMContent() {
             ))}
           </select>
 
-          <select value={dusunFilter} onChange={(e) => setDusunFilter(e.target.value)}>
-            <option value="all">Semua Dusun</option>
-            {dusunList.map((d) => (
-              <option key={d} value={d}>{d}</option>
-            ))}
-          </select>
-
           <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
             <option value="all">Semua Status</option>
             <option value="active">Aktif Beroperasi</option>
             <option value="inactive">Tutup Sementara</option>
-                    </select>
+          </select>
 
-          {(search || catFilter !== 'all' || dusunFilter !== 'all' || statusFilter !== 'all') && (
+          {(search || catFilter !== 'all' || statusFilter !== 'all') && (
             <button
               className="btn btn-outline btn-sm"
               onClick={() => {
                 setSearch('');
                 setCatFilter('all');
-                setDusunFilter('all');
                 setStatusFilter('all');
               }}
               title="Reset Filter"
@@ -256,7 +244,7 @@ function AdminUMKMContent() {
                 <th>ID</th>
                 <th>Nama UMKM & Pemilik</th>
                 <th>Kategori</th>
-                <th>Dusun & Alamat</th>
+                <th>Alamat</th>
                 <th>Tahun</th>
                 <th>Produk</th>
                 <th>Status</th>
@@ -295,7 +283,6 @@ function AdminUMKMContent() {
                       <span className="badge">{m.cat}</span>
                     </td>
                     <td>
-                      <b>{m.dusun}</b>
                       <div className="text-muted" style={{ fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '3px' }}>
                         <PinIcon width="10" height="10" /> {m.addr}
                       </div>
@@ -382,18 +369,6 @@ function AdminUMKMContent() {
                   >
                     {categories.map((c) => (
                       <option key={c} value={c}>{c}</option>
-                    ))}
-                  </select>
-                </div>
-
-                <div className="form-group">
-                  <label>Lokasi Dusun</label>
-                  <select
-                    value={formData.dusun}
-                    onChange={(e) => setFormData({ ...formData, dusun: e.target.value })}
-                  >
-                    {dusunList.map((d) => (
-                      <option key={d} value={d}>{d}</option>
                     ))}
                   </select>
                 </div>

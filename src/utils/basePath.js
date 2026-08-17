@@ -1,6 +1,6 @@
 export function getBasePath() {
   const basePath = process.env.NEXT_PUBLIC_BASE_PATH || '';
-  if (!basePath) return '';
+  if (!basePath || basePath === '/') return '';
   return basePath.startsWith('/') ? basePath : `/${basePath}`;
 }
 
@@ -17,5 +17,6 @@ export function withBasePath(path = '') {
   }
   const basePath = getBasePath();
   const cleanPath = path.startsWith('/') ? path : `/${path}`;
-  return `${basePath}${cleanPath}`;
+  if (!basePath) return cleanPath;
+  return `${basePath.replace(/\/$/, '')}${cleanPath}`;
 }

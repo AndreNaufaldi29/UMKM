@@ -26,7 +26,7 @@ export default function LatestMSMECarousel({ latestMSMEs }) {
       if (el) el.removeEventListener('scroll', checkScroll);
       window.removeEventListener('resize', checkScroll);
     };
-  }, []);
+  }, [latestMSMEs]);
 
   const scrollLeft = () => {
     if (containerRef.current) {
@@ -51,12 +51,12 @@ export default function LatestMSMECarousel({ latestMSMEs }) {
         aria-label="Geser ke kiri"
         style={{
           position: 'absolute',
-          left: '-20px',
+          left: '-16px',
           top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 12,
-          opacity: canScrollLeft ? 1 : 0.25,
-          cursor: canScrollLeft ? 'pointer' : 'not-allowed',
+          opacity: canScrollLeft ? 1 : 0,
+          cursor: canScrollLeft ? 'pointer' : 'default',
           width: '42px',
           height: '42px',
           borderRadius: '50%',
@@ -84,12 +84,12 @@ export default function LatestMSMECarousel({ latestMSMEs }) {
         aria-label="Geser ke kanan"
         style={{
           position: 'absolute',
-          right: '-20px',
+          right: '-16px',
           top: '50%',
           transform: 'translateY(-50%)',
           zIndex: 12,
-          opacity: canScrollRight ? 1 : 0.25,
-          cursor: canScrollRight ? 'pointer' : 'not-allowed',
+          opacity: canScrollRight ? 1 : 0,
+          cursor: canScrollRight ? 'pointer' : 'default',
           width: '42px',
           height: '42px',
           borderRadius: '50%',
@@ -108,10 +108,10 @@ export default function LatestMSMECarousel({ latestMSMEs }) {
         &#10095;
       </button>
 
-      {/* CAROUSEL TRACK WITH HIDDEN SCROLLBAR */}
+      {/* CAROUSEL TRACK WITH HIDDEN SCROLLBAR & NO CLIPPING */}
       <div
         ref={containerRef}
-        className="latest-scroll reveal-stagger"
+        className="latest-scroll"
         style={{
           display: 'flex',
           gap: '20px',
@@ -119,11 +119,12 @@ export default function LatestMSMECarousel({ latestMSMEs }) {
           scrollBehavior: 'smooth',
           scrollbarWidth: 'none',
           msOverflowStyle: 'none',
-          paddingBottom: '8px'
+          padding: '14px 6px 22px',
+          margin: '-14px -6px -22px'
         }}
       >
         {latestMSMEs.map((m) => (
-          <div key={m.id} style={{ minWidth: '270px', flexShrink: 0 }}>
+          <div key={m.id} className="latest-scroll-item" style={{ minWidth: '280px', maxWidth: '320px', flex: '0 0 280px', display: 'flex' }}>
             <MSMECard m={m} />
           </div>
         ))}

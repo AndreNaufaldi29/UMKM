@@ -104,7 +104,6 @@ export default function AdminDashboardOverview() {
                 <th>Nama UMKM</th>
                 <th>Pemilik</th>
                 <th>Kategori</th>
-                <th>Dusun</th>
                 <th>Tahun</th>
                 <th>Status</th>
                 <th>Aksi</th>
@@ -122,7 +121,6 @@ export default function AdminDashboardOverview() {
                   <td>
                     <span className="badge">{m.cat}</span>
                   </td>
-                  <td>{m.dusun}</td>
                   <td className="mono">{m.est}</td>
                   <td>
                     <span className={'status-pill ' + (m.status || '')}>

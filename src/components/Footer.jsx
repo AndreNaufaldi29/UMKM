@@ -12,7 +12,7 @@ export default function Footer() {
         <div className="footer-links">
           <Link href="/">Beranda</Link>
           <Link href="/umkm">UMKM Desa</Link>
-          <Link href="/products">Katalog Produk</Link>
+          <Link href="/produk">Katalog Produk</Link>
         </div>
       </div>
     </footer>

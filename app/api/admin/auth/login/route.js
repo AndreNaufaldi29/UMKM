@@ -1,42 +1,70 @@
 import { NextResponse } from 'next/server';
 import bcrypt from 'bcryptjs';
 import prisma from '@/lib/db';
+import { signToken, setAuthCookie } from '@/lib/auth.js';
+import { checkRateLimit, resetRateLimit, getClientIp } from '@/lib/rateLimit.js';
 
 export async function POST(request) {
-  try {
-    const { username, password } = await request.json();
+  // ── Rate limiting ──────────────────────────────────────────
+  const ip = getClientIp(request);
+  const rl = checkRateLimit(`login:${ip}`);
+  if (rl.limited) {
+    const retryAfterSec = Math.ceil(rl.retryAfterMs / 1000);
+    return NextResponse.json(
+      { success: false, error: `Terlalu banyak percobaan login. Coba lagi dalam ${retryAfterSec} detik.` },
+      { status: 429, headers: { 'Retry-After': String(retryAfterSec) } }
+    );
+  }
 
-    if (!username || !password) {
-      return NextResponse.json({ success: false, error: 'Username and password are required' }, { status: 400 });
+  try {
+    const body = await request.json().catch(() => ({}));
+    const { username, password } = body;
+
+    if (!username || !password || typeof username !== 'string' || typeof password !== 'string') {
+      return NextResponse.json({ success: false, error: 'Username dan password wajib diisi.' }, { status: 400 });
     }
 
+    // Sanitize: max 100 chars each
+    const cleanUsername = username.trim().toLowerCase().substring(0, 100);
+    const cleanPassword = password.substring(0, 200);
+
     const admin = await prisma.adminUser.findUnique({
-      where: { username: username.trim().toLowerCase() }
+      where: { username: cleanUsername },
     });
 
     if (!admin) {
-      return NextResponse.json({ success: false, error: 'Username atau password yang Anda masukkan salah.' }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: 'Username atau password yang Anda masukkan salah.' },
+        { status: 401 }
+      );
     }
 
-    const isValidPassword = await bcrypt.compare(password, admin.passwordHash);
+    const isValidPassword = await bcrypt.compare(cleanPassword, admin.passwordHash);
     if (!isValidPassword) {
-      return NextResponse.json({ success: false, error: 'Username atau password yang Anda masukkan salah.' }, { status: 401 });
+      return NextResponse.json(
+        { success: false, error: 'Username atau password yang Anda masukkan salah.' },
+        { status: 401 }
+      );
     }
 
-    // Update last login
+    // ── Successful login ──────────────────────────────────────
+    resetRateLimit(`login:${ip}`);
+
     await prisma.adminUser.update({
       where: { id: admin.id },
-      data: { lastLoginAt: new Date() }
+      data: { lastLoginAt: new Date() },
     });
 
     const userData = {
       username: admin.username,
       fullName: admin.fullName,
-      role: admin.role === 'admin' ? 'Super Administrator' : admin.role,
-      loginTime: new Date().toISOString()
+      role:     admin.role === 'admin' ? 'Super Administrator' : admin.role,
     };
 
-    return NextResponse.json({ success: true, user: userData });
+    const token = await signToken(userData);
+    const response = NextResponse.json({ success: true, user: userData });
+    setAuthCookie(response, token);
+    return response;
   } catch (error) {
     console.error('API Error /api/admin/auth/login:', error);
     return NextResponse.json({ success: false, error: 'Authentication failed' }, { status: 500 });

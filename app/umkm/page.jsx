@@ -5,8 +5,8 @@ export const dynamic = 'force-dynamic';
 export const revalidate = 0;
 
 export const metadata = {
-  title: 'Direktori UMKM Desa Sukamaju',
-  description: 'Jelajahi, cari, dan filter berbagai usaha mikro, kecil, dan menengah di Desa Sukamaju.',
+  title: 'Direktori UMKM Desa Kedungsumur',
+  description: 'Jelajahi, cari, dan filter berbagai usaha mikro, kecil, dan menengah di Desa Kedungsumur.',
 };
 
 export default function DirectoryPage() {

@@ -9,7 +9,8 @@
     "start": "next start -H 0.0.0.0",
     "lint": "next lint",
     "db:push": "prisma db push",
-    "db:seed": "prisma db seed"
+    "db:seed": "prisma db seed",
+    "admin:set": "node scripts/set-admin.js"
   },
   "prisma": {
     "seed": "node prisma/seed.js"
