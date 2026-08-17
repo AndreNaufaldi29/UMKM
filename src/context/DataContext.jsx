@@ -1,25 +1,34 @@
 'use client';
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import { MSMES as INITIAL_MSMES, CATEGORIES } from '../data/msmes';
+import { CATEGORIES } from '../data/msmes';
 import { withBasePath } from '../utils/basePath';
 
 const DataContext = createContext(null);
+
+const getAuthHeaders = () => {
+  const headers = { 'Content-Type': 'application/json' };
+  if (typeof window !== 'undefined') {
+    const token = localStorage.getItem('umkm_admin_jwt');
+    if (token) headers['Authorization'] = `Bearer ${token}`;
+  }
+  return headers;
+};
+
 
 export function DataProvider({ children }) {
   const [msmes, setMsmes] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
 
-  // Fetch initial data dynamically from Database API using withBasePath helper
+  // Fetch initial data dynamically from Database API
   const fetchAllData = useCallback(async () => {
     try {
-      // Gunakan URL absolut agar fetch() selalu berhasil (origin + path)
       const base = typeof window !== 'undefined' ? window.location.origin : '';
       const apiPath = withBasePath('/api/umkm');
       const url = apiPath.startsWith('http') ? apiPath : `${base}${apiPath}`;
 
       const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 10000); // 10 detik timeout
+      const timeout = setTimeout(() => controller.abort(), 10000);
 
       const umkmRes = await fetch(url, {
         cache: 'no-store',
@@ -31,19 +40,12 @@ export function DataProvider({ children }) {
         const umkmData = await umkmRes.json().catch(() => null);
         if (Array.isArray(umkmData)) {
           setMsmes(umkmData);
-        } else {
-          setMsmes(INITIAL_MSMES);
         }
-      } else {
-        setMsmes(INITIAL_MSMES);
       }
     } catch (error) {
-      if (error.name === 'AbortError') {
-        console.warn('Fetch /api/umkm timed out, falling back to static data.');
-      } else {
+      if (error.name !== 'AbortError') {
         console.error('Error fetching data dynamically from API:', error);
       }
-      setMsmes(INITIAL_MSMES);
     } finally {
       setIsLoaded(true);
     }
@@ -65,7 +67,7 @@ export function DataProvider({ children }) {
       msmeName: m.name,
       cat: m.cat,
       status: m.status,
-      wa: m.wa
+      wa: m.wa,
     }))
   );
 
@@ -74,58 +76,66 @@ export function DataProvider({ children }) {
     try {
       const res = await fetch(withBasePath('/api/umkm'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         credentials: 'include',
-        body: JSON.stringify(newMsme)
+        body: JSON.stringify(newMsme),
       });
       if (res.ok) {
         await fetchAllData();
-        return;
+        return { success: true };
+      } else {
+        const data = await res.json().catch(() => null);
+        const errMsg = data?.error || `Gagal menyimpan data (${res.status})`;
+        alert(`Gagal menyimpan UMKM: ${errMsg}`);
+        return { success: false, error: errMsg };
       }
     } catch (e) {
       console.error('Error adding UMKM:', e);
+      alert('Tidak dapat terhubung ke server database.');
+      return { success: false, error: e.message };
     }
-    const nextId = msmes.length > 0 ? Math.max(...msmes.map((x) => x.id)) + 1 : 1;
-    const formatted = {
-      ...newMsme,
-      id: nextId,
-      est: parseInt(newMsme.est, 10) || new Date().getFullYear(),
-      status: newMsme.status || 'active',
-      certs: typeof newMsme.certs === 'string' ? newMsme.certs.split('\n').filter(Boolean) : (newMsme.certs || []),
-      products: newMsme.products || []
-    };
-    setMsmes((prev) => [formatted, ...prev]);
   };
 
   const updateMsme = async (id, updatedFields) => {
     try {
       const res = await fetch(withBasePath(`/api/umkm/${id}`), {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         credentials: 'include',
-        body: JSON.stringify(updatedFields)
+        body: JSON.stringify(updatedFields),
       });
       if (res.ok) {
         await fetchAllData();
-        return;
+        return { success: true };
+      } else {
+        const data = await res.json().catch(() => null);
+        const errMsg = data?.error || `Gagal memperbarui data (${res.status})`;
+        alert(`Gagal memperbarui UMKM: ${errMsg}`);
+        return { success: false, error: errMsg };
       }
     } catch (e) {
       console.error('Error updating UMKM:', e);
+      alert('Tidak dapat terhubung ke server database.');
+      return { success: false, error: e.message };
     }
-    setMsmes((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, ...updatedFields } : m))
-    );
   };
 
   const deleteMsme = async (id) => {
     try {
-      await fetch(withBasePath(`/api/umkm/${id}`), { method: 'DELETE', credentials: 'include' });
-      await fetchAllData();
-      return;
+      const res = await fetch(withBasePath(`/api/umkm/${id}`), { method: 'DELETE', headers: getAuthHeaders(), credentials: 'include' });
+      if (res.ok) {
+        await fetchAllData();
+        return { success: true };
+      } else {
+        const data = await res.json().catch(() => null);
+        alert(`Gagal menghapus UMKM: ${data?.error || res.status}`);
+        return { success: false };
+      }
     } catch (e) {
       console.error('Error deleting UMKM:', e);
+      alert('Tidak dapat terhubung ke server database.');
+      return { success: false };
     }
-    setMsmes((prev) => prev.filter((m) => m.id !== id));
   };
 
   // Product CRUD Handlers
@@ -133,16 +143,23 @@ export function DataProvider({ children }) {
     try {
       const res = await fetch(withBasePath('/api/products'), {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         credentials: 'include',
-        body: JSON.stringify({ msmeId, ...newProduct })
+        body: JSON.stringify({ msmeId, ...newProduct }),
       });
       if (res.ok) {
         await fetchAllData();
-        return;
+        return { success: true };
+      } else {
+        const data = await res.json().catch(() => null);
+        const errMsg = data?.error || `Gagal menambah produk (${res.status})`;
+        alert(`Gagal menambah produk: ${errMsg}`);
+        return { success: false, error: errMsg };
       }
     } catch (e) {
       console.error('Error adding product:', e);
+      alert('Tidak dapat terhubung ke server database.');
+      return { success: false, error: e.message };
     }
   };
 
@@ -150,61 +167,75 @@ export function DataProvider({ children }) {
     try {
       const res = await fetch(withBasePath(`/api/products/${productId}`), {
         method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
+        headers: getAuthHeaders(),
         credentials: 'include',
-        body: JSON.stringify(updatedFields)
+        body: JSON.stringify(updatedFields),
       });
       if (res.ok) {
         await fetchAllData();
-        return;
+        return { success: true };
+      } else {
+        const data = await res.json().catch(() => null);
+        const errMsg = data?.error || `Gagal memperbarui produk (${res.status})`;
+        alert(`Gagal memperbarui produk: ${errMsg}`);
+        return { success: false, error: errMsg };
       }
     } catch (e) {
       console.error('Error updating product:', e);
+      alert('Tidak dapat terhubung ke server database.');
+      return { success: false, error: e.message };
     }
   };
 
   const deleteProduct = async (productId) => {
     try {
-      await fetch(withBasePath(`/api/products/${productId}`), { method: 'DELETE', credentials: 'include' });
-      await fetchAllData();
-      return;
+      const res = await fetch(withBasePath(`/api/products/${productId}`), { method: 'DELETE', headers: getAuthHeaders(), credentials: 'include' });
+      if (res.ok) {
+        await fetchAllData();
+        return { success: true };
+      } else {
+        const data = await res.json().catch(() => null);
+        alert(`Gagal menghapus produk: ${data?.error || res.status}`);
+        return { success: false };
+      }
     } catch (e) {
       console.error('Error deleting product:', e);
+      alert('Tidak dapat terhubung ke server database.');
+      return { success: false };
     }
   };
 
   // Reset Data Handler
   const resetToDefault = async () => {
     try {
-      const res = await fetch(withBasePath('/api/reset'), { method: 'POST', credentials: 'include' });
+      const res = await fetch(withBasePath('/api/reset'), { method: 'POST', headers: getAuthHeaders(), credentials: 'include' });
       const data = await res.json().catch(() => null);
       if (res.ok && data?.success) {
         await fetchAllData();
-        return { success: true, message: data.message, deleted: data.deleted };
+        return { success: true, message: data.message };
       }
-      const errMsg = data?.error || `Server error (${res.status})`;
-      return { success: false, error: errMsg };
+      return { success: false, error: data?.error || 'Gagal mereset database' };
     } catch (e) {
       console.error('Error resetting database:', e);
-      return { success: false, error: e.message || 'Gagal terhubung ke server.' };
+      return { success: false, error: e.message };
     }
   };
 
   return (
     <DataContext.Provider
       value={{
-        msmes: isLoaded ? msmes : INITIAL_MSMES,
-        products: isLoaded ? products : INITIAL_MSMES.flatMap((m) => m.products || []),
-                categories: CATEGORIES,
-                isLoaded,
+        msmes,
+        products,
+        categories: CATEGORIES,
+        isLoaded,
         addMsme,
         updateMsme,
         deleteMsme,
         addProduct,
         updateProduct,
         deleteProduct,
-                resetToDefault,
-        refreshData: fetchAllData
+        resetToDefault,
+        refreshData: fetchAllData,
       }}
     >
       {children}
@@ -216,18 +247,18 @@ export function useData() {
   const context = useContext(DataContext);
   if (!context) {
     return {
-      msmes: INITIAL_MSMES,
-      products: INITIAL_MSMES.flatMap((m) => m.products || []),
-            categories: CATEGORIES,
-            isLoaded: true,
-      addMsme: () => {},
-      updateMsme: () => {},
-      deleteMsme: () => {},
-      addProduct: () => {},
-      updateProduct: () => {},
-      deleteProduct: () => {},
-            resetToDefault: () => {},
-      refreshData: () => {}
+      msmes: [],
+      products: [],
+      categories: CATEGORIES,
+      isLoaded: true,
+      addMsme: async () => ({ success: false }),
+      updateMsme: async () => ({ success: false }),
+      deleteMsme: async () => ({ success: false }),
+      addProduct: async () => ({ success: false }),
+      updateProduct: async () => ({ success: false }),
+      deleteProduct: async () => ({ success: false }),
+      resetToDefault: async () => ({ success: false }),
+      refreshData: () => {},
     };
   }
   return context;

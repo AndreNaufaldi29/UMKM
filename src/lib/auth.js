@@ -1,7 +1,7 @@
 /**
  * Zero-dependency JWT Authentication using Node.js native 'crypto'.
  * RFC 7519 compliant HMAC-SHA256 signing and constant-time verification.
- * Tokens are stored as HttpOnly, SameSite=Strict cookies.
+ * Supports dual authentication: HttpOnly Cookies + Authorization Bearer Headers.
  */
 import crypto from 'crypto';
 import { NextResponse } from 'next/server';
@@ -103,12 +103,21 @@ export async function verifyToken(token) {
 
 /**
  * Set the auth cookie on a NextResponse.
+ * Adapts secure flag dynamically so HTTP IPs (137.59.126.193:5173) and HTTPS domains both work seamlessly.
  */
-export function setAuthCookie(response, token) {
+export function setAuthCookie(response, token, request = null) {
+  let isSecure = false;
+  if (request && typeof request.headers?.get === 'function') {
+    const proto = request.headers.get('x-forwarded-proto');
+    isSecure = proto === 'https' || (request.url && request.url.startsWith('https://'));
+  } else if (process.env.COOKIE_SECURE === 'true') {
+    isSecure = true;
+  }
+
   response.cookies.set(COOKIE_NAME, token, {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: isSecure,
+    sameSite: 'lax',
     path: '/',
     maxAge: EXPIRY_SECONDS,
   });
@@ -117,21 +126,39 @@ export function setAuthCookie(response, token) {
 /**
  * Clear the auth cookie (logout).
  */
-export function clearAuthCookie(response) {
+export function clearAuthCookie(response, request = null) {
+  let isSecure = false;
+  if (request && typeof request.headers?.get === 'function') {
+    const proto = request.headers.get('x-forwarded-proto');
+    isSecure = proto === 'https' || (request.url && request.url.startsWith('https://'));
+  } else if (process.env.COOKIE_SECURE === 'true') {
+    isSecure = true;
+  }
+
   response.cookies.set(COOKIE_NAME, '', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
-    sameSite: 'strict',
+    secure: isSecure,
+    sameSite: 'lax',
     path: '/',
     maxAge: 0,
   });
 }
 
 /**
- * Read the auth token from incoming request cookies.
+ * Read the auth token from incoming request (Cookie OR Authorization: Bearer Header).
  */
 export function getTokenFromRequest(request) {
-  return request.cookies.get(COOKIE_NAME)?.value ?? null;
+  // 1. Try Cookie
+  const cookieToken = request.cookies?.get(COOKIE_NAME)?.value;
+  if (cookieToken) return cookieToken;
+
+  // 2. Try Authorization: Bearer <token> Header
+  const authHeader = typeof request.headers?.get === 'function' ? request.headers.get('authorization') : null;
+  if (authHeader && authHeader.toLowerCase().startsWith('bearer ')) {
+    return authHeader.substring(7).trim();
+  }
+
+  return null;
 }
 
 export { COOKIE_NAME };

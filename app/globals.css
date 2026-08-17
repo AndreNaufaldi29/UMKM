@@ -532,49 +532,43 @@ select {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  padding: 13px 22px;
+  padding: 11px 20px;
   border-radius: 10px;
-  border: none;
+  border: 1px solid transparent;
   font-weight: 700;
   font-size: .92rem;
   background: var(--forest);
-  color: #fff;
-}
-
-.dark .btn {
-  color: #0D1611;
+  color: #ffffff !important;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  text-decoration: none;
 }
 
 .btn:hover {
   background: var(--forest-light);
-}
-
-.dark .btn:hover {
-  color: #0D1611;
+  color: #ffffff !important;
 }
 
 .btn-outline {
-  background: transparent;
-  border: 1.5px solid var(--forest);
-  color: var(--forest);
+  background: var(--paper);
+  border: 1.5px solid var(--line);
+  color: var(--ink) !important;
 }
 
 .btn-outline:hover {
   background: var(--forest-soft);
-  color: var(--forest);
+  border-color: var(--forest);
+  color: var(--forest) !important;
 }
 
 .btn-soil {
-  background: var(--soil);
-  color: #fff;
-}
-
-.dark .btn-soil {
-  color: #18120B;
+  background: var(--soil) !important;
+  color: #ffffff !important;
 }
 
 .btn-soil:hover {
-  opacity: .9;
+  background: #A06832 !important;
+  color: #ffffff !important;
 }
 
 .chip-row {
@@ -3895,4 +3889,435 @@ body.dark .badge.soil {
 body.dark .badge.sky {
   background: #182A32 !important;
   color: #89C6E5 !important;
+}
+
+/* ==========================================================================
+   ADMIN PANEL DARK MODE COMPREHENSIVE CONTRAST SYSTEM
+   ========================================================================== */
+
+/* 1. Admin Header, Badges & Navigation Tabs */
+body.dark .admin-title,
+.dark .admin-title {
+  color: #F5F4EF !important;
+}
+
+body.dark .admin-badge,
+.dark .admin-badge {
+  background: #1C2A22 !important;
+  color: #76C79C !important;
+  border: 1px solid #31372A !important;
+}
+
+body.dark .admin-nav-tabs,
+.dark .admin-nav-tabs {
+  border-bottom: 1px solid #31372A !important;
+}
+
+body.dark .admin-tab,
+.dark .admin-tab {
+  color: #B4AFA0 !important;
+}
+
+body.dark .admin-tab:hover,
+.dark .admin-tab:hover {
+  color: #76C79C !important;
+  background: #1C2A22 !important;
+}
+
+body.dark .admin-tab.active,
+.dark .admin-tab.active {
+  color: #76C79C !important;
+  border-bottom-color: #76C79C !important;
+  background: rgba(26, 30, 22, 0.95) !important;
+  font-weight: 700 !important;
+}
+
+body.dark .tab-count,
+.dark .tab-count {
+  background: #121610 !important;
+  color: #D9D7CF !important;
+}
+
+/* 2. Admin Stat Cards */
+body.dark .admin-stat-card,
+.dark .admin-stat-card {
+  background: rgba(26, 30, 22, 0.95) !important;
+  border: 1px solid #31372A !important;
+  color: #F5F4EF !important;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
+}
+
+body.dark .stat-val,
+.dark .stat-val {
+  color: #F5F4EF !important;
+}
+
+body.dark .stat-label,
+.dark .stat-label {
+  color: #B4AFA0 !important;
+}
+
+body.dark .stat-link,
+.dark .stat-link {
+  color: #76C79C !important;
+}
+
+body.dark .stat-badge.green,
+.dark .stat-badge.green {
+  background: #1C2A22 !important;
+  color: #76C79C !important;
+  border: 1px solid rgba(118, 199, 156, 0.3) !important;
+}
+
+body.dark .stat-badge.blue,
+.dark .stat-badge.blue {
+  background: #182A32 !important;
+  color: #89C6E5 !important;
+  border: 1px solid rgba(137, 198, 229, 0.3) !important;
+}
+
+body.dark .stat-badge.amber,
+.dark .stat-badge.amber {
+  background: #281E15 !important;
+  color: #E2B887 !important;
+  border: 1px solid rgba(226, 184, 135, 0.3) !important;
+}
+
+/* 3. Admin Page Headers & Search Filters */
+body.dark .admin-page-header,
+.dark .admin-page-header {
+  background: rgba(26, 30, 22, 0.95) !important;
+  border: 1px solid #31372A !important;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.35) !important;
+}
+
+body.dark .admin-page-header h2,
+.dark .admin-page-header h2 {
+  color: #F5F4EF !important;
+}
+
+body.dark .admin-page-header .sub,
+.dark .admin-page-header .sub {
+  color: #B4AFA0 !important;
+}
+
+body.dark .admin-search-bar,
+.dark .admin-search-bar {
+  background: rgba(26, 30, 22, 0.95) !important;
+  border: 1px solid #31372A !important;
+}
+
+body.dark .admin-search-bar select,
+.dark .admin-search-bar select {
+  background: #121610 !important;
+  color: #F5F4EF !important;
+  border: 1px solid #31372A !important;
+}
+
+body.dark .search-field,
+.dark .search-field {
+  background: #121610 !important;
+  border: 1px solid #31372A !important;
+}
+
+body.dark .search-field input,
+.dark .search-field input {
+  background: transparent !important;
+  color: #F5F4EF !important;
+}
+
+body.dark .search-field input::placeholder,
+.dark .search-field input::placeholder {
+  color: #736E60 !important;
+}
+
+body.dark .search-field svg,
+.dark .search-field svg {
+  color: #76C79C !important;
+}
+
+/* 4. Admin Panels & Tables */
+body.dark .admin-panel,
+.dark .admin-panel {
+  background: rgba(26, 30, 22, 0.95) !important;
+  border: 1px solid #31372A !important;
+  color: #F5F4EF !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
+}
+
+body.dark .panel-header h3,
+.dark .panel-header h3 {
+  color: #F5F4EF !important;
+}
+
+body.dark .link-more,
+.dark .link-more {
+  color: #76C79C !important;
+}
+
+body.dark .dir-toolbar .result-count,
+.dark .dir-toolbar .result-count {
+  color: #B4AFA0 !important;
+}
+
+body.dark .dir-toolbar .result-count b,
+.dark .dir-toolbar .result-count b {
+  color: #F5F4EF !important;
+}
+
+body.dark .admin-table-wrap,
+.dark .admin-table-wrap {
+  border: 1px solid #31372A !important;
+  background: #121610 !important;
+}
+
+body.dark .admin-table th,
+.dark .admin-table th {
+  background: #18231C !important;
+  color: #D8D5CC !important;
+  border-bottom: 2px solid #31372A !important;
+}
+
+body.dark .admin-table td,
+.dark .admin-table td {
+  border-bottom: 1px solid #232A20 !important;
+  color: #D9D7CF !important;
+}
+
+body.dark .admin-table td b,
+.dark .admin-table td b {
+  color: #F5F4EF !important;
+}
+
+body.dark .admin-table td .mono,
+.dark .admin-table td .mono {
+  color: #E2B887 !important;
+}
+
+body.dark .admin-table tbody tr:hover,
+.dark .admin-table tbody tr:hover {
+  background: rgba(47, 107, 82, 0.22) !important;
+}
+
+body.dark .text-muted,
+.dark .text-muted {
+  color: #8C867A !important;
+}
+
+/* 5. Status Pills in Dark Mode */
+body.dark .status-pill.active,
+.dark .status-pill.active {
+  background: #1C2A22 !important;
+  color: #76C79C !important;
+  border: 1px solid rgba(118, 199, 156, 0.3) !important;
+}
+
+body.dark .status-pill.inactive,
+.dark .status-pill.inactive {
+  background: #281E15 !important;
+  color: #E2B887 !important;
+  border: 1px solid rgba(226, 184, 135, 0.3) !important;
+}
+
+/* 6. Admin Modals & Form Dialogs */
+body.dark .modal-container,
+.dark .modal-container {
+  background: #1A1E16 !important;
+  border: 1px solid #3A4333 !important;
+  color: #F5F4EF !important;
+  box-shadow: 0 25px 60px rgba(0, 0, 0, 0.75) !important;
+}
+
+body.dark .modal-header,
+.dark .modal-header {
+  background: #1A1E16 !important;
+  border-bottom: 1px solid #31372A !important;
+}
+
+body.dark .modal-header h3,
+.dark .modal-header h3 {
+  color: #F5F4EF !important;
+}
+
+body.dark .modal-close-btn,
+.dark .modal-close-btn {
+  color: #B4AFA0 !important;
+}
+
+body.dark .modal-close-btn:hover,
+.dark .modal-close-btn:hover {
+  color: #76C79C !important;
+  background: #121610 !important;
+}
+
+body.dark .modal-body,
+.dark .modal-body {
+  background: #1A1E16 !important;
+  color: #D9D7CF !important;
+}
+
+body.dark .modal-footer,
+.dark .modal-footer {
+  background: #1A1E16 !important;
+  border-top: 1px solid #31372A !important;
+}
+
+body.dark .admin-form,
+.dark .admin-form {
+  background: #1A1E16 !important;
+}
+
+body.dark .form-group label,
+.dark .form-group label {
+  color: #F5F4EF !important;
+}
+
+body.dark .form-group input,
+body.dark .form-group select,
+body.dark .form-group textarea,
+.dark .form-group input,
+.dark .form-group select,
+.dark .form-group textarea {
+  background: #121610 !important;
+  color: #F5F4EF !important;
+  border: 1px solid #31372A !important;
+}
+
+body.dark .form-group input:focus,
+body.dark .form-group select:focus,
+body.dark .form-group textarea:focus,
+.dark .form-group input:focus,
+.dark .form-group select:focus,
+.dark .form-group textarea:focus {
+  border-color: #76C79C !important;
+  background: #18231C !important;
+  box-shadow: 0 0 0 3px rgba(118, 199, 156, 0.2) !important;
+  outline: none !important;
+}
+
+body.dark .form-group input::placeholder,
+body.dark .form-group textarea::placeholder,
+.dark .form-group input::placeholder,
+.dark .form-group textarea::placeholder {
+  color: #736E60 !important;
+}
+
+/* 7. Admin Login Card (AdminAuthGuard) */
+body.dark .admin-login-card,
+.dark .admin-login-card {
+  background: #1A1E16 !important;
+  border: 1px solid #31372A !important;
+  color: #F5F4EF !important;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6) !important;
+}
+
+body.dark .admin-login-card h2,
+.dark .admin-login-card h2 {
+  color: #F5F4EF !important;
+}
+
+body.dark .admin-login-card p,
+.dark .admin-login-card p {
+  color: #B4AFA0 !important;
+}
+
+body.dark .admin-login-card label,
+.dark .admin-login-card label {
+  color: #F5F4EF !important;
+}
+
+body.dark .admin-login-card input,
+.dark .admin-login-card input {
+  background: #121610 !important;
+  color: #F5F4EF !important;
+  border: 1px solid #31372A !important;
+}
+
+body.dark .admin-login-card input:focus,
+.dark .admin-login-card input:focus {
+  border-color: #76C79C !important;
+  background: #18231C !important;
+  box-shadow: 0 0 0 3px rgba(118, 199, 156, 0.2) !important;
+}
+
+/* =========================================
+   BUTTON CONTRAST FIXES (EDIT, BATAL & ACTIONS) IN DARK MODE
+   ========================================= */
+
+/* General Outline Buttons in Dark Mode */
+body.dark .btn-outline,
+.dark .btn-outline {
+  background: #232B20 !important;
+  border: 1px solid #3E4937 !important;
+  color: #F5F4EF !important;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25) !important;
+}
+
+body.dark .btn-outline:hover,
+.dark .btn-outline:hover {
+  background: #2E382A !important;
+  border-color: #76C79C !important;
+  color: #76C79C !important;
+}
+
+/* Edit Buttons (Table action in Admin & Overview) */
+body.dark .admin-table .btn-outline,
+body.dark .admin-table .btn-xs,
+.dark .admin-table .btn-outline,
+.dark .admin-table .btn-xs {
+  background: #18231C !important;
+  border: 1px solid rgba(118, 199, 156, 0.45) !important;
+  color: #76C79C !important;
+  font-weight: 700 !important;
+}
+
+body.dark .admin-table .btn-outline:hover,
+body.dark .admin-table .btn-xs:hover,
+.dark .admin-table .btn-outline:hover,
+.dark .admin-table .btn-xs:hover {
+  background: #76C79C !important;
+  color: #0D1D16 !important;
+  border-color: #76C79C !important;
+}
+
+/* Batal Buttons (Modal Form Footer) */
+body.dark .modal-footer .btn-outline,
+.dark .modal-footer .btn-outline {
+  background: #283024 !important;
+  border: 1px solid #485440 !important;
+  color: #F5F4EF !important;
+  font-weight: 700 !important;
+}
+
+body.dark .modal-footer .btn-outline:hover,
+.dark .modal-footer .btn-outline:hover {
+  background: #364131 !important;
+  border-color: #B4AFA0 !important;
+  color: #FFFFFF !important;
+}
+
+/* Delete / Danger Buttons */
+body.dark .btn-outline-danger,
+.dark .btn-outline-danger {
+  background: rgba(239, 68, 68, 0.15) !important;
+  border: 1px solid rgba(239, 68, 68, 0.5) !important;
+  color: #F87171 !important;
+}
+
+body.dark .btn-outline-danger:hover,
+.dark .btn-outline-danger:hover {
+  background: #EF4444 !important;
+  color: #FFFFFF !important;
+  border-color: #EF4444 !important;
+}
+
+body.dark .btn-red,
+.dark .btn-red {
+  background: #DC2626 !important;
+  color: #FFFFFF !important;
+}
+
+body.dark .btn-red:hover,
+.dark .btn-red:hover {
+  background: #B91C1C !important;
 }

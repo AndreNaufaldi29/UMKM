@@ -10,23 +10,29 @@ export function AuthProvider({ children }) {
   const [adminUser, setAdminUser] = useState(null);
   const [isInitialized, setIsInitialized] = useState(false);
 
-  // Verify session from server cookie on mount (replaces localStorage-only check)
+  // Verify session on mount (Cookie + LocalStorage Bearer Token)
   useEffect(() => {
     async function checkSession() {
       try {
+        const token = typeof window !== 'undefined' ? localStorage.getItem('umkm_admin_jwt') : null;
+        const headers = {};
+        if (token) headers['Authorization'] = `Bearer ${token}`;
+
         const res = await fetch(withBasePath('/api/admin/auth/me'), {
           method: 'GET',
-          credentials: 'include', // send HttpOnly cookie
+          headers,
+          credentials: 'include',
         });
         if (res.ok) {
           const data = await res.json().catch(() => null);
           if (data && data.authenticated && data.user) {
             setIsAuthenticated(true);
             setAdminUser(data.user);
+          } else if (token) {
+            localStorage.removeItem('umkm_admin_jwt');
           }
         }
       } catch (e) {
-        // Network error — session remains unauthenticated
         console.warn('Session check failed:', e);
       } finally {
         setIsInitialized(true);
@@ -40,7 +46,7 @@ export function AuthProvider({ children }) {
       const res = await fetch(withBasePath('/api/admin/auth/login'), {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        credentials: 'include', // receive HttpOnly cookie in response
+        credentials: 'include',
         body: JSON.stringify({ username, password }),
       });
 
@@ -53,6 +59,9 @@ export function AuthProvider({ children }) {
         }
 
         if (res.ok && data && data.success) {
+          if (data.token && typeof window !== 'undefined') {
+            localStorage.setItem('umkm_admin_jwt', data.token);
+          }
           setIsAuthenticated(true);
           setAdminUser(data.user);
           return { success: true };
@@ -72,13 +81,21 @@ export function AuthProvider({ children }) {
 
   const logout = async () => {
     try {
+      const token = typeof window !== 'undefined' ? localStorage.getItem('umkm_admin_jwt') : null;
+      const headers = {};
+      if (token) headers['Authorization'] = `Bearer ${token}`;
+
       await fetch(withBasePath('/api/admin/auth/logout'), {
         method: 'POST',
+        headers,
         credentials: 'include',
       });
     } catch (e) {
       console.warn('Logout request failed:', e);
     } finally {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('umkm_admin_jwt');
+      }
       setIsAuthenticated(false);
       setAdminUser(null);
     }

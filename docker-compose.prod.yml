@@ -36,7 +36,7 @@ services:
       - "${PORT:-5173}:${PORT:-5173}"
     environment:
       - PORT=${PORT:-5173}
-      - DATABASE_URL=postgresql://${DB_USER:-umkm_user}:${DB_PASSWORD:-umkm_password}@db:5432/${DB_NAME:-umkm_db}?schema=public
+      - DATABASE_URL=postgresql://${DB_USER:-umkm_user}:${DB_PASSWORD:-umkm_password}@db:5432/${DB_NAME:-umkm_db}?schema=public&connection_limit=10&pool_timeout=20
       - NEXT_PUBLIC_BASE_PATH=${NEXT_PUBLIC_BASE_PATH:-}
       - NODE_ENV=production
     volumes:

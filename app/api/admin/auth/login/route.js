@@ -62,8 +62,8 @@ export async function POST(request) {
     };
 
     const token = await signToken(userData);
-    const response = NextResponse.json({ success: true, user: userData });
-    setAuthCookie(response, token);
+    const response = NextResponse.json({ success: true, token, user: userData });
+    setAuthCookie(response, token, request);
     return response;
   } catch (error) {
     console.error('API Error /api/admin/auth/login:', error);

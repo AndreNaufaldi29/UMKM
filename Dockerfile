@@ -24,7 +24,7 @@ ENV NODE_ENV=production
 ARG PORT=5173
 ENV PORT=${PORT}
 
-COPY --from=deps /app/node_modules ./node_modules
+COPY --from=builder /app/node_modules ./node_modules
 COPY --from=builder /app/package*.json ./
 COPY --from=builder /app/prisma ./prisma
 COPY --from=builder /app/public ./public
