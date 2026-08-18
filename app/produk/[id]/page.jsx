@@ -229,29 +229,6 @@ export default async function ProductDetailPage({ params }) {
                 </Link>
               </div>
             </div>
-
-            {/* PURCHASING FLOW / ALUR PEMBELIAN */}
-            <div className="panel reveal reveal-left" style={{ marginTop: '20px' }}>
-              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, marginBottom: '16px', borderBottom: '1px solid var(--line)', paddingBottom: '10px' }}>Alur Pembelian</h3>
-              <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                  <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'var(--soil-soft)', color: 'var(--soil)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.78rem', fontWeight: 700, flexShrink: 0 }}>1</div>
-                  <span style={{ fontSize: '0.86rem', color: 'var(--ink-soft)' }}>Pilih varian produk yang Anda inginkan di halaman ini.</span>
-                </div>
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                  <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'var(--soil-soft)', color: 'var(--soil)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.78rem', fontWeight: 700, flexShrink: 0 }}>2</div>
-                  <span style={{ fontSize: '0.86rem', color: 'var(--ink-soft)' }}>Klik tombol <b>Beli via WhatsApp</b> untuk terhubung dengan penjual.</span>
-                </div>
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                  <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'var(--soil-soft)', color: 'var(--soil)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.78rem', fontWeight: 700, flexShrink: 0 }}>3</div>
-                  <span style={{ fontSize: '0.86rem', color: 'var(--ink-soft)' }}>Kirim pesan otomatis lalu sepakati ongkos kirim & alamat kirim.</span>
-                </div>
-                <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                  <div style={{ width: '20px', height: '20px', borderRadius: '50%', backgroundColor: 'var(--soil-soft)', color: 'var(--soil)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '0.78rem', fontWeight: 700, flexShrink: 0 }}>4</div>
-                  <span style={{ fontSize: '0.86rem', color: 'var(--ink-soft)' }}>Lakukan transfer pembayaran secara aman dan pesanan dikirimkan.</span>
-                </div>
-              </div>
-            </div>
           </div>
 
           {/* RIGHT: DETAILS & ACTIONS */}

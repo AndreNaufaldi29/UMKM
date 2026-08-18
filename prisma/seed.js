@@ -41,18 +41,18 @@ async function main() {
   });
   console.log('✅ Admin user seeded (admin / kedungsumur2026#)');
 
-  // 3. Reset PostgreSQL auto-increment sequence counters
+  // 3. Sync PostgreSQL auto-increment sequence counters safely
   try {
     await prisma.$executeRawUnsafe(
-      `SELECT setval(pg_get_serial_sequence('"Umkm"', 'id'), 1, false);`
+      `SELECT setval(pg_get_serial_sequence('"Umkm"', 'id'), coalesce((SELECT max(id) FROM "Umkm"), 1), (SELECT count(*) > 0 FROM "Umkm"));`
     );
     await prisma.$executeRawUnsafe(
-      `SELECT setval(pg_get_serial_sequence('"Category"', 'id'), coalesce((SELECT max(id) FROM "Category"), 1));`
+      `SELECT setval(pg_get_serial_sequence('"Category"', 'id'), coalesce((SELECT max(id) FROM "Category"), 1), (SELECT count(*) > 0 FROM "Category"));`
     );
     await prisma.$executeRawUnsafe(
-      `SELECT setval(pg_get_serial_sequence('"Certification"', 'id'), 1, false);`
+      `SELECT setval(pg_get_serial_sequence('"Certification"', 'id'), coalesce((SELECT max(id) FROM "Certification"), 1), (SELECT count(*) > 0 FROM "Certification"));`
     );
-    console.log('✅ PostgreSQL auto-increment sequences synced');
+    console.log('✅ PostgreSQL auto-increment sequences safely synced');
   } catch (seqError) {
     console.warn('⚠️ Sequence reset warning (non-fatal):', seqError.message);
   }
