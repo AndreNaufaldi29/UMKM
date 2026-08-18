@@ -15,7 +15,7 @@ UMKM/
 │   │   ├── products/           # Manajemen Produk
 │   │   ├── umkm/               # Manajemen UMKM
 │   │   ├── layout.jsx          # Shell & Navigation Panel Admin
-│   │   └── page.jsx            # Dashboard Stats Overview
+```bash
 │   ├── api/                    # Endpoint REST API Backend
 │   │   ├── admin/auth/         # Rute Auth Admin (login, logout, me)
 │   │   ├── products/           # API Produk & Increment View
@@ -62,14 +62,14 @@ Database menggunakan PostgreSQL dengan entitas utama yang saling terelasi:
 
 ### Model `Category` (Kategori UMKM)
 - `id` (Int, Primary Key, Auto-increment)
-- `name` (String, Unique) - Nama kategori (Kuliner, Kerajinan, Fashion, Pertanian, Jasa)
+```bash
 - `slug` (String, Unique) - URL Slug
 - `description` (String, Optional)
 
 ### Model `AdminUser` (User Pengelola)
 - `id` (Int, Primary Key, Auto-increment)
 - `username` (String, Unique) - Username login
-- `passwordHash` (String) - Hashed password menggunakan bcryptjs (cost factor 10)
+```bash
 - `fullName` (String) - Nama lengkap admin
 - `role` (String, Default: "admin")
 - `lastLoginAt` (DateTime, Optional)
@@ -235,20 +235,20 @@ Metode ini me-*build* image di komputer lokal, lalu mengirimkannya ke server via
 
 #### B. Langkah Manual Step-by-Step:
 1. **Build image produksi lokal:**
-   ```bash
+```bash
    docker build --target runner -t umkm-web:latest .
    ```
 2. **Kompresi image menjadi tarball:**
-   ```bash
+```bash
    docker save umkm-web:latest | gzip > umkm-web.tar.gz
    ```
 3. **Kirim file ke server VPS:**
-   ```bash
+```bash
    ssh root@103.123.45.67 "mkdir -p /opt/umkm-app"
    scp umkm-web.tar.gz docker-compose.prod.yml .env root@103.123.45.67:/opt/umkm-app/
    ```
 4. **Jalankan container di server:**
-   ```bash
+```bash
    ssh root@103.123.45.67 "cd /opt/umkm-app && \
        docker load < umkm-web.tar.gz && \
        cp docker-compose.prod.yml docker-compose.yml && \
@@ -263,17 +263,17 @@ Metode ini me-*build* image di komputer lokal, lalu mengirimkannya ke server via
 Jika server VPS memiliki RAM minimal 2GB+:
 
 1. **Clone repository di server:**
-   ```bash
+```bash
    git clone <repository_url> /opt/umkm-app
    cd /opt/umkm-app
    ```
 2. **Siapkan file `.env` di server:**
-   ```bash
+```bash
    cp .env.example .env
    # Edit variabel PORT, DB_USER, DB_PASSWORD, JWT_SECRET
    ```
 3. **Jalankan build & up container:**
-   ```bash
+```bash
    docker compose -f docker-compose.prod.yml up -d --build
    ```
 
@@ -336,28 +336,33 @@ server {
 Lakukan pengecekan berikut setelah deployment selesai:
 
 1. **Status Container:**
-   ```bash
+```bash
    docker compose ps
-   ```
-   *(Pastikan `umkm-postgres-db` berstatus `healthy` dan `web-frontend` berstatus `Up`)*
+```
+   *(Pastikan umkm-postgres-db berstatus healthy dan web-umkm-frontend berstatus Up)*
 
 2. **Cek Log Container:**
-   ```bash
+```bash
    docker compose logs -f frontend
-   ```
+```
    *(Pastikan migrasi Prisma dan sinkronisasi database selesai)*
 
 3. **Uji Akses Publik & Login Admin:**
-   - Akses beranda publik `http://<IP_SERVER>:<PORT>/`
-   - Akses panel admin `http://<IP_SERVER>:<PORT>/admin` dan lakukan login dengan kredensial yang telah dikonfigurasi.
+   - Akses beranda publik http://<IP_SERVER>:<PORT>/
+   - Akses panel admin http://<IP_SERVER>:<PORT>/admin dan lakukan login dengan kredensial yang telah dikonfigurasi.
 
 ---
 
-## 🔄 7. Panduan Migrasi Server (Pindah Hosting / VPS Tanpa Kehilangan Data)
+## 🔄 7. Panduan Migrasi & Sinkronisasi Data Database
 
-Jika Anda perlu memindahkan aplikasi ke server VPS baru, ikuti panduan 4 langkah berikut agar seluruh data database PostgreSQL dan file gambar upload tidak hilang:
+Bagian ini memuat panduan lengkap untuk memindahkan data (database PostgreSQL & file media upload):
+- **Kasus A (7.1):** Migrasi dari Server Lama ke Server VPS Baru (Pindah Hosting).
+- **Kasus B (7.2):** Backup & Sinkronisasi Data dari Server Production ke Komputer/Server Lokal (PC/Laptop Pengembang).
 
-### 📋 Diagram Alur Migrasi
+---
+
+### 🌐 7.1 Migrasi dari Server Lama ke Server VPS Baru (Pindah Hosting)
+
 ```
 [ SERVER LAMA ]                                [ SERVER BARU ]
 ┌─────────────────────────┐                   ┌─────────────────────────┐
@@ -367,9 +372,7 @@ Jika Anda perlu memindahkan aplikasi ke server VPS baru, ikuti panduan 4 langkah
 └─────────────────────────┘                   └─────────────────────────┘
 ```
 
----
-
-### Langkah 1: Backup Data di Server Lama
+#### Langkah 1: Backup Data di Server Lama
 Jalankan perintah berikut di terminal **Server Lama**:
 
 ```bash
@@ -380,28 +383,24 @@ docker exec -t umkm-postgres-db pg_dump -U umkm_user -d umkm_db -F c -b -v -f /t
 docker cp umkm-postgres-db:/tmp/db_backup.dump ./db_backup.dump
 
 # 1.2 Salin seluruh file gambar upload ke dalam arsip tar.gz
-docker cp web-frontend:/app/public/uploads ./uploads_backup
+docker cp web-umkm-frontend:/app/public/uploads ./uploads_backup
 tar -czvf uploads_backup.tar.gz uploads_backup/
 
 # 1.3 Verifikasi file backup yang siap ditransfer
 ls -lh db_backup.dump uploads_backup.tar.gz .env
 ```
 
----
-
-### Langkah 2: Transfer File Backup ke Server Baru
-Kirim file backup dan konfigurasi ke **Server Baru** via `scp`:
+#### Langkah 2: Transfer File Backup ke Server Baru
+Kirim file backup dan konfigurasi ke **Server Baru** via scp:
 
 ```bash
 # Format: scp <file> <user_server_baru>@<ip_server_baru>:<folder_tujuan>
 scp db_backup.dump uploads_backup.tar.gz .env root@<IP_SERVER_BARU>:/opt/umkm-app/
 ```
 
-> **Catatan:** Pastikan kode aplikasi website juga sudah ditransfer / di-deploy ke `/opt/umkm-app` di Server Baru menggunakan `deploy-direct.sh` atau Git.
+> **Catatan:** Pastikan kode aplikasi website juga sudah ditransfer / di-deploy ke /opt/umkm-app di Server Baru menggunakan deploy-direct.sh atau Git.
 
----
-
-### Langkah 3: Restore Data & Jalankan di Server Baru
+#### Langkah 3: Restore Data & Jalankan di Server Baru
 Login via SSH ke **Server Baru**, lalu jalankan:
 
 ```bash
@@ -416,18 +415,88 @@ docker exec -i umkm-postgres-db pg_restore -U umkm_user -d umkm_db --clean --if-
 
 # 3.3 Ekstrak dan masukkan file gambar upload ke dalam container
 tar -xzvf uploads_backup.tar.gz
-docker cp ./uploads_backup/. web-frontend:/app/public/uploads/
+docker cp ./uploads_backup/. web-umkm-frontend:/app/public/uploads/
 
 # 3.4 Bersihkan file temporary backup
 rm -rf db_backup.dump uploads_backup.tar.gz uploads_backup
 ```
 
+#### Langkah 4: Verifikasi & Pengalihan DNS
+1. **Uji Coba Server Baru**: Buka http://<IP_SERVER_BARU>:<PORT> di browser dan periksa katalog produk, banner, foto UMKM, serta login admin /admin.
+2. **Arahkan Domain (DNS)**: Ubah **A Record** domain Anda di panel DNS penyedia domain ke **IP Server Baru**.
+3. **Matikan Server Lama**: Setelah propagasi DNS selesai dan traffic berpindah sepenuhnya, server lama dapat dinonaktifkan dengan aman.
+
 ---
 
-### Langkah 4: Verifikasi & Pengalihan DNS
-1. **Uji Coba Server Baru**:
-   Buka `http://<IP_SERVER_BARU>:<PORT>` di browser dan periksa katalog produk, banner, foto UMKM, serta login admin `/admin`.
-2. **Arahkan Domain (DNS)**:
-   Ubah **A Record** domain Anda di panel DNS penyedia domain ke **IP Server Baru**.
-3. **Matikan Server Lama**:
-   Setelah propagasi DNS selesai dan traffic berpindah sepenuhnya, server lama dapat dinonaktifkan dengan aman.
+### 💻 7.2 Backup & Pindah Data dari Server Production ke Server Lokal (PC/Laptop)
+
+Gunakan alur ini jika Anda ingin mengambil data riil yang ada di server production (UMKM, produk, foto upload) untuk diuji coba atau disinkronkan di server lokal Anda.
+
+```
+[ SERVER PRODUCTION / VPS ]                     [ KOMPUTER LOKAL / PC ]
+┌───────────────────────────────┐               ┌───────────────────────────────┐
+│ 1. Backup DB (pg_dump)        │ ──(SCP Pull)─►│ 3. Restore DB (pg_restore)    │
+│ 2. Backup Gambar (uploads)    │               │ 4. Salin Gambar ke uploads    │
+└───────────────────────────────┘               │ 5. Jalankan Web Lokal         │
+                                                └───────────────────────────────┘
+```
+
+#### Langkah 1: Buat Backup di Server Production (VPS)
+Buka terminal SSH ke **Server Production**, masuk ke direktori proyek dan jalankan:
+
+```bash
+cd /opt/umkm-app
+
+# 1.1 Ekspor Database PostgreSQL dari dalam container production
+docker exec -t umkm-postgres-db pg_dump -U umkm_user -d umkm_db -F c -b -v -f /tmp/db_backup.dump
+docker cp umkm-postgres-db:/tmp/db_backup.dump ./db_backup.dump
+
+# 1.2 Backup seluruh file foto/banner upload
+docker cp web-umkm-frontend:/app/public/uploads ./uploads_backup
+tar -czvf uploads_backup.tar.gz uploads_backup/
+
+# 1.3 Pastikan kedua file backup sudah terbentuk
+ls -lh db_backup.dump uploads_backup.tar.gz
+```
+
+#### Langkah 2: Unduh File Backup ke Komputer Lokal
+```bash
+# Di terminal komputer lokal:
+cd /home/ramadhani/UMKM
+
+# Unduh file backup dari VPS ke lokal via SCP:
+# Format: scp <user_vps>@<ip_vps>:<path_file_di_vps> <path_tujuan_lokal>
+scp root@<IP_SERVER_VPS>:/opt/umkm-app/db_backup.dump ./
+scp root@<IP_SERVER_VPS>:/opt/umkm-app/uploads_backup.tar.gz ./
+```
+
+#### Langkah 3: Restore Data ke Docker Lokal
+Jalankan container Docker lokal Anda lalu masukkan data backup:
+
+```bash
+# 1. Pastikan Docker lokal sedang berjalan
+docker compose up -d
+
+# 2. Salin dan Restore Database ke container PostgreSQL lokal
+docker cp db_backup.dump umkm-postgres-db:/tmp/db_backup.dump
+docker exec -i umkm-postgres-db pg_restore -U umkm_user -d umkm_db --clean --if-exists /tmp/db_backup.dump
+
+# 3. Ekstrak dan Salin file foto/banner upload ke folder lokal
+tar -xzvf uploads_backup.tar.gz
+mkdir -p ./public/uploads
+cp -r uploads_backup/* ./public/uploads/
+
+# Jika menggunakan container production di lokal (docker-compose.prod.yml):
+docker cp uploads_backup/. web-umkm-frontend:/app/public/uploads/
+
+# 4. Bersihkan file sementara
+rm -rf uploads_backup db_backup.dump uploads_backup.tar.gz
+```
+
+#### Langkah 4: Verifikasi di Browser Lokal
+1. Buka browser di komputer lokal:
+   - **Beranda Publik:** http://localhost:5173
+   - **Katalog Produk:** http://localhost:5173/produk
+   - **Direktori UMKM:** http://localhost:5173/umkm
+   - **Panel Admin:** http://localhost:5173/admin
+2. Pastikan seluruh produk, kategori, data UMKM, dan foto banner tampil identik seperti di server production.

@@ -229,6 +229,16 @@ export default async function ProductDetailPage({ params }) {
                 </Link>
               </div>
             </div>
+
+            {/* DESKRIPSI PRODUK */}
+            <div className="panel reveal reveal-left" style={{ marginTop: '20px' }}>
+              <h3 style={{ fontSize: '1.1rem', fontWeight: 600, color: 'var(--ink)', marginBottom: '14px', borderBottom: '1px solid var(--line)', paddingBottom: '10px' }}>
+                Deskripsi Produk
+              </h3>
+              <p style={{ color: 'var(--ink-soft)', fontSize: '0.96rem', lineHeight: '1.7', margin: 0, whiteSpace: 'pre-line' }}>
+                {p.desc || 'Belum ada deskripsi untuk produk ini.'}
+              </p>
+            </div>
           </div>
 
           {/* RIGHT: DETAILS & ACTIONS */}
@@ -260,11 +270,6 @@ export default async function ProductDetailPage({ params }) {
                 waNumber={p.wa} 
                 status={p.status} 
               />
-
-              <div>
-                <h4 style={{ fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--ink-soft)', marginBottom: '8px' }}>Deskripsi Produk</h4>
-                <p style={{ color: 'var(--ink-soft)', fontSize: '0.96rem', lineHeight: '1.6' }}>{p.desc}</p>
-              </div>
 
               {/* BRIEF MSME DETAIL */}
               <div style={{ borderTop: '1px solid var(--line)', paddingTop: '18px', marginTop: '6px' }}>
