@@ -18,7 +18,7 @@ export default function AdminDashboardOverview() {
   return (
     <div className="admin-overview">
       {/* STATS OVERVIEW GRID */}
-      <div className="admin-stats-grid" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))' }}>
+      <div className="admin-stats-grid">
         <div className="admin-stat-card">
           <div className="stat-top">
             <span className="stat-icon">🏪</span>

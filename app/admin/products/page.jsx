@@ -503,7 +503,7 @@ function AdminProductsContent() {
                 </div>
 
                 {/* DUAL INPUT METHODS */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+                <div className="admin-image-upload-grid">
                   <div>
                     <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--ink-soft)', display: 'block', marginBottom: '4px' }}>
                       1. Unggah File Foto (Lokal)
@@ -544,7 +544,7 @@ function AdminProductsContent() {
 
                 {/* IMAGES GRID & CARDS */}
                 {formData.images && formData.images.length > 0 ? (
-                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(135px, 1fr))', gap: '12px', marginTop: '10px' }}>
+                  <div className="admin-gallery-grid">
                     {formData.images.map((img, idx) => (
                       <div
                         key={idx}

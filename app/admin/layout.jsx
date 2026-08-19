@@ -83,9 +83,9 @@ export default function AdminLayout({ children }) {
             <h1 className="admin-title">Sistem Manajemen UMKM Desa</h1>
           </div>
 
-          <div className="admin-header-right" style={{ gap: '10px' }}>
+          <div className="admin-header-right">
             {adminUser && (
-              <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '0.84rem', background: 'var(--forest-soft)', padding: '6px 12px', borderRadius: '8px', fontWeight: 600, color: 'var(--forest)' }}>
+              <div className="admin-user-badge">
                 <span>👤</span>
                 <span>{adminUser.username}</span>
               </div>

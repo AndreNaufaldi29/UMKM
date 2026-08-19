@@ -475,7 +475,7 @@ function AdminUMKMContent() {
                 </div>
 
                 {/* DUAL INPUT METHODS */}
-                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px', marginBottom: '16px' }}>
+                <div className="admin-image-upload-grid">
                   <div>
                     <label style={{ fontSize: '0.78rem', fontWeight: 600, color: 'var(--ink-soft)', display: 'block', marginBottom: '4px' }}>
                       1. Unggah File Banner (Lokal)
