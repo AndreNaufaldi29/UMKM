@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import fs from 'fs';
 import path from 'path';
@@ -49,6 +49,22 @@ function processProductImages(imagesData, singleImageUrl) {
   return JSON.stringify(savedPaths);
 }
 
+function parseProductVariants(variantsData) {
+  if (!variantsData) return [];
+  if (Array.isArray(variantsData)) return variantsData.filter(Boolean);
+  if (typeof variantsData === 'string') {
+    const trimmed = variantsData.trim();
+    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+      try {
+        const arr = JSON.parse(trimmed);
+        if (Array.isArray(arr)) return arr.filter(Boolean);
+      } catch (e) {}
+    }
+    return trimmed.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
+  }
+  return [];
+}
+
 export async function GET(request) {
   try {
     const { searchParams } = new URL(request.url);
@@ -89,6 +105,7 @@ export async function GET(request) {
         id: p.id, name: p.name, desc: p.desc, price: p.price,
         unit: p.unit, rating: p.rating, sales: p.sales, views: p.views,
         isFeatured: p.isFeatured, imageUrl: p.imageUrl || '', images: imageList,
+        variants: parseProductVariants(p.variants),
         msmeId: p.umkmId,
         msmeName: p.umkm ? p.umkm.name : '',
         cat:    p.umkm && p.umkm.category ? p.umkm.category.name : 'Lainnya',
@@ -117,7 +134,7 @@ export async function POST(request) {
       return NextResponse.json({ error: errors.join(' '), details: errors }, { status: 422 });
     }
 
-    const { name, desc, price, unit, rating, sales, views, isFeatured, images, imageUrl, msmeId } = sanitized;
+    const { name, desc, price, unit, rating, sales, views, isFeatured, images, imageUrl, variants, msmeId } = sanitized;
 
     if (!msmeId) {
       return NextResponse.json({ error: 'msmeId wajib diisi.' }, { status: 422 });
@@ -130,6 +147,7 @@ export async function POST(request) {
 
     const newProdId     = `p${msmeId}_${Date.now()}`;
     const finalImageUrl = processProductImages(images, imageUrl);
+    const finalVariants = variants && variants.length > 0 ? JSON.stringify(variants) : null;
 
     const created = await prisma.product.create({
       data: {
@@ -137,6 +155,7 @@ export async function POST(request) {
         umkmId: msmeId,
         name, desc: desc || '', price, unit, rating, sales, views,
         isFeatured, imageUrl: finalImageUrl,
+        variants: finalVariants,
       },
       include: { umkm: { include: { category: true } } },
     });
@@ -157,6 +176,7 @@ export async function POST(request) {
       price: created.price, unit: created.unit, rating: created.rating,
       sales: created.sales, views: created.views, isFeatured: created.isFeatured,
       imageUrl: created.imageUrl || '', images: imageList,
+      variants: parseProductVariants(created.variants),
       msmeId: created.umkmId,
       msmeName: created.umkm ? created.umkm.name : '',
       cat:    created.umkm && created.umkm.category ? created.umkm.category.name : 'Lainnya',

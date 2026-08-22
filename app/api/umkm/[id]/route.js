@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import fs from 'fs';
 import path from 'path';
@@ -26,6 +26,22 @@ function saveBase64Image(dataUrl) {
   }
 }
 
+function parseProductVariants(variantsData) {
+  if (!variantsData) return [];
+  if (Array.isArray(variantsData)) return variantsData.filter(Boolean);
+  if (typeof variantsData === 'string') {
+    const trimmed = variantsData.trim();
+    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+      try {
+        const arr = JSON.parse(trimmed);
+        if (Array.isArray(arr)) return arr.filter(Boolean);
+      } catch (e) {}
+    }
+    return trimmed.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
+  }
+  return [];
+}
+
 function formatProductList(products = []) {
   return products.map((p) => {
     let imageList = [];
@@ -42,6 +58,7 @@ function formatProductList(products = []) {
       id: p.id, name: p.name, desc: p.desc, price: p.price,
       unit: p.unit, rating: p.rating, sales: p.sales, views: p.views,
       isFeatured: p.isFeatured, imageUrl: p.imageUrl || '', images: imageList,
+      variants: parseProductVariants(p.variants),
     };
   });
 }

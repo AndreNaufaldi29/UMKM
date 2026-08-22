@@ -1039,8 +1039,36 @@ select {
   color: #0D1611;
 }
 
-.page-btn:hover:not(.active) {
+.page-btn:hover:not(.active):not(:disabled) {
   border-color: var(--forest);
+  color: var(--forest);
+}
+
+.page-btn:disabled {
+  opacity: 0.35;
+  cursor: not-allowed !important;
+  border-color: var(--line) !important;
+  pointer-events: none;
+}
+
+.page-btn.page-arrow {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.15rem;
+  line-height: 1;
+}
+
+.page-ellipsis {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 38px;
+  font-weight: 700;
+  color: var(--ink-soft);
+  user-select: none;
+  font-size: 1rem;
 }
 
 .empty-state {

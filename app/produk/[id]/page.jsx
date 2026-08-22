@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import prisma from '@/lib/db';
@@ -27,6 +27,22 @@ function getOriginalProductId(mappedId) {
     return `p${mappedId.slice(0, 2)}_${mappedId[2]}`;
   }
   return `p${mappedId[0]}_${mappedId[1]}`;
+}
+
+function parseProductVariants(variantsData) {
+  if (!variantsData) return [];
+  if (Array.isArray(variantsData)) return variantsData.filter(Boolean);
+  if (typeof variantsData === 'string') {
+    const trimmed = variantsData.trim();
+    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+      try {
+        const arr = JSON.parse(trimmed);
+        if (Array.isArray(arr)) return arr.filter(Boolean);
+      } catch (e) {}
+    }
+    return trimmed.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
+  }
+  return [];
 }
 
 async function getProductDetail(id) {
@@ -94,6 +110,7 @@ async function getProductDetail(id) {
       isFeatured: p.isFeatured,
       imageUrl: p.imageUrl || '',
       images: processedImages,
+      variants: parseProductVariants(p.variants),
       msmeId: p.umkmId || p.msmeId,
       msmeName: p.umkm ? p.umkm.name : (p.msmeName || ''),
       cat: p.umkm && p.umkm.category ? p.umkm.category.name : (p.cat || 'Lainnya'),
@@ -125,6 +142,7 @@ async function getRelatedProducts(msmeId, currentProdId) {
       views: p.views,
       isFeatured: p.isFeatured,
       imageUrl: p.imageUrl || '',
+      variants: parseProductVariants(p.variants),
       msmeId: p.umkmId,
       msmeName: p.umkm ? p.umkm.name : '',
       cat: p.umkm && p.umkm.category ? p.umkm.category.name : 'Lainnya',
@@ -136,33 +154,17 @@ async function getRelatedProducts(msmeId, currentProdId) {
   }
 }
 
-function getProductVariants(cat) {
-  if (cat === 'Kuliner' || cat === 'Makanan & Minuman') {
-    return ['Kemasan Standar (250g)', 'Kemasan Keluarga (500g)', 'Premium Gift Box Pack'];
-  }
-  if (cat === 'Fashion' || cat === 'Fashion & Tekstil') {
-    return ['Ukuran S / M', 'Ukuran L / XL', 'Ukuran XXL Custom'];
-  }
-  if (cat === 'Kerajinan' || cat === 'Kerajinan & Kriya') {
-    return ['Warna Natural', 'Finishing Vernis Glossy', 'Ukuran Kustom'];
-  }
-  if (cat === 'Jasa' || cat === 'Jasa & Servis') {
-    return ['Layanan Standar', 'Layanan Cepat (Express)', 'Paket Lengkap + Garansi'];
-  }
-  return ['Varian Standar', 'Varian Premium'];
-}
-
 export async function generateMetadata({ params }) {
   const { id } = await params;
   const p = await getProductDetail(id);
   if (!p) {
     return {
-      title: 'Produk Tidak Ditemukan - Desa Sukamaju',
+      title: 'Produk Tidak Ditemukan - Desa Kedungsumur',
       description: 'Detail produk tidak ditemukan.',
     };
   }
   return {
-    title: `${p.name} - Katalog Produk Desa Sukamaju`,
+    title: `${p.name} - Katalog Produk Desa Kedungsumur`,
     description: p.desc,
   };
 }
@@ -186,7 +188,7 @@ export default async function ProductDetailPage({ params }) {
   }
 
   const relatedProducts = await getRelatedProducts(p.msmeId, p.id);
-  const variants = getProductVariants(p.cat);
+  const variants = Array.isArray(p.variants) ? p.variants : [];
 
   return (
     <main className="container page-content detail-container">

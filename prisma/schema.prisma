@@ -76,7 +76,9 @@ model Product {
   views      Int      @default(0)
   isFeatured Boolean  @default(false)
   imageUrl   String?
+  variants   String?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
 }
+
 

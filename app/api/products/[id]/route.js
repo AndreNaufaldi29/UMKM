@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+﻿import { NextResponse } from 'next/server';
 import prisma from '@/lib/db';
 import fs from 'fs';
 import path from 'path';
@@ -49,6 +49,66 @@ function processProductImages(imagesData, singleImageUrl) {
   return JSON.stringify(savedPaths);
 }
 
+function parseProductVariants(variantsData) {
+  if (!variantsData) return [];
+  if (Array.isArray(variantsData)) return variantsData.filter(Boolean);
+  if (typeof variantsData === 'string') {
+    const trimmed = variantsData.trim();
+    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+      try {
+        const arr = JSON.parse(trimmed);
+        if (Array.isArray(arr)) return arr.filter(Boolean);
+      } catch (e) {}
+    }
+    return trimmed.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
+  }
+  return [];
+}
+
+export async function GET(request, { params }) {
+  try {
+    const { id } = await params;
+    if (!id) {
+      return NextResponse.json({ error: 'Product ID required' }, { status: 400 });
+    }
+
+    const p = await prisma.product.findUnique({
+      where: { id },
+      include: { umkm: { include: { category: true } } },
+    });
+
+    if (!p) {
+      return NextResponse.json({ error: 'Product not found' }, { status: 404 });
+    }
+
+    let imageList = [];
+    if (p.imageUrl) {
+      const trimmed = p.imageUrl.trim();
+      if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+        try { imageList = JSON.parse(trimmed); } catch (e) {}
+      }
+      if (imageList.length === 0) {
+        imageList = trimmed.split(',').map((s) => s.trim()).filter(Boolean);
+      }
+    }
+
+    return NextResponse.json({
+      id: p.id, name: p.name, desc: p.desc, price: p.price,
+      unit: p.unit, rating: p.rating, sales: p.sales, views: p.views,
+      isFeatured: p.isFeatured, imageUrl: p.imageUrl || '', images: imageList,
+      variants: parseProductVariants(p.variants),
+      msmeId: p.umkmId,
+      msmeName: p.umkm ? p.umkm.name : '',
+      cat:    p.umkm && p.umkm.category ? p.umkm.category.name : 'Lainnya',
+      status: p.umkm ? p.umkm.status : 'active',
+      wa:     p.umkm ? p.umkm.wa : '',
+    });
+  } catch (error) {
+    console.error('API Error GET /api/products/[id]:', error);
+    return NextResponse.json({ error: error.message || 'Failed to fetch product' }, { status: 500 });
+  }
+}
+
 export async function PUT(request, { params }) {
   // ── Auth guard ────────────────────────────────────────────
   const auth = await requireAuth(request);
@@ -67,7 +127,7 @@ export async function PUT(request, { params }) {
       return NextResponse.json({ error: errors.join(' '), details: errors }, { status: 422 });
     }
 
-    const { name, desc, price, unit, rating, sales, views, isFeatured, images, imageUrl } = sanitized;
+    const { name, desc, price, unit, rating, sales, views, isFeatured, images, imageUrl, variants } = sanitized;
 
     let updateData = {
       ...(name !== undefined       && { name }),
@@ -78,6 +138,7 @@ export async function PUT(request, { params }) {
       ...(sales !== undefined      && { sales }),
       ...(views !== undefined      && { views }),
       ...(isFeatured !== undefined && { isFeatured }),
+      ...(variants !== undefined   && { variants: variants && variants.length > 0 ? JSON.stringify(variants) : null }),
     };
 
     if (images !== undefined || imageUrl !== undefined) {
@@ -106,6 +167,7 @@ export async function PUT(request, { params }) {
       price: updated.price, unit: updated.unit, rating: updated.rating,
       sales: updated.sales, views: updated.views, isFeatured: updated.isFeatured,
       imageUrl: updated.imageUrl || '', images: imageList,
+      variants: parseProductVariants(updated.variants),
       msmeId: updated.umkmId,
       msmeName: updated.umkm ? updated.umkm.name : '',
       cat:    updated.umkm && updated.umkm.category ? updated.umkm.category.name : 'Lainnya',

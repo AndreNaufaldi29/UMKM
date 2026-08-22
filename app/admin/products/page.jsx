@@ -23,6 +23,7 @@ function AdminProductsContent() {
   const [editingProduct, setEditingProduct] = useState(null);
   const [deleteConfirmId, setDeleteConfirmId] = useState(null);
   const [urlInput, setUrlInput] = useState('');
+  const [variantInput, setVariantInput] = useState('');
 
   // Form State
   const emptyForm = {
@@ -33,6 +34,7 @@ function AdminProductsContent() {
     unit: 'pcs',
     rating: 5.0,
     isFeatured: false,
+    variants: [],
     images: [],
     imagePreviews: []
   };
@@ -61,6 +63,7 @@ function AdminProductsContent() {
       msmeId: msmes[0]?.id || 1
     });
     setUrlInput('');
+    setVariantInput('');
     setIsModalOpen(true);
   };
 
@@ -81,6 +84,22 @@ function AdminProductsContent() {
       }
     }
 
+    let existingVariants = [];
+    if (Array.isArray(p.variants)) {
+      existingVariants = p.variants;
+    } else if (typeof p.variants === 'string' && p.variants.trim()) {
+      const trimmed = p.variants.trim();
+      if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+        try {
+          const arr = JSON.parse(trimmed);
+          if (Array.isArray(arr)) existingVariants = arr;
+        } catch (e) {}
+      }
+      if (existingVariants.length === 0) {
+        existingVariants = trimmed.split(/[\n,]+/).map((s) => s.trim()).filter(Boolean);
+      }
+    }
+
     setFormData({
       msmeId: p.msmeId,
       name: p.name || '',
@@ -89,10 +108,12 @@ function AdminProductsContent() {
       unit: p.unit || 'pcs',
       rating: p.rating || 5.0,
       isFeatured: !!p.isFeatured,
+      variants: existingVariants,
       images: existingImages,
       imagePreviews: existingImages
     });
     setUrlInput('');
+    setVariantInput('');
     setIsModalOpen(true);
   };
 
@@ -100,6 +121,7 @@ function AdminProductsContent() {
     setIsModalOpen(false);
     setEditingProduct(null);
     setUrlInput('');
+    setVariantInput('');
   };
 
   const handleSubmit = (e) => {
@@ -111,6 +133,7 @@ function AdminProductsContent() {
 
     const payload = {
       ...formData,
+      variants: formData.variants || [],
       images: formData.images || []
     };
 
@@ -129,6 +152,38 @@ function AdminProductsContent() {
   const handleDelete = (id) => {
     deleteProduct(id);
     setDeleteConfirmId(null);
+  };
+
+  const handleAddVariant = () => {
+    const trimmed = variantInput.trim();
+    if (!trimmed) return;
+    if (formData.variants.includes(trimmed)) {
+      setVariantInput('');
+      return;
+    }
+    setFormData((prev) => ({
+      ...prev,
+      variants: [...prev.variants, trimmed]
+    }));
+    setVariantInput('');
+  };
+
+  const handleRemoveVariant = (index) => {
+    setFormData((prev) => ({
+      ...prev,
+      variants: prev.variants.filter((_, i) => i !== index)
+    }));
+  };
+
+  const handleAddPresetVariants = (presets) => {
+    setFormData((prev) => {
+      const existing = new Set(prev.variants);
+      presets.forEach((p) => existing.add(p));
+      return {
+        ...prev,
+        variants: Array.from(existing)
+      };
+    });
   };
 
   const handleImageChange = (e) => {
@@ -300,7 +355,7 @@ function AdminProductsContent() {
               <tr>
                 <th style={{ width: '64px' }}>Foto</th>
                 <th>ID</th>
-                <th>Nama Produk</th>
+                <th>Nama Produk & Varian</th>
                 <th>Toko UMKM</th>
                 <th>Kategori</th>
                 <th>Harga</th>
@@ -354,9 +409,17 @@ function AdminProductsContent() {
                       <td className="mono" style={{ fontSize: '0.75rem' }}>{p.id}</td>
                       <td>
                         <b style={{ color: 'var(--ink)', display: 'block' }}>{p.name}</b>
-                        <span className="text-muted text-ellipsis" style={{ fontSize: '0.76rem', maxWidth: '240px', display: 'block' }}>
-                          {p.desc}
-                        </span>
+                        {Array.isArray(p.variants) && p.variants.length > 0 ? (
+                          <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap', marginTop: '4px' }}>
+                            {p.variants.map((v, vIdx) => (
+                              <span key={vIdx} style={{ fontSize: '0.68rem', padding: '1px 6px', background: 'var(--forest-soft, #e8f5e9)', color: 'var(--forest, #1E4B3B)', borderRadius: '4px', fontWeight: 600 }}>
+                                {v}
+                              </span>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-muted" style={{ fontSize: '0.74rem' }}>Tanpa varian</span>
+                        )}
                       </td>
                       <td>
                         <b>{p.msmeName}</b>
@@ -484,6 +547,127 @@ function AdminProductsContent() {
                     value={formData.desc}
                     onChange={(e) => setFormData({ ...formData, desc: e.target.value })}
                   />
+                </div>
+              </div>
+
+              {/* VARIANTS MANAGEMENT SECTION */}
+              <div style={{ marginTop: '20px', borderTop: '1px solid var(--line)', paddingTop: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <label style={{ fontWeight: 600, fontSize: '0.95rem', color: 'var(--ink)' }}>
+                    🏷️ Pilihan Varian Produk (Opsional)
+                  </label>
+                  <span style={{ fontSize: '0.78rem', color: 'var(--ink-soft)' }}>
+                    Total: <b>{formData.variants?.length || 0}</b> Varian
+                  </span>
+                </div>
+
+                <p style={{ fontSize: '0.8rem', color: 'var(--ink-soft)', margin: '0 0 10px', lineHeight: '1.4' }}>
+                  Tambahkan pilihan varian jika produk memiliki opsi (misal: <i>Level 1 / Level 2</i>, <i>Botol 600ml / 1.5L</i>, <i>Original / Mentai</i>). <b>Kosongkan jika produk tidak memiliki varian.</b>
+                </p>
+
+                {/* VARIANT INPUT ROW */}
+                <div style={{ display: 'flex', gap: '8px', marginBottom: '12px' }}>
+                  <input
+                    type="text"
+                    placeholder="Ketik nama varian (misal: Level 1 (Sedang), Isi 4 pcs, dll.)"
+                    value={variantInput}
+                    onChange={(e) => setVariantInput(e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        handleAddVariant();
+                      }
+                    }}
+                    style={{ flex: 1, padding: '8px 12px', fontSize: '0.86rem', borderRadius: '6px', border: '1px solid var(--line)' }}
+                  />
+                  <button
+                    type="button"
+                    className="btn btn-outline"
+                    onClick={handleAddVariant}
+                    style={{ padding: '8px 14px', fontSize: '0.84rem', whiteSpace: 'nowrap' }}
+                  >
+                    + Tambah Varian
+                  </button>
+                </div>
+
+                {/* VARIANT CHIPS LIST */}
+                {formData.variants && formData.variants.length > 0 ? (
+                  <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap', padding: '10px 12px', background: '#f8f9fa', border: '1px solid var(--line)', borderRadius: '8px' }}>
+                    {formData.variants.map((v, idx) => (
+                      <span
+                        key={idx}
+                        style={{
+                          display: 'inline-flex',
+                          alignItems: 'center',
+                          gap: '6px',
+                          padding: '6px 12px',
+                          background: '#fff',
+                          border: '1px solid var(--forest, #1E4B3B)',
+                          color: 'var(--forest, #1E4B3B)',
+                          borderRadius: '20px',
+                          fontSize: '0.82rem',
+                          fontWeight: 600,
+                          boxShadow: '0 1px 3px rgba(0,0,0,0.05)'
+                        }}
+                      >
+                        <span>{v}</span>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveVariant(idx)}
+                          style={{
+                            background: 'transparent',
+                            border: 'none',
+                            color: 'var(--red, #ef4444)',
+                            fontSize: '12px',
+                            cursor: 'pointer',
+                            padding: 0,
+                            lineHeight: 1,
+                            fontWeight: 700
+                          }}
+                          title="Hapus varian ini"
+                        >
+                          ✕
+                        </button>
+                      </span>
+                    ))}
+                  </div>
+                ) : (
+                  <div style={{ padding: '10px 14px', background: '#fafafa', border: '1px dashed var(--line)', borderRadius: '8px', color: 'var(--ink-soft)', fontSize: '0.8rem' }}>
+                    Belum ada varian ditambahkan. Produk akan ditampilkan sebagai produk tunggal tanpa pemilih varian.
+                  </div>
+                )}
+
+                {/* QUICK TEMPLATES */}
+                <div style={{ marginTop: '10px', display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap', fontSize: '0.75rem', color: 'var(--ink-soft)' }}>
+                  <span>Pilihan Cepat:</span>
+                  <button
+                    type="button"
+                    onClick={() => handleAddPresetVariants(['Level 1 (Sedang)', 'Level 2 (Pedas)', 'Level 3 (Extra Pedas)'])}
+                    style={{ background: '#fff', border: '1px solid var(--line)', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.74rem' }}
+                  >
+                    + Level Pedas
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddPresetVariants(['Kemasan 600 ml', 'Kemasan 1,5 Liter'])}
+                    style={{ background: '#fff', border: '1px solid var(--line)', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.74rem' }}
+                  >
+                    + Ukuran Botol Jamu
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => handleAddPresetVariants(['Original', 'Mentai', 'Goreng'])}
+                    style={{ background: '#fff', border: '1px solid var(--line)', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.74rem' }}
+                  >
+                    + Varian Dimsum
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setFormData((prev) => ({ ...prev, variants: [] }))}
+                    style={{ background: '#fff', border: '1px solid rgba(239,68,68,0.3)', color: 'var(--red, #ef4444)', padding: '3px 8px', borderRadius: '4px', cursor: 'pointer', fontSize: '0.74rem' }}
+                  >
+                    Hapus Semua Varian
+                  </button>
                 </div>
               </div>
 

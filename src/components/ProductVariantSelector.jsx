@@ -1,21 +1,30 @@
-'use client';
+﻿'use client';
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { PhoneIcon } from './Icons';
 
-export default function ProductVariantSelector({ variants, productName, msmeName, waNumber, status }) {
-  const [selectedVariant, setSelectedVariant] = useState(variants[0] || '');
+export default function ProductVariantSelector({ variants = [], productName, msmeName, waNumber, status }) {
+  const hasVariants = Array.isArray(variants) && variants.length > 0;
+  const [selectedVariant, setSelectedVariant] = useState(hasVariants ? variants[0] : '');
+
+  useEffect(() => {
+    if (hasVariants && (!selectedVariant || !variants.includes(selectedVariant))) {
+      setSelectedVariant(variants[0]);
+    }
+  }, [variants, hasVariants]);
+
+  const message = hasVariants && selectedVariant
+    ? `Halo, saya tertarik untuk membeli produk "${productName}" (Varian: ${selectedVariant}) dari toko "${msmeName}". Apakah stok varian ini masih tersedia?`
+    : `Halo, saya tertarik untuk membeli produk "${productName}" dari toko "${msmeName}". Apakah stok produk ini masih tersedia?`;
 
   const waUrl = waNumber && status !== 'inactive'
-    ? `https://wa.me/${waNumber}?text=${encodeURIComponent(
-        `Halo, saya tertarik untuk membeli produk "${productName}" (Varian: ${selectedVariant}) dari toko "${msmeName}". Apakah stok varian ini masih tersedia?`
-      )}`
+    ? `https://wa.me/${waNumber}?text=${encodeURIComponent(message)}`
     : null;
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
       {/* VARIANTS LIST */}
-      {variants && variants.length > 0 && (
+      {hasVariants && (
         <div>
           <h4 style={{ fontSize: '0.78rem', textTransform: 'uppercase', letterSpacing: '0.06em', color: 'var(--ink-soft)', marginBottom: '10px' }}>
             Pilihan Varian: <b style={{ color: 'var(--forest)', textTransform: 'none' }}>{selectedVariant}</b>
@@ -55,7 +64,7 @@ export default function ProductVariantSelector({ variants, productName, msmeName
         </div>
       )}
 
-      {/* ACTION BUTTONS WITH SELECTED VARIANT */}
+      {/* ACTION BUTTONS */}
       <div style={{ display: 'flex', gap: '12px', marginTop: '4px', flexWrap: 'wrap' }}>
         {waUrl ? (
           <a
@@ -75,7 +84,7 @@ export default function ProductVariantSelector({ variants, productName, msmeName
             }}
           >
             <PhoneIcon style={{ width: '18px', height: '18px' }} />
-            <span>Beli Varian Ini via WhatsApp</span>
+            <span>{hasVariants ? 'Beli Varian Ini via WhatsApp' : 'Beli Sekarang via WhatsApp'}</span>
           </a>
         ) : (
           <div

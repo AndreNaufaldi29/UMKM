@@ -6,6 +6,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { useData } from '../context/DataContext';
 import ProductCard from './ProductCard';
 import { SearchIcon, EmptyIcon, CategoryIcon } from './Icons';
+import Pagination from './Pagination';
 
 const PER_PAGE = 8;
 
@@ -221,19 +222,11 @@ export default function ProductCatalogView() {
               </div>
             )}
 
-            {totalPages > 1 && (
-              <div className="pagination">
-                {Array.from({ length: totalPages }).map((_, i) => (
-                  <button
-                    key={i}
-                    className={`page-btn ${currentPage === i + 1 ? 'active' : ''}`}
-                    onClick={() => handlePageChange(i + 1)}
-                  >
-                    {i + 1}
-                  </button>
-                ))}
-              </div>
-            )}
+            <Pagination
+              currentPage={currentPage}
+              totalPages={totalPages}
+              onPageChange={handlePageChange}
+            />
           </div>
         </div>
       </div>

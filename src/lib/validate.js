@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Input validation and sanitization helpers for API routes.
  * Prevents XSS, excessively large payloads, and malformed data.
  */
@@ -143,6 +143,26 @@ export function validateProductInput(body) {
     isFeatured: !!body.isFeatured,
     msmeId:     parseInt(body.msmeId, 10) || null,
   };
+
+  // Parse and sanitize variants
+  let parsedVariants = [];
+  if (Array.isArray(body.variants)) {
+    parsedVariants = body.variants.map((v) => sanitizeString(String(v))).filter(Boolean);
+  } else if (typeof body.variants === 'string' && body.variants.trim()) {
+    const trimmed = body.variants.trim();
+    if (trimmed.startsWith('[') && trimmed.endsWith(']')) {
+      try {
+        const arr = JSON.parse(trimmed);
+        if (Array.isArray(arr)) {
+          parsedVariants = arr.map((v) => sanitizeString(String(v))).filter(Boolean);
+        }
+      } catch (e) {}
+    }
+    if (parsedVariants.length === 0) {
+      parsedVariants = trimmed.split(/[\n,]+/).map((v) => sanitizeString(v)).filter(Boolean);
+    }
+  }
+  sanitized.variants = parsedVariants;
 
   // Validate images
   const rawImages = Array.isArray(body.images) ? body.images : [];
