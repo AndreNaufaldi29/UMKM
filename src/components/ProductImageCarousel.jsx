@@ -1,13 +1,17 @@
-'use client';
+﻿'use client';
 
 import React, { useState } from 'react';
 import { withBasePath } from '../utils/basePath';
 import { ProductSVG } from './DynamicSVGs';
+import { ChevronLeftIcon, ChevronRightIcon, MaximizeIcon } from './Icons';
+import ImageLightboxModal from './ImageLightboxModal';
 
 export default function ProductImageCarousel({ images = [], name = '', cat = '', price = 0 }) {
   const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
 
   const imageList = Array.isArray(images) && images.length > 0 ? images.filter(Boolean) : [];
+  const baseSeed = name ? name.length + (price || 10) : 42;
 
   const handlePrev = (e) => {
     e.stopPropagation();
@@ -19,40 +23,124 @@ export default function ProductImageCarousel({ images = [], name = '', cat = '',
     setCurrentIndex((prev) => (prev === imageList.length - 1 ? 0 : prev + 1));
   };
 
-  const currentImage = imageList[currentIndex];
+  const handleOpenLightbox = (e) => {
+    if (e) e.stopPropagation();
+    setIsLightboxOpen(true);
+  };
 
+  const currentImage = imageList[currentIndex];
+  const currentSrc = currentImage ? withBasePath(currentImage) : '';
 
   return (
     <div className="product-carousel-wrapper">
       {/* MAIN DISPLAY PHOTO */}
       <div 
-        className="panel detail-photo-panel" 
+        className="panel detail-photo-panel product-gallery-main" 
+        onClick={handleOpenLightbox}
+        title="Klik untuk melihat foto ukuran penuh"
         style={{ 
           padding: 0, 
           overflow: 'hidden', 
           aspectRatio: '4/3', 
           position: 'relative',
-          borderRadius: 'var(--radius)'
+          borderRadius: 'var(--radius)',
+          cursor: 'zoom-in',
+          backgroundColor: '#151c19',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
         }}
       >
         {currentImage ? (
-          <img
-            src={withBasePath(currentImage)}
-            alt={`${name} - foto ${currentIndex + 1}`}
-            style={{ 
-              width: '100%', 
-              height: '100%', 
-              objectFit: 'cover',
-              transition: 'opacity 0.3s ease'
-            }}
-          />
+          <>
+            {/* AMBIENT BLURRED BACKDROP */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                inset: '-12px',
+                backgroundImage: `url(${currentSrc})`,
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                filter: 'blur(22px) brightness(0.48) saturate(1.3)',
+                opacity: 0.85,
+                transform: 'scale(1.15)',
+                pointerEvents: 'none',
+                zIndex: 1
+              }}
+            />
+
+            {/* VIGNETTE OVERLAY */}
+            <div
+              aria-hidden="true"
+              style={{
+                position: 'absolute',
+                inset: 0,
+                background: 'radial-gradient(ellipse at center, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0.45) 100%)',
+                pointerEvents: 'none',
+                zIndex: 2
+              }}
+            />
+
+            {/* FOREGROUND SHARP FULL IMAGE (Uncropped) */}
+            <img
+              src={currentSrc}
+              alt={`${name} - foto ${currentIndex + 1}`}
+              style={{ 
+                position: 'relative',
+                zIndex: 3,
+                width: '100%', 
+                height: '100%', 
+                maxWidth: '100%',
+                maxHeight: '100%',
+                objectFit: 'contain',
+                transition: 'transform 0.35s cubic-bezier(0.16, 1, 0.3, 1)',
+                filter: 'drop-shadow(0 8px 24px rgba(0,0,0,0.35))'
+              }}
+            />
+          </>
         ) : (
-          <ProductSVG 
-            cat={cat} 
-            seed={name.length + price} 
-            style={{ width: '100%', height: '100%', objectFit: 'cover' }} 
-          />
+          <div style={{ position: 'relative', zIndex: 3, width: '100%', height: '100%' }}>
+            <ProductSVG 
+              cat={cat} 
+              seed={baseSeed} 
+              style={{ width: '100%', height: '100%', objectFit: 'contain' }} 
+            />
+          </div>
         )}
+
+        {/* EXPAND BUTTON */}
+        <button
+          type="button"
+          onClick={handleOpenLightbox}
+          className="gallery-expand-btn"
+          aria-label="Lihat Ukuran Penuh"
+          title="Lihat Ukuran Penuh"
+          style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            background: 'rgba(0, 0, 0, 0.65)',
+            backdropFilter: 'blur(8px)',
+            WebkitBackdropFilter: 'blur(8px)',
+            color: '#fff',
+            border: '1px solid rgba(255, 255, 255, 0.25)',
+            padding: '7px 12px',
+            borderRadius: '999px',
+            fontSize: '0.78rem',
+            fontWeight: 600,
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+            cursor: 'pointer',
+            zIndex: 6,
+            transition: 'all 0.2s ease',
+            boxShadow: '0 4px 12px rgba(0,0,0,0.35)'
+          }}
+        >
+          <MaximizeIcon style={{ width: '14px', height: '14px' }} />
+          <span>Lihat Penuh</span>
+        </button>
 
         {/* CAROUSEL CONTROLS IF MORE THAN 1 IMAGE */}
         {imageList.length > 1 && (
@@ -71,21 +159,19 @@ export default function ProductImageCarousel({ images = [], name = '', cat = '',
                 width: '38px',
                 height: '38px',
                 borderRadius: '50%',
-                background: 'rgba(0, 0, 0, 0.55)',
+                background: 'rgba(0, 0, 0, 0.6)',
                 color: '#fff',
                 border: '1px solid rgba(255, 255, 255, 0.25)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                zIndex: 5,
-                backdropFilter: 'blur(4px)',
-                transition: 'all 0.2s ease',
-                fontSize: '1.2rem',
-                lineHeight: 1
+                zIndex: 6,
+                backdropFilter: 'blur(6px)',
+                transition: 'all 0.2s ease'
               }}
             >
-              &lite;
+              <ChevronLeftIcon style={{ width: '20px', height: '20px', color: '#fff' }} />
             </button>
 
             <button
@@ -102,21 +188,19 @@ export default function ProductImageCarousel({ images = [], name = '', cat = '',
                 width: '38px',
                 height: '38px',
                 borderRadius: '50%',
-                background: 'rgba(0, 0, 0, 0.55)',
+                background: 'rgba(0, 0, 0, 0.6)',
                 color: '#fff',
                 border: '1px solid rgba(255, 255, 255, 0.25)',
                 cursor: 'pointer',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                zIndex: 5,
-                backdropFilter: 'blur(4px)',
-                transition: 'all 0.2s ease',
-                fontSize: '1.2rem',
-                lineHeight: 1
+                zIndex: 6,
+                backdropFilter: 'blur(6px)',
+                transition: 'all 0.2s ease'
               }}
             >
-              &gt;
+              <ChevronRightIcon style={{ width: '20px', height: '20px', color: '#fff' }} />
             </button>
 
             {/* COUNTER BADGE */}
@@ -125,15 +209,16 @@ export default function ProductImageCarousel({ images = [], name = '', cat = '',
                 position: 'absolute',
                 bottom: '12px',
                 right: '12px',
-                background: 'rgba(0, 0, 0, 0.65)',
-                backdropFilter: 'blur(4px)',
+                background: 'rgba(0, 0, 0, 0.7)',
+                backdropFilter: 'blur(6px)',
                 color: '#fff',
                 padding: '4px 10px',
                 borderRadius: '999px',
                 fontSize: '0.76rem',
                 fontWeight: 600,
                 fontFamily: 'IBM Plex Mono, monospace',
-                zIndex: 5
+                border: '1px solid rgba(255, 255, 255, 0.15)',
+                zIndex: 6
               }}
             >
               {currentIndex + 1} / {imageList.length}
@@ -144,33 +229,13 @@ export default function ProductImageCarousel({ images = [], name = '', cat = '',
 
       {/* THUMBNAIL GALLERY STRIP IF MORE THAN 1 IMAGE */}
       {imageList.length > 1 && (
-        <div 
-          className="gallery-strip" 
-          style={{ 
-            display: 'flex',
-            gap: '10px',
-            marginTop: '12px',
-            overflowX: 'auto',
-            paddingBottom: '4px'
-          }}
-        >
+        <div className="gallery-strip">
           {imageList.map((img, idx) => (
             <div
               key={idx}
               className={`thumb ${idx === currentIndex ? 'active' : ''}`}
               onClick={() => setCurrentIndex(idx)}
-              style={{
-                width: '80px',
-                height: '60px',
-                borderRadius: '8px',
-                overflow: 'hidden',
-                flexShrink: 0,
-                cursor: 'pointer',
-                border: idx === currentIndex ? '2px solid var(--forest)' : '1px solid var(--line)',
-                boxShadow: idx === currentIndex ? '0 4px 12px rgba(47, 107, 82, 0.35)' : 'none',
-                opacity: idx === currentIndex ? 1 : 0.7,
-                transition: 'all 0.2s ease'
-              }}
+              title={`${name} - Foto ${idx + 1}`}
             >
               <img
                 style={{ width: '100%', height: '100%', objectFit: 'cover' }}
@@ -181,6 +246,18 @@ export default function ProductImageCarousel({ images = [], name = '', cat = '',
           ))}
         </div>
       )}
+
+      {/* FULLSCREEN IMAGE LIGHTBOX MODAL */}
+      <ImageLightboxModal
+        isOpen={isLightboxOpen}
+        onClose={() => setIsLightboxOpen(false)}
+        images={imageList}
+        initialIndex={currentIndex}
+        title={name}
+        subtitle="Galeri Produk"
+        cat={cat}
+        fallbackSeed={baseSeed}
+      />
     </div>
   );
 }

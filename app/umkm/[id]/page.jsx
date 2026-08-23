@@ -1,4 +1,4 @@
-import UMKMBannerImage from '../../../src/components/UMKMBannerImage';
+﻿import UMKMBannerImage from '../../../src/components/UMKMBannerImage';
 import { withBasePath } from '../../../src/utils/basePath';
 import React from 'react';
 import Link from 'next/link';
@@ -186,7 +186,8 @@ export default async function UMKMDetailPage({ params }) {
               display: 'flex', 
               flexDirection: 'column', 
               justifyContent: 'flex-end', 
-              padding: '24px 28px' 
+              padding: '24px 28px',
+              pointerEvents: 'none'
             }}
           >
             <div style={{ display: 'flex', gap: '8px', marginBottom: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
