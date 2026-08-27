@@ -124,5 +124,8 @@ docker compose -f docker-compose.prod.yml up -d --build
 ## 🔄 Panduan Migrasi Server
 Petunjuk lengkap cara memindahkan database dan file gambar yang diunggah ke server baru tanpa kehilangan data tersedia di **[DOCUMENTATION.md (Bagian 7)](DOCUMENTATION.md#-7-panduan-migrasi-server-pindah-hosting--vps-tanpa-kehilangan-data)**.
 
-## 📖 Dokumentasi Lengkap
+## 📖 Buku Panduan Penggunaan (Admin & Client)
+Panduan operasional non-teknis lengkap untuk pengunjung umum, pemesanan WhatsApp, dan tata cara pengelolaan data oleh administrator desa tersedia di **[PANDUAN_PENGGUNA.md](PANDUAN_PENGGUNA.md)**.
+
+## 💻 Dokumentasi Teknis Pengembang
 Dokumentasi teknis mendalam mengenai arsitektur sistem, spesifikasi REST API, lapisan keamanan, dan konfigurasi Nginx/SSL tersedia di **[DOCUMENTATION.md](DOCUMENTATION.md)**.

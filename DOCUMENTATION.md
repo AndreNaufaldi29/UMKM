@@ -2,6 +2,9 @@
 
 Dokumen ini berisi spesifikasi teknis lengkap aplikasi **UMKM Kedungsumur**, meliputi struktur arsitektur folder, skema entitas database (Prisma), panduan REST API, mekanisme keamanan berlapis (*defense-in-depth*), pengelolaan akun admin, serta petunjuk komprehensif deployment ke server production.
 
+> 💡 **Mencari Buku Panduan Pengguna Non-Teknis (Admin & Pengunjung)?**
+> Silakan baca **[PANDUAN_PENGGUNA.md](PANDUAN_PENGGUNA.md)** untuk panduan langkah-demi-langkah pengoperasian website, cara belanja via WhatsApp, manajemen data UMKM/produk di panel admin, dan FAQ umum.
+
 ---
 
 ## 📂 1. Arsitektur Proyek & Struktur Direktori
